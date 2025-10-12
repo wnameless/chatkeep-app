@@ -2,6 +2,8 @@ package me.moonote.app.chatkeep.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,6 +19,8 @@ public interface ConversationArchiveRepository
 
   // Find public archives
   List<ConversationArchive> findByIsPublicTrue();
+
+  Page<ConversationArchive> findByIsPublic(Boolean isPublic, Pageable pageable);
 
   // Find by tags
   List<ConversationArchive> findByTagsContaining(String tag);
