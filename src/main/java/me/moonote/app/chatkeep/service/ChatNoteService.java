@@ -163,6 +163,88 @@ public class ChatNoteService {
     return repository.findByIsPublic(true, pageable).map(this::toResponse);
   }
 
+  // ==================== Tag-Based Filtering ====================
+
+  /**
+   * Filter chat notes by multiple tags with AND/OR operation
+   */
+  public Page<ChatNoteResponse> filterByTags(List<String> tags, String operator,
+      Pageable pageable) {
+    if (tags == null || tags.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findByTagsIn(tags, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findByTagsContainingAll(tags, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter chat notes by tags for a specific user
+   */
+  public Page<ChatNoteResponse> filterByTagsForUser(String userId, List<String> tags,
+      String operator, Pageable pageable) {
+    if (tags == null || tags.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findByTagsInAndUserId(tags, userId, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findByTagsContainingAllAndUserId(tags, userId, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter active (not archived, not trashed) chat notes by tags
+   */
+  public Page<ChatNoteResponse> filterActiveByTags(List<String> tags, String operator,
+      Pageable pageable) {
+    if (tags == null || tags.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findActiveByTagsIn(tags, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findActiveByTagsContainingAll(tags, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter active chat notes by tags for a specific user
+   */
+  public Page<ChatNoteResponse> filterActiveByTagsForUser(String userId, List<String> tags,
+      String operator, Pageable pageable) {
+    if (tags == null || tags.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findActiveByTagsInAndUserId(tags, userId, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findActiveByTagsContainingAllAndUserId(tags, userId, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
   // ==================== Lifecycle Management ====================
 
   /**

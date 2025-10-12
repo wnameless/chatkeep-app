@@ -213,6 +213,81 @@ public class ChatNoteApiController {
     }
   }
 
+  // ==================== Tag-Based Filtering Endpoints ====================
+
+  /**
+   * Filter chat notes by multiple tags (global)
+   * GET /api/v1/chat-notes/filter/tags?tags=java,spring&operator=AND
+   */
+  @GetMapping("/filter/tags")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterByTags(
+      @RequestParam java.util.List<String> tags,
+      @RequestParam(defaultValue = "AND") String operator,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ChatNoteResponse> chatNotes = chatNoteService.filterByTags(tags, operator, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error filtering chat notes by tags", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to filter chat notes by tags"));
+    }
+  }
+
+  /**
+   * Filter chat notes by tags for a specific user
+   * GET /api/v1/chat-notes/user/{userId}/filter/tags?tags=java,spring&operator=AND&lifecycle=active
+   */
+  @GetMapping("/user/{userId}/filter/tags")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterByTagsForUser(
+      @PathVariable String userId, @RequestParam java.util.List<String> tags,
+      @RequestParam(defaultValue = "AND") String operator,
+      @RequestParam(defaultValue = "active") String lifecycle,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ChatNoteResponse> chatNotes;
+
+      if ("active".equalsIgnoreCase(lifecycle)) {
+        chatNotes =
+            chatNoteService.filterActiveByTagsForUser(userId, tags, operator, pageable);
+      } else if ("all".equalsIgnoreCase(lifecycle)) {
+        chatNotes = chatNoteService.filterByTagsForUser(userId, tags, operator, pageable);
+      } else {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.error("Invalid lifecycle parameter. Use 'active' or 'all'"));
+      }
+
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error filtering user chat notes by tags", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to filter user chat notes by tags"));
+    }
+  }
+
+  /**
+   * Filter active (not archived, not trashed) chat notes by tags (global)
+   * GET /api/v1/chat-notes/filter/tags/active?tags=java,spring&operator=OR
+   */
+  @GetMapping("/filter/tags/active")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterActiveByTags(
+      @RequestParam java.util.List<String> tags,
+      @RequestParam(defaultValue = "AND") String operator,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ChatNoteResponse> chatNotes =
+          chatNoteService.filterActiveByTags(tags, operator, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error filtering active chat notes by tags", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to filter active chat notes by tags"));
+    }
+  }
+
   /**
    * Update archive visibility
    * PATCH /api/v1/chat-notes/{id}/visibility

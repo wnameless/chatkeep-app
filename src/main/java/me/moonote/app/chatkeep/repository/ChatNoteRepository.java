@@ -23,8 +23,44 @@ public interface ChatNoteRepository
 
   Page<ChatNote> findByIsPublic(Boolean isPublic, Pageable pageable);
 
-  // Find by tags
+  // Find by tags - Single tag
   List<ChatNote> findByTagsContaining(String tag);
+
+  // Find by tags - Multiple tags (AND operation - contains ALL tags)
+  @Query("{ 'tags': { $all: ?0 } }")
+  List<ChatNote> findByTagsContainingAll(List<String> tags);
+
+  @Query("{ 'tags': { $all: ?0 } }")
+  Page<ChatNote> findByTagsContainingAll(List<String> tags, Pageable pageable);
+
+  @Query("{ 'tags': { $all: ?0 }, 'userId': ?1 }")
+  Page<ChatNote> findByTagsContainingAllAndUserId(List<String> tags, String userId,
+      Pageable pageable);
+
+  // Find by tags - Multiple tags (OR operation - contains ANY tag)
+  @Query("{ 'tags': { $in: ?0 } }")
+  List<ChatNote> findByTagsIn(List<String> tags);
+
+  @Query("{ 'tags': { $in: ?0 } }")
+  Page<ChatNote> findByTagsIn(List<String> tags, Pageable pageable);
+
+  @Query("{ 'tags': { $in: ?0 }, 'userId': ?1 }")
+  Page<ChatNote> findByTagsInAndUserId(List<String> tags, String userId, Pageable pageable);
+
+  // Find by tags with lifecycle filters - Active notes only (AND operation)
+  @Query("{ 'tags': { $all: ?0 }, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByTagsContainingAll(List<String> tags, Pageable pageable);
+
+  @Query("{ 'tags': { $all: ?0 }, 'userId': ?1, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByTagsContainingAllAndUserId(List<String> tags, String userId,
+      Pageable pageable);
+
+  // Find by tags with lifecycle filters - Active notes only (OR operation)
+  @Query("{ 'tags': { $in: ?0 }, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByTagsIn(List<String> tags, Pageable pageable);
+
+  @Query("{ 'tags': { $in: ?0 }, 'userId': ?1, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByTagsInAndUserId(List<String> tags, String userId, Pageable pageable);
 
   // Search by title
   List<ChatNote> findByTitleContainingIgnoreCase(String keyword);

@@ -348,9 +348,162 @@ Permanently delete a chat note.
 
 ---
 
+## Tag-Based Filtering Endpoints
+
+### 10.1. Filter by Multiple Tags (Global)
+**GET** `/api/v1/chat-notes/filter/tags?tags=java,spring&operator=AND`
+
+Filter chat notes by multiple tags with AND/OR logic.
+
+**Query Parameters:**
+- `tags` (required) - Comma-separated list of tags
+- `operator` (optional, default: AND) - Filter operation: `AND` (must have ALL tags) or `OR` (must have ANY tag)
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": "67890abcdef",
+        "title": "Spring Boot Tutorial",
+        "tags": ["java", "spring", "backend"],
+        // ... chat note summary
+      }
+    ],
+    "totalElements": 25,
+    "totalPages": 2
+  }
+}
+```
+
+**Examples:**
+```bash
+# Find notes with ALL tags (AND operation)
+GET /api/v1/chat-notes/filter/tags?tags=java,spring&operator=AND
+
+# Find notes with ANY tag (OR operation)
+GET /api/v1/chat-notes/filter/tags?tags=java,python,go&operator=OR
+```
+
+---
+
+### 10.2. Filter User's Notes by Tags
+**GET** `/api/v1/chat-notes/user/{userId}/filter/tags?tags=java,spring&operator=AND&lifecycle=active`
+
+Filter a specific user's chat notes by tags with lifecycle support.
+
+**Path Parameters:**
+- `userId` (required) - User ID
+
+**Query Parameters:**
+- `tags` (required) - Comma-separated list of tags
+- `operator` (optional, default: AND) - `AND` or `OR`
+- `lifecycle` (optional, default: active) - `active` (not archived/trashed) or `all`
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": "67890abcdef",
+        "title": "My Java Notes",
+        "tags": ["java", "spring"],
+        "isArchived": false,
+        "isTrashed": false,
+        // ... chat note summary
+      }
+    ]
+  }
+}
+```
+
+**Examples:**
+```bash
+# User's active notes with ALL tags
+GET /api/v1/chat-notes/user/john/filter/tags?tags=java,spring&operator=AND&lifecycle=active
+
+# User's all notes (including archived) with ANY tag
+GET /api/v1/chat-notes/user/john/filter/tags?tags=tutorial,guide&operator=OR&lifecycle=all
+```
+
+---
+
+### 10.3. Filter Active Notes by Tags (Global)
+**GET** `/api/v1/chat-notes/filter/tags/active?tags=java,spring&operator=OR`
+
+Filter active (not archived, not trashed) chat notes by tags across all users.
+
+**Query Parameters:**
+- `tags` (required) - Comma-separated list of tags
+- `operator` (optional, default: AND) - `AND` or `OR`
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": "67890abcdef",
+        "title": "Active Tutorial",
+        "tags": ["java", "spring"],
+        "isArchived": false,
+        "isTrashed": false,
+        // ... chat note summary
+      }
+    ]
+  }
+}
+```
+
+**Error Responses:**
+- `400 Bad Request` - Invalid operator or lifecycle parameter
+- `500 Internal Server Error` - Server error
+
+---
+
+## Tag Filtering Usage Examples
+
+### Quick Filters
+```bash
+# Find all Python tutorials
+curl "http://localhost:8080/api/v1/chat-notes/filter/tags?tags=python,tutorial&operator=AND"
+
+# Find notes about Java OR Spring OR React
+curl "http://localhost:8080/api/v1/chat-notes/filter/tags?tags=java,spring,react&operator=OR"
+```
+
+### User-Specific Filters
+```bash
+# John's active notes about databases
+curl "http://localhost:8080/api/v1/chat-notes/user/john/filter/tags?tags=database,sql&lifecycle=active"
+
+# All of Mary's notes with machine-learning tag
+curl "http://localhost:8080/api/v1/chat-notes/user/mary/filter/tags?tags=machine-learning&lifecycle=all"
+```
+
+### Benefits
+- ✅ **Fast Filtering** - MongoDB indexed tag queries
+- ✅ **Flexible Logic** - AND/OR operations
+- ✅ **Lifecycle-Aware** - Filter active, archived, or all notes
+- ✅ **User-Scoped** - Personal tag filtering
+- ✅ **Paginated** - Handle large result sets
+
+---
+
 ## Lifecycle Management Endpoints
 
-### 11. Update Archive Status
+### 11. Update Archive Status (renumbered from previous)
 **PATCH** `/api/v1/chat-notes/{id}/archive?isArchived=true`
 
 Archive or unarchive a chat note. Archived notes are hidden from the main/active view but remain accessible.
