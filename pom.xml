@@ -13,7 +13,7 @@
   <artifactId>chatkeep</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>chatkeep</name>
-  <description>ChatKeep is an app to capture and share all your AI chat conversations</description>
+  <description>ChatKeep is an app to capture and share all your conversations between AI chatbots</description>
   <url>https://github.com/wnameless/chatkeep-app</url>
 
   <developers>
