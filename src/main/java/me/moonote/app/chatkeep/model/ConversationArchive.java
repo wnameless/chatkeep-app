@@ -1,8 +1,8 @@
 package me.moonote.app.chatkeep.model;
 
 import static lombok.AccessLevel.PRIVATE;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -47,10 +47,9 @@ public class ConversationArchive {
 
   // Metadata for web app
   @CreatedDate
-  LocalDateTime createdAt;
-
+  Instant createdAt;
   @LastModifiedDate
-  LocalDateTime updatedAt;
+  Instant updatedAt;
   String userId; // For multi-user support
   Boolean isPublic; // For sharing feature
   Long viewCount;
