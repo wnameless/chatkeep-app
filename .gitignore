@@ -5,6 +5,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### AI ###
+CLAUDE.md
+.claude/
+
 ### STS ###
 .apt_generated
 .classpath
