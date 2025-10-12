@@ -27,6 +27,8 @@ public class ChatNoteResponse {
   Integer artifactCount;
   Long viewCount;
   Boolean isPublic;
+  Boolean isArchived;
+  Boolean isTrashed;
   Instant createdAt;
   Instant updatedAt;
 

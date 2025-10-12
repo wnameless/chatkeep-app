@@ -348,6 +348,264 @@ Permanently delete a chat note.
 
 ---
 
+## Lifecycle Management Endpoints
+
+### 11. Update Archive Status
+**PATCH** `/api/v1/chat-notes/{id}/archive?isArchived=true`
+
+Archive or unarchive a chat note. Archived notes are hidden from the main/active view but remain accessible.
+
+**Query Parameters:**
+- `isArchived` (required) - Boolean flag (true to archive, false to unarchive)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Archive status updated successfully",
+  "data": {
+    "id": "67890abcdef",
+    "isArchived": true,
+    "isTrashed": false,
+    // ... full chat note details
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Chat note does not exist
+
+---
+
+### 12. Move to Trash (Soft Delete)
+**PATCH** `/api/v1/chat-notes/{id}/trash`
+
+Move a chat note to trash (soft delete). Trashed notes can be restored within 30 days before auto-purge.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Chat note moved to trash",
+  "data": {
+    "id": "67890abcdef",
+    "isTrashed": true,
+    "trashedAt": "2025-10-12T10:30:00Z",
+    // ... full chat note details
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Chat note does not exist
+
+---
+
+### 13. Restore from Trash
+**PATCH** `/api/v1/chat-notes/{id}/restore`
+
+Restore a chat note from trash back to active status.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Chat note restored from trash",
+  "data": {
+    "id": "67890abcdef",
+    "isTrashed": false,
+    "trashedAt": null,
+    // ... full chat note details
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Chat note does not exist
+
+---
+
+### 14. Permanently Delete
+**DELETE** `/api/v1/chat-notes/{id}/permanent`
+
+Permanently delete a chat note from the database (hard delete). Cannot be undone.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Chat note permanently deleted",
+  "data": null
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Chat note does not exist
+
+---
+
+### 15. Get Active Chat Notes for User
+**GET** `/api/v1/chat-notes/user/{userId}/active?page=0&size=20`
+
+Retrieve active (not archived, not trashed) chat notes for a specific user.
+
+**Query Parameters:**
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [ ... ],
+    "totalElements": 45,
+    "totalPages": 3
+  }
+}
+```
+
+---
+
+### 16. Get Archived Chat Notes for User
+**GET** `/api/v1/chat-notes/user/{userId}/archived`
+
+Retrieve archived (but not trashed) chat notes for a specific user.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "67890abcdef",
+      "title": "Archived Conversation",
+      "isArchived": true,
+      "isTrashed": false,
+      // ... chat note summary
+    }
+  ]
+}
+```
+
+---
+
+### 17. Get Trashed Chat Notes for User
+**GET** `/api/v1/chat-notes/user/{userId}/trash`
+
+Retrieve trashed chat notes for a specific user (within 30-day recovery window).
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "67890abcdef",
+      "title": "Trashed Conversation",
+      "isTrashed": true,
+      "trashedAt": "2025-10-12T10:30:00Z",
+      // ... chat note summary
+    }
+  ]
+}
+```
+
+---
+
+### 18. Get All Archived Chat Notes (Admin)
+**GET** `/api/v1/chat-notes/archived?page=0&size=20`
+
+Retrieve all archived chat notes across all users (paginated). For admin/global view.
+
+**Query Parameters:**
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [ ... ],
+    "totalElements": 150,
+    "totalPages": 8
+  }
+}
+```
+
+---
+
+### 19. Get All Trashed Chat Notes (Admin)
+**GET** `/api/v1/chat-notes/trash?page=0&size=20`
+
+Retrieve all trashed chat notes across all users (paginated). For admin/global view.
+
+**Query Parameters:**
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [ ... ],
+    "totalElements": 25,
+    "totalPages": 2
+  }
+}
+```
+
+---
+
+## Lifecycle Management Flow
+
+### Chat Note States
+- **Active**: `isArchived=false`, `isTrashed=false` - Normal working notes
+- **Archived**: `isArchived=true`, `isTrashed=false` - Old notes, hidden from main view
+- **Trashed**: `isTrashed=true` - Soft deleted, 30-day recovery window
+- **Permanently Deleted**: Removed from database (hard delete)
+
+### Typical Workflows
+
+#### Archive Old Notes
+```bash
+# Archive a note
+curl -X PATCH http://localhost:8080/api/v1/chat-notes/abc123/archive?isArchived=true
+
+# View archived notes
+curl http://localhost:8080/api/v1/chat-notes/user/john/archived
+
+# Unarchive a note
+curl -X PATCH http://localhost:8080/api/v1/chat-notes/abc123/archive?isArchived=false
+```
+
+#### Soft Delete with Recovery
+```bash
+# Move to trash
+curl -X PATCH http://localhost:8080/api/v1/chat-notes/abc123/trash
+
+# View trashed notes
+curl http://localhost:8080/api/v1/chat-notes/user/john/trash
+
+# Restore from trash
+curl -X PATCH http://localhost:8080/api/v1/chat-notes/abc123/restore
+```
+
+#### Permanent Deletion
+```bash
+# Permanently delete (cannot be undone)
+curl -X DELETE http://localhost:8080/api/v1/chat-notes/abc123/permanent
+```
+
+### Auto-Purge
+- Trashed notes older than 30 days are automatically purged
+- Scheduled job runs daily to clean up old trashed notes
+- No recovery possible after auto-purge
+
+---
+
 ## Response Format
 
 All API responses follow this structure:
@@ -404,7 +662,7 @@ const attachment = await fetch('/api/v1/chat-notes/abc123/attachments/1');
 
 ## Archive Models
 
-### ArchiveResponse (Summary)
+### ChatNoteResponse (Summary)
 Used in list endpoints:
 ```json
 {
@@ -418,6 +676,8 @@ Used in list endpoints:
   "artifactCount": "number",
   "viewCount": "number",
   "isPublic": "boolean",
+  "isArchived": "boolean",
+  "isTrashed": "boolean",
   "createdAt": "timestamp",
   "updatedAt": "timestamp"
 }

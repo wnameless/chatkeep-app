@@ -41,9 +41,11 @@ public class ChatNoteMapper {
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())
         .summary(toSummary(dto.getSummary())).artifacts(toArtifacts(dto.getArtifacts()))
         .attachments(toAttachments(dto.getAttachments()))
-        .workarounds(toWorkarounds(dto.getWorkarounds())).userId(userId).isPublic(false) // Default
-                                                                                         // to
-                                                                                         // private
+        .workarounds(toWorkarounds(dto.getWorkarounds())).userId(userId)
+        .isPublic(false) // Default to private
+        .isArchived(false) // Default to active (not archived)
+        .isTrashed(false) // Default to not trashed
+        .trashedAt(null) // No trash timestamp initially
         .viewCount(0L).build();
   }
 

@@ -252,4 +252,174 @@ public class ChatNoteApiController {
     }
   }
 
+  // ==================== Lifecycle Management Endpoints ====================
+
+  /**
+   * Update archive status (archive/unarchive)
+   * PATCH /api/v1/chat-notes/{id}/archive
+   */
+  @PatchMapping("/{id}/archive")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateArchiveStatus(
+      @PathVariable String id, @RequestParam Boolean isArchived) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.updateArchiveStatus(id, isArchived);
+      return ResponseEntity
+          .ok(ApiResponse.success("Archive status updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating archive status", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update archive status"));
+    }
+  }
+
+  /**
+   * Move chat note to trash (soft delete)
+   * PATCH /api/v1/chat-notes/{id}/trash
+   */
+  @PatchMapping("/{id}/trash")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> moveToTrash(@PathVariable String id) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.moveToTrash(id);
+      return ResponseEntity.ok(ApiResponse.success("Chat note moved to trash", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error moving chat note to trash", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to move chat note to trash"));
+    }
+  }
+
+  /**
+   * Restore chat note from trash
+   * PATCH /api/v1/chat-notes/{id}/restore
+   */
+  @PatchMapping("/{id}/restore")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> restoreFromTrash(
+      @PathVariable String id) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.restoreFromTrash(id);
+      return ResponseEntity.ok(ApiResponse.success("Chat note restored from trash", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error restoring chat note from trash", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to restore chat note from trash"));
+    }
+  }
+
+  /**
+   * Permanently delete chat note (hard delete)
+   * DELETE /api/v1/chat-notes/{id}/permanent
+   */
+  @DeleteMapping("/{id}/permanent")
+  public ResponseEntity<ApiResponse<Void>> permanentlyDeleteChatNote(@PathVariable String id) {
+    try {
+      chatNoteService.permanentlyDeleteChatNote(id);
+      return ResponseEntity.ok(ApiResponse.success("Chat note permanently deleted", null));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error permanently deleting chat note", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to permanently delete chat note"));
+    }
+  }
+
+  /**
+   * Get active chat notes for a user
+   * GET /api/v1/chat-notes/user/{userId}/active
+   */
+  @GetMapping("/user/{userId}/active")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getActiveChatNotes(
+      @PathVariable String userId, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ChatNoteResponse> chatNotes = chatNoteService.getActiveChatNotes(userId, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving active chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve active chat notes"));
+    }
+  }
+
+  /**
+   * Get archived chat notes for a user
+   * GET /api/v1/chat-notes/user/{userId}/archived
+   */
+  @GetMapping("/user/{userId}/archived")
+  public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getArchivedChatNotes(
+      @PathVariable String userId) {
+    try {
+      java.util.List<ChatNoteResponse> chatNotes = chatNoteService.getArchivedChatNotes(userId);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving archived chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve archived chat notes"));
+    }
+  }
+
+  /**
+   * Get trashed chat notes for a user
+   * GET /api/v1/chat-notes/user/{userId}/trash
+   */
+  @GetMapping("/user/{userId}/trash")
+  public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getTrashedChatNotes(
+      @PathVariable String userId) {
+    try {
+      java.util.List<ChatNoteResponse> chatNotes = chatNoteService.getTrashedChatNotes(userId);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving trashed chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve trashed chat notes"));
+    }
+  }
+
+  /**
+   * Get all archived chat notes (paginated) - admin/global view
+   * GET /api/v1/chat-notes/archived
+   */
+  @GetMapping("/archived")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllArchivedChatNotes(
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ChatNoteResponse> chatNotes = chatNoteService.getAllArchivedChatNotes(pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving all archived chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve all archived chat notes"));
+    }
+  }
+
+  /**
+   * Get all trashed chat notes (paginated) - admin/global view
+   * GET /api/v1/chat-notes/trash
+   */
+  @GetMapping("/trash")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllTrashedChatNotes(
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "trashedAt"));
+      Page<ChatNoteResponse> chatNotes = chatNoteService.getAllTrashedChatNotes(pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving all trashed chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve all trashed chat notes"));
+    }
+  }
+
 }

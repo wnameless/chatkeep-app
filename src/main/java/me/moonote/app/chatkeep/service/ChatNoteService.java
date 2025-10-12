@@ -163,6 +163,120 @@ public class ChatNoteService {
     return repository.findByIsPublic(true, pageable).map(this::toResponse);
   }
 
+  // ==================== Lifecycle Management ====================
+
+  /**
+   * Update archive status (archive/unarchive)
+   */
+  public ChatNoteDetailResponse updateArchiveStatus(String id, Boolean isArchived) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setIsArchived(isArchived);
+    ChatNote updated = repository.save(chatNote);
+
+    log.info("Chat note {} archive status updated to: {}", id, isArchived);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Move chat note to trash (soft delete)
+   */
+  public ChatNoteDetailResponse moveToTrash(String id) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setIsTrashed(true);
+    chatNote.setTrashedAt(java.time.Instant.now());
+    ChatNote updated = repository.save(chatNote);
+
+    log.info("Chat note {} moved to trash", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Restore chat note from trash
+   */
+  public ChatNoteDetailResponse restoreFromTrash(String id) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setIsTrashed(false);
+    chatNote.setTrashedAt(null);
+    ChatNote updated = repository.save(chatNote);
+
+    log.info("Chat note {} restored from trash", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Permanently delete chat note from database (hard delete)
+   */
+  public void permanentlyDeleteChatNote(String id) {
+    if (!repository.existsById(id)) {
+      throw new ChatNoteNotFoundException(id);
+    }
+
+    repository.deleteById(id);
+    log.info("Chat note {} permanently deleted", id);
+  }
+
+  /**
+   * Get active chat notes for a user (not archived, not trashed)
+   */
+  public Page<ChatNoteResponse> getActiveChatNotes(String userId, Pageable pageable) {
+    return repository.findByUserIdAndIsArchivedFalseAndIsTrashedFalse(userId, pageable)
+        .map(this::toResponse);
+  }
+
+  /**
+   * Get archived chat notes for a user
+   */
+  public List<ChatNoteResponse> getArchivedChatNotes(String userId) {
+    return repository.findByUserIdAndIsArchivedTrueAndIsTrashedFalse(userId).stream()
+        .map(this::toResponse).toList();
+  }
+
+  /**
+   * Get trashed chat notes for a user
+   */
+  public List<ChatNoteResponse> getTrashedChatNotes(String userId) {
+    return repository.findByUserIdAndIsTrashedTrue(userId).stream().map(this::toResponse).toList();
+  }
+
+  /**
+   * Get all archived chat notes (paginated) - for admin or global view
+   */
+  public Page<ChatNoteResponse> getAllArchivedChatNotes(Pageable pageable) {
+    return repository.findByIsArchivedTrueAndIsTrashedFalse(pageable).map(this::toResponse);
+  }
+
+  /**
+   * Get all trashed chat notes (paginated) - for admin or global view
+   */
+  public Page<ChatNoteResponse> getAllTrashedChatNotes(Pageable pageable) {
+    return repository.findByIsTrashedTrue(pageable).map(this::toResponse);
+  }
+
+  /**
+   * Purge old trashed chat notes (trashed > 30 days ago) - for scheduled job
+   */
+  public int purgeOldTrashedNotes() {
+    java.time.Instant cutoffDate = java.time.Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS);
+    List<ChatNote> oldTrashedNotes = repository.findByIsTrashedTrueAndTrashedAtBefore(cutoffDate);
+
+    int count = oldTrashedNotes.size();
+    repository.deleteAll(oldTrashedNotes);
+
+    log.info("Purged {} chat notes trashed before {}", count, cutoffDate);
+    return count;
+  }
+
+  // ==================== Private Helper Methods ====================
+
   private ChatNoteResponse toResponse(ChatNote archive) {
     return ChatNoteResponse.builder().id(archive.getId()).title(archive.getTitle())
         .conversationDate(archive.getConversationDate()).tags(archive.getTags())
@@ -170,6 +284,7 @@ public class ChatNoteService {
         .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
         .viewCount(archive.getViewCount()).isPublic(archive.getIsPublic())
+        .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
         .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
@@ -184,8 +299,9 @@ public class ChatNoteService {
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(archive.getArtifacts())
         .attachments(archive.getAttachments()).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
-        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
-        .updatedAt(archive.getUpdatedAt()).build();
+        .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
+        .trashedAt(archive.getTrashedAt()).viewCount(archive.getViewCount())
+        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
   private ChatNoteDetailLightResponse toDetailLightResponse(ChatNote archive) {
@@ -217,8 +333,9 @@ public class ChatNoteService {
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(artifactMetadata)
         .attachments(attachmentMetadata).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
-        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
-        .updatedAt(archive.getUpdatedAt()).build();
+        .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
+        .trashedAt(archive.getTrashedAt()).viewCount(archive.getViewCount())
+        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
 }

@@ -52,6 +52,9 @@ public class ChatNote {
   Instant updatedAt;
   String userId; // For multi-user support
   Boolean isPublic; // For sharing feature
+  Boolean isArchived; // Archived (hidden from main view)
+  Boolean isTrashed; // Soft deleted (in trash)
+  Instant trashedAt; // When moved to trash (for auto-purge)
   Long viewCount;
 
 }

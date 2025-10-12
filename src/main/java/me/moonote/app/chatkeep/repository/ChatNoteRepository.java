@@ -1,5 +1,6 @@
 package me.moonote.app.chatkeep.repository;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,24 @@ public interface ChatNoteRepository
 
   // Find by platform
   List<ChatNote> findByOriginalPlatform(String platform);
+
+  // Lifecycle queries - Active notes (not archived, not trashed)
+  List<ChatNote> findByIsArchivedFalseAndIsTrashedFalse();
+
+  Page<ChatNote> findByUserIdAndIsArchivedFalseAndIsTrashedFalse(String userId, Pageable pageable);
+
+  // Archived notes
+  List<ChatNote> findByUserIdAndIsArchivedTrueAndIsTrashedFalse(String userId);
+
+  Page<ChatNote> findByIsArchivedTrueAndIsTrashedFalse(Pageable pageable);
+
+  // Trashed notes
+  List<ChatNote> findByUserIdAndIsTrashedTrue(String userId);
+
+  Page<ChatNote> findByIsTrashedTrue(Pageable pageable);
+
+  // Auto-purge candidates (trashed > 30 days ago)
+  List<ChatNote> findByIsTrashedTrueAndTrashedAtBefore(Instant cutoffDate);
 
   // Custom queries
   @Query("{ 'user_id': ?0, 'is_public': true }")

@@ -38,6 +38,9 @@ public class ChatNoteDetailLightResponse {
   List<Workaround> workarounds;
   String userId;
   Boolean isPublic;
+  Boolean isArchived;
+  Boolean isTrashed;
+  Instant trashedAt;
   Long viewCount;
   Instant createdAt;
   Instant updatedAt;
