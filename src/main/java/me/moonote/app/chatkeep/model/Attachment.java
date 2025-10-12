@@ -1,33 +1,25 @@
 package me.moonote.app.chatkeep.model;
 
-import org.springframework.data.mongodb.core.mapping.Field;
+import static lombok.AccessLevel.PRIVATE;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class Attachment {
 
-  private String filename;
-  private String content;
-
-  @Field("is_summarized")
-  private Boolean isSummarized;
-
-  @Field("original_size")
-  private String originalSize;
-
-  @Field("summarization_level")
-  private String summarizationLevel;
-
-  @Field("content_preserved")
-  private String contentPreserved;
-
-  @Field("processing_limitation")
-  private String processingLimitation;
+  String filename;
+  String content;
+  Boolean isSummarized;
+  String originalSize;
+  String summarizationLevel;
+  String contentPreserved;
+  String processingLimitation;
 
 }

@@ -1,22 +1,25 @@
 package me.moonote.app.chatkeep.dto;
 
+import static lombok.AccessLevel.PRIVATE;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class ArtifactDto {
 
-  private String type;
-  private String title;
-  private String language;
-  private String version;
-  private String iterations;
-  private String evolutionNotes;
-  private String content;
+  String type;
+  String title;
+  String language;
+  String version;
+  String iterations;
+  String evolutionNotes;
+  String content;
 
 }

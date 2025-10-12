@@ -1,19 +1,22 @@
 package me.moonote.app.chatkeep.dto;
 
+import static lombok.AccessLevel.PRIVATE;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class QuerySectionDto {
 
-  private String description;
-  private List<String> attachmentsReferenced;
-  private List<String> artifactsCreated;
+  String description;
+  List<String> attachmentsReferenced;
+  List<String> artifactsCreated;
 
 }

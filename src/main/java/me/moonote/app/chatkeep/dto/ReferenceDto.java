@@ -1,17 +1,20 @@
 package me.moonote.app.chatkeep.dto;
 
+import static lombok.AccessLevel.PRIVATE;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class ReferenceDto {
 
-  private String url;
-  private String description;
+  String url;
+  String description;
 
 }

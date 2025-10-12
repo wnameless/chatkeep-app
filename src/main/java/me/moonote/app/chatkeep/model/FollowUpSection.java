@@ -1,23 +1,22 @@
 package me.moonote.app.chatkeep.model;
 
+import static lombok.AccessLevel.PRIVATE;
 import java.util.List;
-import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = PRIVATE)
 public class FollowUpSection {
-  private String description;
 
-  @Field("attachments_referenced")
-  private List<String> attachmentsReferenced;
-
-  @Field("artifacts_created")
-  private List<String> artifactsCreated;
+  String description;
+  List<String> attachmentsReferenced;
+  List<String> artifactsCreated;
 
 }
