@@ -1,0 +1,317 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://chatkeep.com/schemas/archive-schema.json",
+  "title": "AI Conversation Archive",
+  "type": "object",
+  "required": [
+    "metadata",
+    "summary",
+    "artifacts",
+    "attachments"
+  ],
+  "properties": {
+    "metadata": {
+      "$ref": "#/definitions/metadata"
+    },
+    "summary": {
+      "$ref": "#/definitions/summary"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/artifact"
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/attachment"
+      }
+    },
+    "workarounds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/workaround"
+      }
+    }
+  },
+  "definitions": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "archiveVersion",
+        "archiveType",
+        "createdDate",
+        "originalPlatform",
+        "title"
+      ],
+      "properties": {
+        "archiveVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "Version of the archive format"
+        },
+        "archiveType": {
+          "type": "string",
+          "enum": [
+            "conversation_summary"
+          ],
+          "description": "Type of archive"
+        },
+        "createdDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date when archive was created"
+        },
+        "originalPlatform": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Platform where conversation occurred"
+        },
+        "attachmentCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of attachments"
+        },
+        "artifactCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of artifacts"
+        },
+        "archiveCompleteness": {
+          "type": "string",
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "SUMMARIZED"
+          ],
+          "description": "Completeness status of the archive"
+        },
+        "workaroundsCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of workarounds used"
+        },
+        "totalFileSize": {
+          "type": "string",
+          "description": "Total size of the archive"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Title of the conversation"
+        },
+        "conversationDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of the conversation"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags for categorizing the conversation"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "initialQuery": {
+          "$ref": "#/definitions/querySection"
+        },
+        "keyInsights": {
+          "$ref": "#/definitions/insightsSection"
+        },
+        "followUpExplorations": {
+          "$ref": "#/definitions/followUpSection"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reference"
+          }
+        }
+      }
+    },
+    "querySection": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "attachmentsReferenced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifactsCreated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "insightsSection": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "keyPoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attachmentsReferenced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifactsCreated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "followUpSection": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "attachmentsReferenced": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifactsCreated": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "content"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Type of artifact (code, poem, document, etc.)"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Title of the artifact"
+        },
+        "language": {
+          "type": "string",
+          "description": "Programming language for code artifacts"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version identifier"
+        },
+        "iterations": {
+          "type": "string",
+          "description": "Number of iterations"
+        },
+        "evolutionNotes": {
+          "type": "string",
+          "description": "Notes about how the artifact evolved"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Content of the artifact"
+        }
+      }
+    },
+    "attachment": {
+      "type": "object",
+      "required": [
+        "filename",
+        "content"
+      ],
+      "properties": {
+        "filename": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Original filename"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Content of the attachment"
+        },
+        "isSummarized": {
+          "type": "boolean",
+          "description": "Whether the attachment was summarized"
+        },
+        "originalSize": {
+          "type": "string",
+          "description": "Original size of the attachment"
+        },
+        "summarizationLevel": {
+          "type": "string",
+          "description": "Level of summarization applied"
+        },
+        "contentPreserved": {
+          "type": "string",
+          "description": "Description of what content was preserved"
+        },
+        "processingLimitation": {
+          "type": "string",
+          "description": "Reason for processing limitation"
+        }
+      }
+    },
+    "workaround": {
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string"
+        },
+        "workaround": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "preserved": {
+          "type": "string"
+        },
+        "lost": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

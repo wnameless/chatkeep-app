@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://chatkeep.com/schemas/metadata-schema.json",
+  "title": "Archive Metadata",
+  "type": "object",
+  "required": [
+    "archiveVersion",
+    "archiveType",
+    "createdDate",
+    "originalPlatform",
+    "title"
+  ],
+  "properties": {
+    "archiveVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "archiveType": {
+      "type": "string",
+      "enum": [
+        "conversation_summary"
+      ]
+    },
+    "createdDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "originalPlatform": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attachmentCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "artifactCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "archiveCompleteness": {
+      "type": "string",
+      "enum": [
+        "COMPLETE",
+        "PARTIAL",
+        "SUMMARIZED"
+      ]
+    },
+    "workaroundsCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "totalFileSize": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conversationDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
