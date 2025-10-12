@@ -31,11 +31,14 @@ public class JsonSchemaValidator {
     JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
 
     // Load schemas from resources
-    this.archiveSchema = factory.getSchema(loadSchemaFromResource("schemas/archive-schema.json"));
-    this.metadataSchema = factory.getSchema(loadSchemaFromResource("schemas/metadata-schema.json"));
-    this.artifactSchema = factory.getSchema(loadSchemaFromResource("schemas/artifact-schema.json"));
+    this.archiveSchema =
+        factory.getSchema(loadSchemaFromResource("json-schemas/archive-schema.json"));
+    this.metadataSchema =
+        factory.getSchema(loadSchemaFromResource("json-schemas/metadata-schema.json"));
+    this.artifactSchema =
+        factory.getSchema(loadSchemaFromResource("json-schemas/artifact-schema.json"));
     this.attachmentSchema =
-        factory.getSchema(loadSchemaFromResource("schemas/attachment-schema.json"));
+        factory.getSchema(loadSchemaFromResource("json-schemas/attachment-schema.json"));
 
     log.info("JSON schemas loaded successfully");
   }
