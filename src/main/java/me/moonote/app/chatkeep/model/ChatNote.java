@@ -18,9 +18,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "conversation_archives")
+@Document
 @FieldDefaults(level = PRIVATE)
-public class ConversationArchive {
+public class ChatNote {
 
   @Id
   String id;
@@ -32,7 +32,7 @@ public class ConversationArchive {
   String originalPlatform;
   Integer attachmentCount;
   Integer artifactCount;
-  ArchiveCompleteness archiveCompleteness; // ENUM
+  ChatNoteCompleteness chatNoteCompleteness; // ENUM
   Integer workaroundsCount;
   String totalFileSize;
   String title;

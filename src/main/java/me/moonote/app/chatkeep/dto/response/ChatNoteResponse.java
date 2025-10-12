@@ -15,14 +15,14 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class ArchiveResponse {
+public class ChatNoteResponse {
 
   String id;
   String title;
   LocalDate conversationDate;
   List<String> tags;
   String originalPlatform;
-  String archiveCompleteness;
+  String chatNoteCompleteness;
   Integer attachmentCount;
   Integer artifactCount;
   Long viewCount;

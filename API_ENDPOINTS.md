@@ -2,12 +2,12 @@
 
 Base URL: `/api/v1`
 
-## Archive Management Endpoints
+## Chat Note Management Endpoints
 
-### 1. Upload Archive
-**POST** `/api/v1/archives`
+### 1. Upload Chat Note
+**POST** `/api/v1/chat-notes`
 
-Upload and process a new conversation archive from markdown format.
+Upload and process a new conversation chat note from markdown format.
 
 **Request Body:**
 ```json
@@ -30,7 +30,7 @@ Upload and process a new conversation archive from markdown format.
     "conversationDate": "2025-10-12",
     "tags": ["ai", "development"],
     "originalPlatform": "Claude",
-    "archiveCompleteness": "COMPLETE",
+    "chatNoteCompleteness": "COMPLETE",
     "attachmentCount": 2,
     "artifactCount": 3,
     "summary": { ... },
@@ -47,15 +47,15 @@ Upload and process a new conversation archive from markdown format.
 ```
 
 **Error Responses:**
-- `400 Bad Request` - Invalid archive format or validation failed
+- `400 Bad Request` - Invalid chat note format or validation failed
 - `500 Internal Server Error` - Server processing error
 
 ---
 
-### 2. Get Archive by ID (Lightweight)
-**GET** `/api/v1/archives/{id}`
+### 2. Get Chat Note by ID (Lightweight)
+**GET** `/api/v1/chat-notes/{id}`
 
-Retrieve a specific archive by ID with **lightweight response** - includes all metadata, conversation summary, and workarounds, but **excludes** artifact and attachment content (metadata only). Increments view count.
+Retrieve a specific chat note by ID with **lightweight response** - includes all metadata, conversation summary, and workarounds, but **excludes** artifact and attachment content (metadata only). Increments view count.
 
 **Response (200 OK):**
 ```json
@@ -69,7 +69,7 @@ Retrieve a specific archive by ID with **lightweight response** - includes all m
     "conversationDate": "2025-10-12",
     "tags": ["ai", "development"],
     "originalPlatform": "Claude",
-    "archiveCompleteness": "COMPLETE",
+    "chatNoteCompleteness": "COMPLETE",
     "attachmentCount": 2,
     "artifactCount": 3,
     "summary": {
@@ -125,7 +125,7 @@ Retrieve a specific archive by ID with **lightweight response** - includes all m
 ---
 
 ### 3. Get Artifact Content
-**GET** `/api/v1/archives/{id}/artifacts/{index}`
+**GET** `/api/v1/chat-notes/{id}/artifacts/{index}`
 
 Retrieve the full content of a specific artifact by its index (0-based).
 
@@ -157,7 +157,7 @@ Retrieve the full content of a specific artifact by its index (0-based).
 ---
 
 ### 4. Get Attachment Content
-**GET** `/api/v1/archives/{id}/attachments/{index}`
+**GET** `/api/v1/chat-notes/{id}/attachments/{index}`
 
 Retrieve the full content of a specific attachment by its index (0-based).
 
@@ -189,9 +189,9 @@ Retrieve the full content of a specific attachment by its index (0-based).
 ---
 
 ### 5. Get All Archives (Paginated)
-**GET** `/api/v1/archives?page=0&size=20&sort=createdAt,desc`
+**GET** `/api/v1/chat-notes?page=0&size=20&sort=createdAt,desc`
 
-Retrieve all archives with pagination and sorting.
+Retrieve all chat notes with pagination and sorting.
 
 **Query Parameters:**
 - `page` (optional, default: 0) - Page number
@@ -210,7 +210,7 @@ Retrieve all archives with pagination and sorting.
         "conversationDate": "2025-10-12",
         "tags": ["ai", "development"],
         "originalPlatform": "Claude",
-        "archiveCompleteness": "COMPLETE",
+        "chatNoteCompleteness": "COMPLETE",
         "attachmentCount": 2,
         "artifactCount": 3,
         "viewCount": 15,
@@ -230,10 +230,10 @@ Retrieve all archives with pagination and sorting.
 
 ---
 
-### 6. Get Archives by User
-**GET** `/api/v1/archives/user/{userId}`
+### 6. Get Chat Notes by User
+**GET** `/api/v1/chat-notes/user/{userId}`
 
-Retrieve all archives created by a specific user.
+Retrieve all chat notes created by a specific user.
 
 **Response (200 OK):**
 ```json
@@ -243,7 +243,7 @@ Retrieve all archives created by a specific user.
     {
       "id": "67890abcdef",
       "title": "Conversation Title",
-      // ... archive summary
+      // ... chat note summary
     }
   ]
 }
@@ -252,13 +252,13 @@ Retrieve all archives created by a specific user.
 ---
 
 ### 7. Search Archives
-**GET** `/api/v1/archives/search?title=keyword`
-**GET** `/api/v1/archives/search?tag=tagname`
+**GET** `/api/v1/chat-notes/search?title=keyword`
+**GET** `/api/v1/chat-notes/search?tag=tagname`
 
-Search archives by title or tag. Requires at least one parameter.
+Search chat notes by title or tag. Requires at least one parameter.
 
 **Query Parameters:**
-- `title` (optional) - Search in archive titles (case-insensitive)
+- `title` (optional) - Search in chat note titles (case-insensitive)
 - `tag` (optional) - Filter by tag
 
 **Response (200 OK):**
@@ -269,7 +269,7 @@ Search archives by title or tag. Requires at least one parameter.
     {
       "id": "67890abcdef",
       "title": "Conversation Title",
-      // ... archive summary
+      // ... chat note summary
     }
   ]
 }
@@ -281,9 +281,9 @@ Search archives by title or tag. Requires at least one parameter.
 ---
 
 ### 8. Get Public Archives
-**GET** `/api/v1/archives/public?page=0&size=20`
+**GET** `/api/v1/chat-notes/public?page=0&size=20`
 
-Retrieve public archives (paginated).
+Retrieve public chat notes (paginated).
 
 **Query Parameters:**
 - `page` (optional, default: 0) - Page number
@@ -303,10 +303,10 @@ Retrieve public archives (paginated).
 
 ---
 
-### 9. Update Archive Visibility
-**PATCH** `/api/v1/archives/{id}/visibility?isPublic=true`
+### 9. Update Chat Note Visibility
+**PATCH** `/api/v1/chat-notes/{id}/visibility?isPublic=true`
 
-Update whether an archive is public or private.
+Update whether a chat note is public or private.
 
 **Query Parameters:**
 - `isPublic` (required) - Boolean flag for visibility
@@ -319,7 +319,7 @@ Update whether an archive is public or private.
   "data": {
     "id": "67890abcdef",
     "isPublic": true,
-    // ... full archive details
+    // ... full chat note details
   }
 }
 ```
@@ -329,10 +329,10 @@ Update whether an archive is public or private.
 
 ---
 
-### 10. Delete Archive
-**DELETE** `/api/v1/archives/{id}`
+### 10. Delete Chat Note
+**DELETE** `/api/v1/chat-notes/{id}`
 
-Permanently delete an archive.
+Permanently delete a chat note.
 
 **Response (200 OK):**
 ```json
@@ -367,7 +367,7 @@ All API responses follow this structure:
 To optimize bandwidth and performance, the API implements a **lazy loading pattern** for artifacts and attachments:
 
 ### 1. Initial Browse (Lightweight)
-When viewing an archive, call `GET /api/v1/archives/{id}` to receive:
+When viewing a chat note, call `GET /api/v1/chat-notes/{id}` to receive:
 - ✅ All metadata
 - ✅ Conversation summary
 - ✅ Artifact/attachment metadata (titles, filenames, types)
@@ -376,8 +376,8 @@ When viewing an archive, call `GET /api/v1/archives/{id}` to receive:
 
 ### 2. On-Demand Content Loading
 When user clicks to view a specific artifact or attachment:
-- Call `GET /api/v1/archives/{id}/artifacts/{index}` for artifact content
-- Call `GET /api/v1/archives/{id}/attachments/{index}` for attachment content
+- Call `GET /api/v1/chat-notes/{id}/artifacts/{index}` for artifact content
+- Call `GET /api/v1/chat-notes/{id}/attachments/{index}` for attachment content
 
 ### 3. Benefits
 - **Bandwidth**: 90%+ reduction when browsing
@@ -387,16 +387,16 @@ When user clicks to view a specific artifact or attachment:
 
 ### Usage Example Flow
 ```javascript
-// 1. Load archive (lightweight)
-const archive = await fetch('/api/v1/archives/abc123');
-// archive.artifacts = [{ title: "Script", type: "code" }]  // NO content
+// 1. Load chat note (lightweight)
+const chatNote = await fetch('/api/v1/chat-notes/abc123');
+// chatNote.artifacts = [{ title: "Script", type: "code" }]  // NO content
 
 // 2. User clicks on first artifact
-const artifact = await fetch('/api/v1/archives/abc123/artifacts/0');
+const artifact = await fetch('/api/v1/chat-notes/abc123/artifacts/0');
 // artifact.content = "def process():\n..."  // Full content loaded
 
 // 3. User clicks on second attachment
-const attachment = await fetch('/api/v1/archives/abc123/attachments/1');
+const attachment = await fetch('/api/v1/chat-notes/abc123/attachments/1');
 // attachment.content = "base64encodedimage..."  // Full content loaded
 ```
 
@@ -413,7 +413,7 @@ Used in list endpoints:
   "conversationDate": "date",
   "tags": ["string"],
   "originalPlatform": "string",
-  "archiveCompleteness": "COMPLETE|PARTIAL|SUMMARIZED",
+  "chatNoteCompleteness": "COMPLETE|PARTIAL|SUMMARIZED",
   "attachmentCount": "number",
   "artifactCount": "number",
   "viewCount": "number",
@@ -424,7 +424,7 @@ Used in list endpoints:
 ```
 
 ### ArchiveDetailResponse
-Full archive details including summary, artifacts, attachments, and workarounds.
+Full chat note details including summary, artifacts, attachments, and workarounds.
 
 ---
 
@@ -444,11 +444,11 @@ Full archive details including summary, artifacts, attachments, and workarounds.
 3. **Batch Operations**
    - Bulk upload
    - Bulk delete
-   - Export multiple archives
+   - Export multiple chat notes
 
 4. **Analytics**
    - View statistics
-   - Popular archives
+   - Popular chat notes
    - User activity tracking
 
 ---
@@ -457,7 +457,7 @@ Full archive details including summary, artifacts, attachments, and workarounds.
 
 ### Example: Upload an Archive
 ```bash
-curl -X POST http://localhost:8080/api/v1/archives \
+curl -X POST http://localhost:8080/api/v1/chat-notes \
   -H "Content-Type: application/json" \
   -d '{
     "markdownContent": "---\nARCHIVE_FORMAT_VERSION: 1.0\n...",
@@ -465,30 +465,30 @@ curl -X POST http://localhost:8080/api/v1/archives \
   }'
 ```
 
-### Example: Get Archive (Lightweight)
+### Example: Get Chat Note (Lightweight)
 ```bash
 # Returns metadata only (no artifact/attachment content)
-curl http://localhost:8080/api/v1/archives/abc123
+curl http://localhost:8080/api/v1/chat-notes/abc123
 ```
 
 ### Example: Get Artifact Content
 ```bash
 # Get first artifact's content (index 0)
-curl http://localhost:8080/api/v1/archives/abc123/artifacts/0
+curl http://localhost:8080/api/v1/chat-notes/abc123/artifacts/0
 ```
 
 ### Example: Get Attachment Content
 ```bash
 # Get second attachment's content (index 1)
-curl http://localhost:8080/api/v1/archives/abc123/attachments/1
+curl http://localhost:8080/api/v1/chat-notes/abc123/attachments/1
 ```
 
 ### Example: Get All Archives
 ```bash
-curl http://localhost:8080/api/v1/archives?page=0&size=10
+curl http://localhost:8080/api/v1/chat-notes?page=0&size=10
 ```
 
 ### Example: Search by Title
 ```bash
-curl http://localhost:8080/api/v1/archives/search?title=python
+curl http://localhost:8080/api/v1/chat-notes/search?title=python
 ```

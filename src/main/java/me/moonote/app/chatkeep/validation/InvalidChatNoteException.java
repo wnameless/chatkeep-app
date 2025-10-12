@@ -2,14 +2,14 @@ package me.moonote.app.chatkeep.validation;
 
 import java.util.List;
 
-public class InvalidArchiveException extends RuntimeException {
+public class InvalidChatNoteException extends RuntimeException {
 
-  public InvalidArchiveException(String message) {
+  public InvalidChatNoteException(String message) {
     super(message);
   }
 
-  public InvalidArchiveException(List<String> errors) {
-    super("Archive validation failed: " + String.join(", ", errors));
+  public InvalidChatNoteException(List<String> errors) {
+    super("Chat note validation failed: " + String.join(", ", errors));
   }
 
 }

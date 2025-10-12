@@ -1,9 +1,9 @@
 package me.moonote.app.chatkeep.validation;
 
-public class ArchiveNotFoundException extends RuntimeException {
+public class ChatNoteNotFoundException extends RuntimeException {
 
-  public ArchiveNotFoundException(String id) {
-    super("Archive not found with id: " + id);
+  public ChatNoteNotFoundException(String id) {
+    super("Chat note not found with id: " + id);
   }
 
 }

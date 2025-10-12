@@ -19,7 +19,7 @@ import me.moonote.app.chatkeep.model.Workaround;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class ArchiveDetailResponse {
+public class ChatNoteDetailResponse {
 
   String id;
   String archiveVersion;
@@ -28,7 +28,7 @@ public class ArchiveDetailResponse {
   String originalPlatform;
   Integer attachmentCount;
   Integer artifactCount;
-  String archiveCompleteness;
+  String chatNoteCompleteness;
   Integer workaroundsCount;
   String totalFileSize;
   String title;

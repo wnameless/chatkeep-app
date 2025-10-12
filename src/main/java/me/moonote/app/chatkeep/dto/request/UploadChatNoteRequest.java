@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class UploadArchiveRequest {
+public class UploadChatNoteRequest {
 
   String markdownContent;
   String userId; // Optional - for multi-user support

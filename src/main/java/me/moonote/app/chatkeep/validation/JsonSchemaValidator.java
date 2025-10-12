@@ -32,7 +32,7 @@ public class JsonSchemaValidator {
 
     // Load schemas from resources
     this.archiveSchema =
-        factory.getSchema(loadSchemaFromResource("json-schemas/archive-schema.json"));
+        factory.getSchema(loadSchemaFromResource("json-schemas/chat-note-schema.json"));
     this.metadataSchema =
         factory.getSchema(loadSchemaFromResource("json-schemas/metadata-schema.json"));
     this.artifactSchema =

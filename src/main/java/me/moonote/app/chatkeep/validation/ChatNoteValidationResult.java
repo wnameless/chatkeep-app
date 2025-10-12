@@ -4,21 +4,21 @@ import java.util.Collections;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import me.moonote.app.chatkeep.dto.ArchiveDto;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
 
 @Data
 @Builder
-public class ArchiveValidationResult {
+public class ChatNoteValidationResult {
   private boolean valid;
-  private ArchiveDto archiveDto;
+  private ChatNoteDto chatNoteDto;
   private List<String> errors;
 
-  public static ArchiveValidationResult success(ArchiveDto dto) {
-    return ArchiveValidationResult.builder().valid(true).archiveDto(dto)
+  public static ChatNoteValidationResult success(ChatNoteDto dto) {
+    return ChatNoteValidationResult.builder().valid(true).chatNoteDto(dto)
         .errors(Collections.emptyList()).build();
   }
 
-  public static ArchiveValidationResult failure(List<String> errors) {
-    return ArchiveValidationResult.builder().valid(false).errors(errors).build();
+  public static ChatNoteValidationResult failure(List<String> errors) {
+    return ChatNoteValidationResult.builder().valid(false).errors(errors).build();
   }
 }

@@ -7,38 +7,38 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
-import me.moonote.app.chatkeep.model.ArchiveCompleteness;
-import me.moonote.app.chatkeep.model.ConversationArchive;
+import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
+import me.moonote.app.chatkeep.model.ChatNote;
 
 @Repository
-public interface ConversationArchiveRepository
-    extends MongoRepository<ConversationArchive, String> {
+public interface ChatNoteRepository
+    extends MongoRepository<ChatNote, String> {
 
   // Find by user
-  List<ConversationArchive> findByUserId(String userId);
+  List<ChatNote> findByUserId(String userId);
 
   // Find public archives
-  List<ConversationArchive> findByIsPublicTrue();
+  List<ChatNote> findByIsPublicTrue();
 
-  Page<ConversationArchive> findByIsPublic(Boolean isPublic, Pageable pageable);
+  Page<ChatNote> findByIsPublic(Boolean isPublic, Pageable pageable);
 
   // Find by tags
-  List<ConversationArchive> findByTagsContaining(String tag);
+  List<ChatNote> findByTagsContaining(String tag);
 
   // Search by title
-  List<ConversationArchive> findByTitleContainingIgnoreCase(String keyword);
+  List<ChatNote> findByTitleContainingIgnoreCase(String keyword);
 
   // Find by date range
-  List<ConversationArchive> findByConversationDateBetween(LocalDate start, LocalDate end);
+  List<ChatNote> findByConversationDateBetween(LocalDate start, LocalDate end);
 
   // Find by platform
-  List<ConversationArchive> findByOriginalPlatform(String platform);
+  List<ChatNote> findByOriginalPlatform(String platform);
 
   // Custom queries
   @Query("{ 'user_id': ?0, 'is_public': true }")
-  List<ConversationArchive> findPublicArchivesByUser(String userId);
+  List<ChatNote> findPublicArchivesByUser(String userId);
 
   @Query("{ 'archive_completeness': ?0 }")
-  List<ConversationArchive> findByCompleteness(ArchiveCompleteness completeness);
+  List<ChatNote> findByCompleteness(ChatNoteCompleteness completeness);
 
 }

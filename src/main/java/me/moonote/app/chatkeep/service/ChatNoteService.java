@@ -6,51 +6,51 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.moonote.app.chatkeep.dto.ArchiveDto;
-import me.moonote.app.chatkeep.dto.response.ArchiveDetailLightResponse;
-import me.moonote.app.chatkeep.dto.response.ArchiveDetailResponse;
-import me.moonote.app.chatkeep.dto.response.ArchiveResponse;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
+import me.moonote.app.chatkeep.dto.response.ChatNoteDetailLightResponse;
+import me.moonote.app.chatkeep.dto.response.ChatNoteDetailResponse;
+import me.moonote.app.chatkeep.dto.response.ChatNoteResponse;
 import me.moonote.app.chatkeep.dto.response.ArtifactMetadata;
 import me.moonote.app.chatkeep.dto.response.AttachmentMetadata;
-import me.moonote.app.chatkeep.mapper.ArchiveMapper;
+import me.moonote.app.chatkeep.mapper.ChatNoteMapper;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
-import me.moonote.app.chatkeep.model.ConversationArchive;
-import me.moonote.app.chatkeep.repository.ConversationArchiveRepository;
-import me.moonote.app.chatkeep.validation.ArchiveNotFoundException;
-import me.moonote.app.chatkeep.validation.ArchiveValidationResult;
-import me.moonote.app.chatkeep.validation.InvalidArchiveException;
+import me.moonote.app.chatkeep.model.ChatNote;
+import me.moonote.app.chatkeep.repository.ChatNoteRepository;
+import me.moonote.app.chatkeep.validation.ChatNoteNotFoundException;
+import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
+import me.moonote.app.chatkeep.validation.InvalidChatNoteException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ArchiveService {
+public class ChatNoteService {
 
-  private final MarkdownArchivePreprocessor preprocessor;
-  private final ConversationArchiveRepository repository;
-  private final ArchiveMapper mapper;
+  private final MarkdownChatNotePreprocessor preprocessor;
+  private final ChatNoteRepository repository;
+  private final ChatNoteMapper mapper;
 
   /**
    * Upload and process a markdown archive
    */
-  public ArchiveDetailResponse uploadArchive(String markdownContent, String userId) {
+  public ChatNoteDetailResponse uploadChatNote(String markdownContent, String userId) {
     log.info("Processing archive upload for user: {}", userId);
 
     // Parse and validate markdown
-    ArchiveValidationResult validationResult = preprocessor.preprocess(markdownContent);
+    ChatNoteValidationResult validationResult = preprocessor.preprocess(markdownContent);
 
     if (!validationResult.isValid()) {
-      log.warn("Archive validation failed: {}", validationResult.getErrors());
-      throw new InvalidArchiveException("Archive validation failed: "
+      log.warn("Chat note validation failed: {}", validationResult.getErrors());
+      throw new InvalidChatNoteException("Chat note validation failed: "
           + String.join(", ", validationResult.getErrors()));
     }
 
     // Convert to entity and save
-    ArchiveDto archiveDto = validationResult.getArchiveDto();
-    ConversationArchive entity = mapper.toEntity(archiveDto, userId);
-    ConversationArchive saved = repository.save(entity);
+    ChatNoteDto chatNoteDto = validationResult.getChatNoteDto();
+    ChatNote entity = mapper.toEntity(chatNoteDto, userId);
+    ChatNote saved = repository.save(entity);
 
-    log.info("Archive saved successfully with id: {}", saved.getId());
+    log.info("Chat note saved successfully with id: {}", saved.getId());
 
     return toDetailResponse(saved);
   }
@@ -58,9 +58,9 @@ public class ArchiveService {
   /**
    * Get archive by ID (lightweight - without artifact/attachment content)
    */
-  public ArchiveDetailLightResponse getArchiveById(String id) {
-    ConversationArchive archive =
-        repository.findById(id).orElseThrow(() -> new ArchiveNotFoundException(id));
+  public ChatNoteDetailLightResponse getChatNoteById(String id) {
+    ChatNote archive =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     // Increment view count
     archive.setViewCount(archive.getViewCount() + 1);
@@ -73,8 +73,8 @@ public class ArchiveService {
    * Get artifact content by archive ID and artifact index
    */
   public Artifact getArtifactContent(String archiveId, int index) {
-    ConversationArchive archive =
-        repository.findById(archiveId).orElseThrow(() -> new ArchiveNotFoundException(archiveId));
+    ChatNote archive =
+        repository.findById(archiveId).orElseThrow(() -> new ChatNoteNotFoundException(archiveId));
 
     if (archive.getArtifacts() == null || index < 0 || index >= archive.getArtifacts().size()) {
       throw new IllegalArgumentException(
@@ -88,8 +88,8 @@ public class ArchiveService {
    * Get attachment content by archive ID and attachment index
    */
   public Attachment getAttachmentContent(String archiveId, int index) {
-    ConversationArchive archive =
-        repository.findById(archiveId).orElseThrow(() -> new ArchiveNotFoundException(archiveId));
+    ChatNote archive =
+        repository.findById(archiveId).orElseThrow(() -> new ChatNoteNotFoundException(archiveId));
 
     if (archive.getAttachments() == null || index < 0
         || index >= archive.getAttachments().size()) {
@@ -103,21 +103,21 @@ public class ArchiveService {
   /**
    * Get all archives (paginated)
    */
-  public Page<ArchiveResponse> getAllArchives(Pageable pageable) {
+  public Page<ChatNoteResponse> getAllChatNotes(Pageable pageable) {
     return repository.findAll(pageable).map(this::toResponse);
   }
 
   /**
    * Get archives by user ID
    */
-  public List<ArchiveResponse> getArchivesByUserId(String userId) {
+  public List<ChatNoteResponse> getChatNotesByUserId(String userId) {
     return repository.findByUserId(userId).stream().map(this::toResponse).toList();
   }
 
   /**
    * Search archives by title
    */
-  public List<ArchiveResponse> searchByTitle(String title) {
+  public List<ChatNoteResponse> searchByTitle(String title) {
     return repository.findByTitleContainingIgnoreCase(title).stream().map(this::toResponse)
         .toList();
   }
@@ -125,21 +125,21 @@ public class ArchiveService {
   /**
    * Search archives by tags
    */
-  public List<ArchiveResponse> searchByTag(String tag) {
+  public List<ChatNoteResponse> searchByTag(String tag) {
     return repository.findByTagsContaining(tag).stream().map(this::toResponse).toList();
   }
 
   /**
    * Update archive visibility
    */
-  public ArchiveDetailResponse updateVisibility(String id, Boolean isPublic) {
-    ConversationArchive archive =
-        repository.findById(id).orElseThrow(() -> new ArchiveNotFoundException(id));
+  public ChatNoteDetailResponse updateVisibility(String id, Boolean isPublic) {
+    ChatNote archive =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     archive.setIsPublic(isPublic);
-    ConversationArchive updated = repository.save(archive);
+    ChatNote updated = repository.save(archive);
 
-    log.info("Archive {} visibility updated to: {}", id, isPublic);
+    log.info("Chat note {} visibility updated to: {}", id, isPublic);
 
     return toDetailResponse(updated);
   }
@@ -147,38 +147,38 @@ public class ArchiveService {
   /**
    * Delete archive
    */
-  public void deleteArchive(String id) {
+  public void deleteChatNote(String id) {
     if (!repository.existsById(id)) {
-      throw new ArchiveNotFoundException(id);
+      throw new ChatNoteNotFoundException(id);
     }
 
     repository.deleteById(id);
-    log.info("Archive deleted: {}", id);
+    log.info("Chat note deleted: {}", id);
   }
 
   /**
    * Get public archives
    */
-  public Page<ArchiveResponse> getPublicArchives(Pageable pageable) {
+  public Page<ChatNoteResponse> getPublicChatNotes(Pageable pageable) {
     return repository.findByIsPublic(true, pageable).map(this::toResponse);
   }
 
-  private ArchiveResponse toResponse(ConversationArchive archive) {
-    return ArchiveResponse.builder().id(archive.getId()).title(archive.getTitle())
+  private ChatNoteResponse toResponse(ChatNote archive) {
+    return ChatNoteResponse.builder().id(archive.getId()).title(archive.getTitle())
         .conversationDate(archive.getConversationDate()).tags(archive.getTags())
         .originalPlatform(archive.getOriginalPlatform())
-        .archiveCompleteness(archive.getArchiveCompleteness().name())
+        .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
         .viewCount(archive.getViewCount()).isPublic(archive.getIsPublic())
         .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
-  private ArchiveDetailResponse toDetailResponse(ConversationArchive archive) {
-    return ArchiveDetailResponse.builder().id(archive.getId())
+  private ChatNoteDetailResponse toDetailResponse(ChatNote archive) {
+    return ChatNoteDetailResponse.builder().id(archive.getId())
         .archiveVersion(archive.getArchiveVersion()).archiveType(archive.getArchiveType())
         .createdDate(archive.getCreatedDate()).originalPlatform(archive.getOriginalPlatform())
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
-        .archiveCompleteness(archive.getArchiveCompleteness().name())
+        .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .workaroundsCount(archive.getWorkaroundsCount()).totalFileSize(archive.getTotalFileSize())
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(archive.getArtifacts())
@@ -188,7 +188,7 @@ public class ArchiveService {
         .updatedAt(archive.getUpdatedAt()).build();
   }
 
-  private ArchiveDetailLightResponse toDetailLightResponse(ConversationArchive archive) {
+  private ChatNoteDetailLightResponse toDetailLightResponse(ChatNote archive) {
     // Convert artifacts to metadata only (no content)
     List<ArtifactMetadata> artifactMetadata = archive.getArtifacts() == null ? List.of()
         : archive.getArtifacts().stream()
@@ -207,11 +207,11 @@ public class ArchiveService {
                 .processingLimitation(att.getProcessingLimitation()).build())
             .toList();
 
-    return ArchiveDetailLightResponse.builder().id(archive.getId())
+    return ChatNoteDetailLightResponse.builder().id(archive.getId())
         .archiveVersion(archive.getArchiveVersion()).archiveType(archive.getArchiveType())
         .createdDate(archive.getCreatedDate()).originalPlatform(archive.getOriginalPlatform())
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
-        .archiveCompleteness(archive.getArchiveCompleteness().name())
+        .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .workaroundsCount(archive.getWorkaroundsCount()).totalFileSize(archive.getTotalFileSize())
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(artifactMetadata)

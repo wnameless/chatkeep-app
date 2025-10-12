@@ -17,42 +17,42 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.moonote.app.chatkeep.dto.request.UploadArchiveRequest;
+import me.moonote.app.chatkeep.dto.request.UploadChatNoteRequest;
 import me.moonote.app.chatkeep.dto.response.ApiResponse;
-import me.moonote.app.chatkeep.dto.response.ArchiveDetailLightResponse;
-import me.moonote.app.chatkeep.dto.response.ArchiveDetailResponse;
-import me.moonote.app.chatkeep.dto.response.ArchiveResponse;
+import me.moonote.app.chatkeep.dto.response.ChatNoteDetailLightResponse;
+import me.moonote.app.chatkeep.dto.response.ChatNoteDetailResponse;
+import me.moonote.app.chatkeep.dto.response.ChatNoteResponse;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
-import me.moonote.app.chatkeep.service.ArchiveService;
-import me.moonote.app.chatkeep.validation.ArchiveNotFoundException;
-import me.moonote.app.chatkeep.validation.InvalidArchiveException;
+import me.moonote.app.chatkeep.service.ChatNoteService;
+import me.moonote.app.chatkeep.validation.ChatNoteNotFoundException;
+import me.moonote.app.chatkeep.validation.InvalidChatNoteException;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/archives")
+@RequestMapping("/api/v1/chat-notes")
 @RequiredArgsConstructor
-public class ArchiveApiController {
+public class ChatNoteApiController {
 
-  private final ArchiveService archiveService;
+  private final ChatNoteService chatNoteService;
 
   /**
    * Upload and process a new archive
-   * POST /api/v1/archives
+   * POST /api/v1/chat-notes
    */
   @PostMapping
-  public ResponseEntity<ApiResponse<ArchiveDetailResponse>> uploadArchive(
-      @RequestBody UploadArchiveRequest request) {
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadChatNote(
+      @RequestBody UploadChatNoteRequest request) {
     try {
       log.info("Received archive upload request");
       String userId = request.getUserId() != null ? request.getUserId() : "anonymous";
 
-      ArchiveDetailResponse response =
-          archiveService.uploadArchive(request.getMarkdownContent(), userId);
+      ChatNoteDetailResponse response =
+          chatNoteService.uploadChatNote(request.getMarkdownContent(), userId);
 
       return ResponseEntity.status(HttpStatus.CREATED)
-          .body(ApiResponse.success("Archive uploaded successfully", response));
-    } catch (InvalidArchiveException e) {
+          .body(ApiResponse.success("Chat note uploaded successfully", response));
+    } catch (InvalidChatNoteException e) {
       log.error("Invalid archive: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.error("Invalid archive: " + e.getMessage()));
@@ -65,17 +65,17 @@ public class ArchiveApiController {
 
   /**
    * Get archive by ID (lightweight - without artifact/attachment content)
-   * GET /api/v1/archives/{id}
+   * GET /api/v1/chat-notes/{id}
    */
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<ArchiveDetailLightResponse>> getArchive(
+  public ResponseEntity<ApiResponse<ChatNoteDetailLightResponse>> getArchive(
       @PathVariable String id) {
     try {
-      ArchiveDetailLightResponse response = archiveService.getArchiveById(id);
+      ChatNoteDetailLightResponse response = chatNoteService.getChatNoteById(id);
       return ResponseEntity.ok(ApiResponse.success(response));
-    } catch (ArchiveNotFoundException e) {
+    } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(ApiResponse.error("Archive not found: " + id));
+          .body(ApiResponse.error("Chat note not found: " + id));
     } catch (Exception e) {
       log.error("Error retrieving archive", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -85,17 +85,17 @@ public class ArchiveApiController {
 
   /**
    * Get artifact content by index
-   * GET /api/v1/archives/{id}/artifacts/{index}
+   * GET /api/v1/chat-notes/{id}/artifacts/{index}
    */
   @GetMapping("/{id}/artifacts/{index}")
   public ResponseEntity<ApiResponse<Artifact>> getArtifactContent(@PathVariable String id,
       @PathVariable int index) {
     try {
-      Artifact artifact = archiveService.getArtifactContent(id, index);
+      Artifact artifact = chatNoteService.getArtifactContent(id, index);
       return ResponseEntity.ok(ApiResponse.success(artifact));
-    } catch (ArchiveNotFoundException e) {
+    } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(ApiResponse.error("Archive not found: " + id));
+          .body(ApiResponse.error("Chat note not found: " + id));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
     } catch (Exception e) {
@@ -107,17 +107,17 @@ public class ArchiveApiController {
 
   /**
    * Get attachment content by index
-   * GET /api/v1/archives/{id}/attachments/{index}
+   * GET /api/v1/chat-notes/{id}/attachments/{index}
    */
   @GetMapping("/{id}/attachments/{index}")
   public ResponseEntity<ApiResponse<Attachment>> getAttachmentContent(@PathVariable String id,
       @PathVariable int index) {
     try {
-      Attachment attachment = archiveService.getAttachmentContent(id, index);
+      Attachment attachment = chatNoteService.getAttachmentContent(id, index);
       return ResponseEntity.ok(ApiResponse.success(attachment));
-    } catch (ArchiveNotFoundException e) {
+    } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(ApiResponse.error("Archive not found: " + id));
+          .body(ApiResponse.error("Chat note not found: " + id));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
     } catch (Exception e) {
@@ -129,10 +129,10 @@ public class ArchiveApiController {
 
   /**
    * Get all archives (paginated)
-   * GET /api/v1/archives?page=0&size=20&sort=createdAt,desc
+   * GET /api/v1/chat-notes?page=0&size=20&sort=createdAt,desc
    */
   @GetMapping
-  public ResponseEntity<ApiResponse<Page<ArchiveResponse>>> getAllArchives(
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllChatNotes(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
     try {
@@ -141,7 +141,7 @@ public class ArchiveApiController {
           : Sort.Direction.DESC;
       Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
 
-      Page<ArchiveResponse> archives = archiveService.getAllArchives(pageable);
+      Page<ChatNoteResponse> archives = chatNoteService.getAllChatNotes(pageable);
       return ResponseEntity.ok(ApiResponse.success(archives));
     } catch (Exception e) {
       log.error("Error retrieving archives", e);
@@ -152,13 +152,13 @@ public class ArchiveApiController {
 
   /**
    * Get archives by user ID
-   * GET /api/v1/archives/user/{userId}
+   * GET /api/v1/chat-notes/user/{userId}
    */
   @GetMapping("/user/{userId}")
-  public ResponseEntity<ApiResponse<java.util.List<ArchiveResponse>>> getArchivesByUser(
+  public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getArchivesByUser(
       @PathVariable String userId) {
     try {
-      java.util.List<ArchiveResponse> archives = archiveService.getArchivesByUserId(userId);
+      java.util.List<ChatNoteResponse> archives = chatNoteService.getChatNotesByUserId(userId);
       return ResponseEntity.ok(ApiResponse.success(archives));
     } catch (Exception e) {
       log.error("Error retrieving user archives", e);
@@ -169,19 +169,19 @@ public class ArchiveApiController {
 
   /**
    * Search archives by title
-   * GET /api/v1/archives/search?title=keyword
+   * GET /api/v1/chat-notes/search?title=keyword
    */
   @GetMapping("/search")
-  public ResponseEntity<ApiResponse<java.util.List<ArchiveResponse>>> searchArchives(
+  public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> searchArchives(
       @RequestParam(required = false) String title,
       @RequestParam(required = false) String tag) {
     try {
-      java.util.List<ArchiveResponse> archives;
+      java.util.List<ChatNoteResponse> archives;
 
       if (title != null && !title.isEmpty()) {
-        archives = archiveService.searchByTitle(title);
+        archives = chatNoteService.searchByTitle(title);
       } else if (tag != null && !tag.isEmpty()) {
-        archives = archiveService.searchByTag(tag);
+        archives = chatNoteService.searchByTag(tag);
       } else {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ApiResponse.error("Either 'title' or 'tag' parameter is required"));
@@ -197,14 +197,14 @@ public class ArchiveApiController {
 
   /**
    * Get public archives
-   * GET /api/v1/archives/public?page=0&size=20
+   * GET /api/v1/chat-notes/public?page=0&size=20
    */
   @GetMapping("/public")
-  public ResponseEntity<ApiResponse<Page<ArchiveResponse>>> getPublicArchives(
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getPublicChatNotes(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
     try {
       Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<ArchiveResponse> archives = archiveService.getPublicArchives(pageable);
+      Page<ChatNoteResponse> archives = chatNoteService.getPublicChatNotes(pageable);
       return ResponseEntity.ok(ApiResponse.success(archives));
     } catch (Exception e) {
       log.error("Error retrieving public archives", e);
@@ -215,17 +215,17 @@ public class ArchiveApiController {
 
   /**
    * Update archive visibility
-   * PATCH /api/v1/archives/{id}/visibility
+   * PATCH /api/v1/chat-notes/{id}/visibility
    */
   @PatchMapping("/{id}/visibility")
-  public ResponseEntity<ApiResponse<ArchiveDetailResponse>> updateVisibility(
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateVisibility(
       @PathVariable String id, @RequestParam Boolean isPublic) {
     try {
-      ArchiveDetailResponse response = archiveService.updateVisibility(id, isPublic);
+      ChatNoteDetailResponse response = chatNoteService.updateVisibility(id, isPublic);
       return ResponseEntity.ok(ApiResponse.success("Visibility updated successfully", response));
-    } catch (ArchiveNotFoundException e) {
+    } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(ApiResponse.error("Archive not found: " + id));
+          .body(ApiResponse.error("Chat note not found: " + id));
     } catch (Exception e) {
       log.error("Error updating visibility", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -235,16 +235,16 @@ public class ArchiveApiController {
 
   /**
    * Delete archive
-   * DELETE /api/v1/archives/{id}
+   * DELETE /api/v1/chat-notes/{id}
    */
   @DeleteMapping("/{id}")
-  public ResponseEntity<ApiResponse<Void>> deleteArchive(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<Void>> deleteChatNote(@PathVariable String id) {
     try {
-      archiveService.deleteArchive(id);
-      return ResponseEntity.ok(ApiResponse.success("Archive deleted successfully", null));
-    } catch (ArchiveNotFoundException e) {
+      chatNoteService.deleteChatNote(id);
+      return ResponseEntity.ok(ApiResponse.success("Chat note deleted successfully", null));
+    } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body(ApiResponse.error("Archive not found: " + id));
+          .body(ApiResponse.error("Chat note not found: " + id));
     } catch (Exception e) {
       log.error("Error deleting archive", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

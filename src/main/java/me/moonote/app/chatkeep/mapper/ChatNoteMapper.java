@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import me.moonote.app.chatkeep.dto.ArchiveDto;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
 import me.moonote.app.chatkeep.dto.ArtifactDto;
 import me.moonote.app.chatkeep.dto.AttachmentDto;
 import me.moonote.app.chatkeep.dto.ConversationSummaryDto;
@@ -13,10 +13,10 @@ import me.moonote.app.chatkeep.dto.InsightsSectionDto;
 import me.moonote.app.chatkeep.dto.QuerySectionDto;
 import me.moonote.app.chatkeep.dto.ReferenceDto;
 import me.moonote.app.chatkeep.dto.WorkaroundDto;
-import me.moonote.app.chatkeep.model.ArchiveCompleteness;
+import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
-import me.moonote.app.chatkeep.model.ConversationArchive;
+import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.model.ConversationSummary;
 import me.moonote.app.chatkeep.model.FollowUpSection;
 import me.moonote.app.chatkeep.model.InsightsSection;
@@ -25,17 +25,17 @@ import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.model.Workaround;
 
 @Component
-public class ArchiveMapper {
+public class ChatNoteMapper {
 
-  public ConversationArchive toEntity(ArchiveDto dto, String userId) {
-    return ConversationArchive.builder().archiveVersion(dto.getMetadata().getArchiveVersion())
+  public ChatNote toEntity(ChatNoteDto dto, String userId) {
+    return ChatNote.builder().archiveVersion(dto.getMetadata().getArchiveVersion())
         .archiveType(dto.getMetadata().getArchiveType())
         .createdDate(dto.getMetadata().getCreatedDate())
         .originalPlatform(dto.getMetadata().getOriginalPlatform())
         .attachmentCount(dto.getMetadata().getAttachmentCount())
         .artifactCount(dto.getMetadata().getArtifactCount())
-        .archiveCompleteness(
-            ArchiveCompleteness.valueOf(dto.getMetadata().getArchiveCompleteness()))
+        .chatNoteCompleteness(
+            ChatNoteCompleteness.valueOf(dto.getMetadata().getChatNoteCompleteness()))
         .workaroundsCount(dto.getMetadata().getWorkaroundsCount())
         .totalFileSize(dto.getMetadata().getTotalFileSize()).title(dto.getMetadata().getTitle())
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())

@@ -15,8 +15,8 @@ import org.yaml.snakeyaml.Yaml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.moonote.app.chatkeep.dto.ArchiveDto;
-import me.moonote.app.chatkeep.dto.ArchiveMetadataDto;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
+import me.moonote.app.chatkeep.dto.ChatNoteMetadataDto;
 import me.moonote.app.chatkeep.dto.ArtifactDto;
 import me.moonote.app.chatkeep.dto.AttachmentDto;
 import me.moonote.app.chatkeep.dto.ConversationSummaryDto;
@@ -25,61 +25,61 @@ import me.moonote.app.chatkeep.dto.InsightsSectionDto;
 import me.moonote.app.chatkeep.dto.QuerySectionDto;
 import me.moonote.app.chatkeep.dto.ReferenceDto;
 import me.moonote.app.chatkeep.dto.WorkaroundDto;
-import me.moonote.app.chatkeep.validation.ArchiveValidationResult;
-import me.moonote.app.chatkeep.validation.InvalidArchiveException;
+import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
+import me.moonote.app.chatkeep.validation.InvalidChatNoteException;
 import me.moonote.app.chatkeep.validation.JsonSchemaValidator;
 import me.moonote.app.chatkeep.validation.ValidationResult;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MarkdownArchivePreprocessor {
+public class MarkdownChatNotePreprocessor {
 
   private final ObjectMapper objectMapper;
   private final JsonSchemaValidator schemaValidator;
 
-  public ArchiveValidationResult preprocess(String markdownContent) {
+  public ChatNoteValidationResult preprocess(String markdownContent) {
     try {
       log.info("Starting preprocessing of markdown archive");
 
       // Step 1-5: Parse all sections (same as before)
-      ArchiveMetadataDto metadata = parseYamlFrontmatter(markdownContent);
+      ChatNoteMetadataDto metadata = parseYamlFrontmatter(markdownContent);
       ConversationSummaryDto summary = parseSummary(markdownContent);
       List<ArtifactDto> artifacts = extractArtifacts(markdownContent);
       List<AttachmentDto> attachments = extractAttachments(markdownContent);
       List<WorkaroundDto> workarounds = extractWorkarounds(markdownContent);
 
       // Step 6: Create JSON structure
-      ArchiveDto archiveDto = ArchiveDto.builder().metadata(metadata).summary(summary)
+      ChatNoteDto chatNoteDto = ChatNoteDto.builder().metadata(metadata).summary(summary)
           .artifacts(artifacts).attachments(attachments).workarounds(workarounds).build();
 
       // Step 7: Convert to JSON
-      String json = objectMapper.writeValueAsString(archiveDto);
+      String json = objectMapper.writeValueAsString(chatNoteDto);
       log.debug("Converted archive to JSON, size: {} bytes", json.length());
 
       // Step 8: Validate against schema
       ValidationResult validationResult = schemaValidator.validate(json);
 
       if (validationResult.isValid()) {
-        log.info("Archive validation successful");
-        return ArchiveValidationResult.success(archiveDto);
+        log.info("Chat note validation successful");
+        return ChatNoteValidationResult.success(chatNoteDto);
       } else {
-        log.warn("Archive validation failed: {}", validationResult.getErrors());
-        return ArchiveValidationResult.failure(validationResult.getErrors());
+        log.warn("Chat note validation failed: {}", validationResult.getErrors());
+        return ChatNoteValidationResult.failure(validationResult.getErrors());
       }
 
     } catch (Exception e) {
       log.error("Error preprocessing archive", e);
-      return ArchiveValidationResult.failure(Collections.singletonList(e.getMessage()));
+      return ChatNoteValidationResult.failure(Collections.singletonList(e.getMessage()));
     }
   }
 
-  private ArchiveMetadataDto parseYamlFrontmatter(String content) {
+  private ChatNoteMetadataDto parseYamlFrontmatter(String content) {
     Pattern yamlPattern = Pattern.compile("^---\\s*\\n(.*?)\\n---", Pattern.DOTALL);
     Matcher matcher = yamlPattern.matcher(content);
 
     if (!matcher.find()) {
-      throw new InvalidArchiveException("YAML frontmatter not found");
+      throw new InvalidChatNoteException("YAML frontmatter not found");
     }
 
     String yamlContent = matcher.group(1);
@@ -91,14 +91,14 @@ public class MarkdownArchivePreprocessor {
     LocalDate conversationDate = extractConversationDate(content);
     List<String> tags = extractTags(content);
 
-    return ArchiveMetadataDto.builder()
+    return ChatNoteMetadataDto.builder()
         .archiveVersion(String.valueOf(yamlMap.get("ARCHIVE_FORMAT_VERSION")))
         .archiveType(String.valueOf(yamlMap.get("ARCHIVE_TYPE")))
         .createdDate(LocalDate.parse(String.valueOf(yamlMap.get("CREATED_DATE"))))
         .originalPlatform(String.valueOf(yamlMap.get("ORIGINAL_PLATFORM")))
         .attachmentCount((Integer) yamlMap.get("ATTACHMENT_COUNT"))
         .artifactCount((Integer) yamlMap.get("ARTIFACT_COUNT"))
-        .archiveCompleteness(String.valueOf(yamlMap.get("ARCHIVE_COMPLETENESS")))
+        .chatNoteCompleteness(String.valueOf(yamlMap.get("ARCHIVE_COMPLETENESS")))
         .workaroundsCount((Integer) yamlMap.get("WORKAROUNDS_COUNT"))
         .totalFileSize(String.valueOf(yamlMap.get("TOTAL_FILE_SIZE"))).title(title)
         .conversationDate(conversationDate).tags(tags).build();

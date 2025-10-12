@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://chatkeep.com/schemas/archive-schema.json",
-  "title": "AI Conversation Archive",
+  "title": "AI Conversation Chat Note",
   "type": "object",
   "required": [
     "metadata",

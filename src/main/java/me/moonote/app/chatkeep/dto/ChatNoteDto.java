@@ -13,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class ArchiveDto {
+public class ChatNoteDto {
 
-  ArchiveMetadataDto metadata;
+  ChatNoteMetadataDto metadata;
   ConversationSummaryDto summary;
   List<ArtifactDto> artifacts;
   List<AttachmentDto> attachments;

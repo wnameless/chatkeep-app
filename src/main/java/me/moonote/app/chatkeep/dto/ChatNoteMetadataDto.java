@@ -14,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = PRIVATE)
-public class ArchiveMetadataDto {
+public class ChatNoteMetadataDto {
 
   String archiveVersion;
   String archiveType;
@@ -22,7 +22,7 @@ public class ArchiveMetadataDto {
   String originalPlatform;
   Integer attachmentCount;
   Integer artifactCount;
-  String archiveCompleteness;
+  String chatNoteCompleteness;
   Integer workaroundsCount;
   String totalFileSize;
   String title;
