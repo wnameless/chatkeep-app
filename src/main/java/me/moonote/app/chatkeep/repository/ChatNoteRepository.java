@@ -89,6 +89,18 @@ public interface ChatNoteRepository
   // Auto-purge candidates (trashed > 30 days ago)
   List<ChatNote> findByIsTrashedTrueAndTrashedAtBefore(Instant cutoffDate);
 
+  // Favorite notes
+  List<ChatNote> findByUserIdAndIsFavoriteTrue(String userId);
+
+  Page<ChatNote> findByUserIdAndIsFavoriteTrue(String userId, Pageable pageable);
+
+  // Favorite active notes (not archived, not trashed)
+  @Query("{ 'userId': ?0, 'isFavorite': true, 'isArchived': false, 'isTrashed': false }")
+  List<ChatNote> findFavoriteActiveByUserId(String userId);
+
+  @Query("{ 'userId': ?0, 'isFavorite': true, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findFavoriteActiveByUserId(String userId, Pageable pageable);
+
   // Custom queries
   @Query("{ 'user_id': ?0, 'is_public': true }")
   List<ChatNote> findPublicArchivesByUser(String userId);

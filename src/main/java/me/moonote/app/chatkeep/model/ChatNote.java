@@ -54,6 +54,7 @@ public class ChatNote {
   Boolean isPublic; // For sharing feature
   Boolean isArchived; // Archived (hidden from main view)
   Boolean isTrashed; // Soft deleted (in trash)
+  Boolean isFavorite; // Starred/favorited for quick access
   Instant trashedAt; // When moved to trash (for auto-purge)
   Long viewCount;
 

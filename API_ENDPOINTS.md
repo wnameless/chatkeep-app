@@ -501,6 +501,130 @@ curl "http://localhost:8080/api/v1/chat-notes/user/mary/filter/tags?tags=machine
 
 ---
 
+## Favorites Management Endpoints
+
+### 10.4. Toggle Favorite Status
+**PATCH** `/api/v1/chat-notes/{id}/favorite?isFavorite=true`
+
+Star or unstar a chat note for quick access. Favorites are independent from lifecycle states.
+
+**Query Parameters:**
+- `isFavorite` (required) - Boolean flag (true to favorite, false to unfavorite)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Favorite status updated successfully",
+  "data": {
+    "id": "67890abcdef",
+    "isFavorite": true,
+    // ... full chat note details
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Chat note does not exist
+
+---
+
+### 10.5. Get User's Favorite Notes
+**GET** `/api/v1/chat-notes/user/{userId}/favorites?page=0&size=20`
+
+Retrieve all favorited chat notes for a user (paginated). Includes notes in all lifecycle states (active, archived, trashed).
+
+**Path Parameters:**
+- `userId` (required) - User ID
+
+**Query Parameters:**
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": "67890abcdef",
+        "title": "Important Reference",
+        "isFavorite": true,
+        "isArchived": false,
+        "isTrashed": false,
+        // ... chat note summary
+      }
+    ],
+    "totalElements": 12,
+    "totalPages": 1
+  }
+}
+```
+
+---
+
+### 10.6. Get User's Active Favorite Notes
+**GET** `/api/v1/chat-notes/user/{userId}/favorites/active?page=0&size=20`
+
+Retrieve only active (not archived, not trashed) favorited notes for a user.
+
+**Path Parameters:**
+- `userId` (required) - User ID
+
+**Query Parameters:**
+- `page` (optional, default: 0) - Page number
+- `size` (optional, default: 20) - Items per page
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "content": [
+      {
+        "id": "67890abcdef",
+        "title": "Quick Reference Guide",
+        "isFavorite": true,
+        "isArchived": false,
+        "isTrashed": false,
+        // ... chat note summary
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Favorites Usage Examples
+
+### Toggle Favorites
+```bash
+# Mark as favorite
+curl -X PATCH "http://localhost:8080/api/v1/chat-notes/abc123/favorite?isFavorite=true"
+
+# Remove from favorites
+curl -X PATCH "http://localhost:8080/api/v1/chat-notes/abc123/favorite?isFavorite=false"
+```
+
+### View Favorites
+```bash
+# All favorites (including archived)
+curl "http://localhost:8080/api/v1/chat-notes/user/john/favorites"
+
+# Active favorites only
+curl "http://localhost:8080/api/v1/chat-notes/user/john/favorites/active"
+```
+
+### Benefits
+- ⭐ **Quick Access** - Star important notes for easy retrieval
+- 🔄 **Lifecycle Independent** - Favorite notes in any state (active/archived/trashed)
+- 📌 **Personal** - Each user maintains their own favorites
+- 🎯 **Focused View** - Filter out noise, see only what matters
+
+---
+
 ## Lifecycle Management Endpoints
 
 ### 11. Update Archive Status (renumbered from previous)
@@ -831,6 +955,7 @@ Used in list endpoints:
   "isPublic": "boolean",
   "isArchived": "boolean",
   "isTrashed": "boolean",
+  "isFavorite": "boolean",
   "createdAt": "timestamp",
   "updatedAt": "timestamp"
 }

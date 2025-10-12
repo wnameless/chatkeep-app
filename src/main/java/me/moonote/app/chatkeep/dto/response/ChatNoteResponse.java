@@ -29,6 +29,7 @@ public class ChatNoteResponse {
   Boolean isPublic;
   Boolean isArchived;
   Boolean isTrashed;
+  Boolean isFavorite;
   Instant createdAt;
   Instant updatedAt;
 

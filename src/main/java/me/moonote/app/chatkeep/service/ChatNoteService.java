@@ -245,6 +245,37 @@ public class ChatNoteService {
     return chatNotes.map(this::toResponse);
   }
 
+  // ==================== Favorites Management ====================
+
+  /**
+   * Toggle favorite status (star/unstar)
+   */
+  public ChatNoteDetailResponse toggleFavorite(String id, Boolean isFavorite) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setIsFavorite(isFavorite);
+    ChatNote updated = repository.save(chatNote);
+
+    log.info("Chat note {} favorite status updated to: {}", id, isFavorite);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Get all favorite chat notes for a user (paginated)
+   */
+  public Page<ChatNoteResponse> getFavoriteChatNotes(String userId, Pageable pageable) {
+    return repository.findByUserIdAndIsFavoriteTrue(userId, pageable).map(this::toResponse);
+  }
+
+  /**
+   * Get favorite active chat notes for a user (not archived, not trashed)
+   */
+  public Page<ChatNoteResponse> getFavoriteActiveChatNotes(String userId, Pageable pageable) {
+    return repository.findFavoriteActiveByUserId(userId, pageable).map(this::toResponse);
+  }
+
   // ==================== Lifecycle Management ====================
 
   /**
@@ -367,6 +398,7 @@ public class ChatNoteService {
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
         .viewCount(archive.getViewCount()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
+        .isFavorite(archive.getIsFavorite())
         .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
@@ -382,8 +414,9 @@ public class ChatNoteService {
         .attachments(archive.getAttachments()).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
-        .trashedAt(archive.getTrashedAt()).viewCount(archive.getViewCount())
-        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
+        .isFavorite(archive.getIsFavorite()).trashedAt(archive.getTrashedAt())
+        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
+        .updatedAt(archive.getUpdatedAt()).build();
   }
 
   private ChatNoteDetailLightResponse toDetailLightResponse(ChatNote archive) {
@@ -416,8 +449,9 @@ public class ChatNoteService {
         .attachments(attachmentMetadata).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
-        .trashedAt(archive.getTrashedAt()).viewCount(archive.getViewCount())
-        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
+        .isFavorite(archive.getIsFavorite()).trashedAt(archive.getTrashedAt())
+        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
+        .updatedAt(archive.getUpdatedAt()).build();
   }
 
 }

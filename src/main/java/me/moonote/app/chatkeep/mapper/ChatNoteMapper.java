@@ -45,6 +45,7 @@ public class ChatNoteMapper {
         .isPublic(false) // Default to private
         .isArchived(false) // Default to active (not archived)
         .isTrashed(false) // Default to not trashed
+        .isFavorite(false) // Default to not favorited
         .trashedAt(null) // No trash timestamp initially
         .viewCount(0L).build();
   }

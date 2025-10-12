@@ -308,6 +308,67 @@ public class ChatNoteApiController {
     }
   }
 
+  // ==================== Favorites Management Endpoints ====================
+
+  /**
+   * Toggle favorite status (star/unstar)
+   * PATCH /api/v1/chat-notes/{id}/favorite
+   */
+  @PatchMapping("/{id}/favorite")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> toggleFavorite(
+      @PathVariable String id, @RequestParam Boolean isFavorite) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.toggleFavorite(id, isFavorite);
+      return ResponseEntity.ok(ApiResponse.success("Favorite status updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating favorite status", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update favorite status"));
+    }
+  }
+
+  /**
+   * Get all favorite chat notes for a user
+   * GET /api/v1/chat-notes/user/{userId}/favorites
+   */
+  @GetMapping("/user/{userId}/favorites")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getFavoriteChatNotes(
+      @PathVariable String userId, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+      Page<ChatNoteResponse> chatNotes = chatNoteService.getFavoriteChatNotes(userId, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving favorite chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve favorite chat notes"));
+    }
+  }
+
+  /**
+   * Get favorite active chat notes for a user (not archived, not trashed)
+   * GET /api/v1/chat-notes/user/{userId}/favorites/active
+   */
+  @GetMapping("/user/{userId}/favorites/active")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getFavoriteActiveChatNotes(
+      @PathVariable String userId, @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+      Page<ChatNoteResponse> chatNotes =
+          chatNoteService.getFavoriteActiveChatNotes(userId, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error retrieving favorite active chat notes", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve favorite active chat notes"));
+    }
+  }
+
   /**
    * Delete archive
    * DELETE /api/v1/chat-notes/{id}
