@@ -19,8 +19,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.request.UploadArchiveRequest;
 import me.moonote.app.chatkeep.dto.response.ApiResponse;
+import me.moonote.app.chatkeep.dto.response.ArchiveDetailLightResponse;
 import me.moonote.app.chatkeep.dto.response.ArchiveDetailResponse;
 import me.moonote.app.chatkeep.dto.response.ArchiveResponse;
+import me.moonote.app.chatkeep.model.Artifact;
+import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.service.ArchiveService;
 import me.moonote.app.chatkeep.validation.ArchiveNotFoundException;
 import me.moonote.app.chatkeep.validation.InvalidArchiveException;
@@ -61,13 +64,14 @@ public class ArchiveApiController {
   }
 
   /**
-   * Get archive by ID
+   * Get archive by ID (lightweight - without artifact/attachment content)
    * GET /api/v1/archives/{id}
    */
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<ArchiveDetailResponse>> getArchive(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<ArchiveDetailLightResponse>> getArchive(
+      @PathVariable String id) {
     try {
-      ArchiveDetailResponse response = archiveService.getArchiveById(id);
+      ArchiveDetailLightResponse response = archiveService.getArchiveById(id);
       return ResponseEntity.ok(ApiResponse.success(response));
     } catch (ArchiveNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -76,6 +80,50 @@ public class ArchiveApiController {
       log.error("Error retrieving archive", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(ApiResponse.error("Failed to retrieve archive"));
+    }
+  }
+
+  /**
+   * Get artifact content by index
+   * GET /api/v1/archives/{id}/artifacts/{index}
+   */
+  @GetMapping("/{id}/artifacts/{index}")
+  public ResponseEntity<ApiResponse<Artifact>> getArtifactContent(@PathVariable String id,
+      @PathVariable int index) {
+    try {
+      Artifact artifact = archiveService.getArtifactContent(id, index);
+      return ResponseEntity.ok(ApiResponse.success(artifact));
+    } catch (ArchiveNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Archive not found: " + id));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error retrieving artifact content", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve artifact content"));
+    }
+  }
+
+  /**
+   * Get attachment content by index
+   * GET /api/v1/archives/{id}/attachments/{index}
+   */
+  @GetMapping("/{id}/attachments/{index}")
+  public ResponseEntity<ApiResponse<Attachment>> getAttachmentContent(@PathVariable String id,
+      @PathVariable int index) {
+    try {
+      Attachment attachment = archiveService.getAttachmentContent(id, index);
+      return ResponseEntity.ok(ApiResponse.success(attachment));
+    } catch (ArchiveNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Archive not found: " + id));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error retrieving attachment content", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to retrieve attachment content"));
     }
   }
 

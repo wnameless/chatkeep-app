@@ -7,9 +7,14 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.ArchiveDto;
+import me.moonote.app.chatkeep.dto.response.ArchiveDetailLightResponse;
 import me.moonote.app.chatkeep.dto.response.ArchiveDetailResponse;
 import me.moonote.app.chatkeep.dto.response.ArchiveResponse;
+import me.moonote.app.chatkeep.dto.response.ArtifactMetadata;
+import me.moonote.app.chatkeep.dto.response.AttachmentMetadata;
 import me.moonote.app.chatkeep.mapper.ArchiveMapper;
+import me.moonote.app.chatkeep.model.Artifact;
+import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ConversationArchive;
 import me.moonote.app.chatkeep.repository.ConversationArchiveRepository;
 import me.moonote.app.chatkeep.validation.ArchiveNotFoundException;
@@ -51,9 +56,9 @@ public class ArchiveService {
   }
 
   /**
-   * Get archive by ID
+   * Get archive by ID (lightweight - without artifact/attachment content)
    */
-  public ArchiveDetailResponse getArchiveById(String id) {
+  public ArchiveDetailLightResponse getArchiveById(String id) {
     ConversationArchive archive =
         repository.findById(id).orElseThrow(() -> new ArchiveNotFoundException(id));
 
@@ -61,7 +66,38 @@ public class ArchiveService {
     archive.setViewCount(archive.getViewCount() + 1);
     repository.save(archive);
 
-    return toDetailResponse(archive);
+    return toDetailLightResponse(archive);
+  }
+
+  /**
+   * Get artifact content by archive ID and artifact index
+   */
+  public Artifact getArtifactContent(String archiveId, int index) {
+    ConversationArchive archive =
+        repository.findById(archiveId).orElseThrow(() -> new ArchiveNotFoundException(archiveId));
+
+    if (archive.getArtifacts() == null || index < 0 || index >= archive.getArtifacts().size()) {
+      throw new IllegalArgumentException(
+          "Invalid artifact index: " + index + " for archive: " + archiveId);
+    }
+
+    return archive.getArtifacts().get(index);
+  }
+
+  /**
+   * Get attachment content by archive ID and attachment index
+   */
+  public Attachment getAttachmentContent(String archiveId, int index) {
+    ConversationArchive archive =
+        repository.findById(archiveId).orElseThrow(() -> new ArchiveNotFoundException(archiveId));
+
+    if (archive.getAttachments() == null || index < 0
+        || index >= archive.getAttachments().size()) {
+      throw new IllegalArgumentException(
+          "Invalid attachment index: " + index + " for archive: " + archiveId);
+    }
+
+    return archive.getAttachments().get(index);
   }
 
   /**
@@ -147,6 +183,39 @@ public class ArchiveService {
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(archive.getArtifacts())
         .attachments(archive.getAttachments()).workarounds(archive.getWorkarounds())
+        .userId(archive.getUserId()).isPublic(archive.getIsPublic())
+        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
+        .updatedAt(archive.getUpdatedAt()).build();
+  }
+
+  private ArchiveDetailLightResponse toDetailLightResponse(ConversationArchive archive) {
+    // Convert artifacts to metadata only (no content)
+    List<ArtifactMetadata> artifactMetadata = archive.getArtifacts() == null ? List.of()
+        : archive.getArtifacts().stream()
+            .map(a -> ArtifactMetadata.builder().type(a.getType()).title(a.getTitle())
+                .language(a.getLanguage()).version(a.getVersion()).iterations(a.getIterations())
+                .evolutionNotes(a.getEvolutionNotes()).build())
+            .toList();
+
+    // Convert attachments to metadata only (no content)
+    List<AttachmentMetadata> attachmentMetadata = archive.getAttachments() == null ? List.of()
+        : archive.getAttachments().stream()
+            .map(att -> AttachmentMetadata.builder().filename(att.getFilename())
+                .isSummarized(att.getIsSummarized()).originalSize(att.getOriginalSize())
+                .summarizationLevel(att.getSummarizationLevel())
+                .contentPreserved(att.getContentPreserved())
+                .processingLimitation(att.getProcessingLimitation()).build())
+            .toList();
+
+    return ArchiveDetailLightResponse.builder().id(archive.getId())
+        .archiveVersion(archive.getArchiveVersion()).archiveType(archive.getArchiveType())
+        .createdDate(archive.getCreatedDate()).originalPlatform(archive.getOriginalPlatform())
+        .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
+        .archiveCompleteness(archive.getArchiveCompleteness().name())
+        .workaroundsCount(archive.getWorkaroundsCount()).totalFileSize(archive.getTotalFileSize())
+        .title(archive.getTitle()).conversationDate(archive.getConversationDate())
+        .tags(archive.getTags()).summary(archive.getSummary()).artifacts(artifactMetadata)
+        .attachments(attachmentMetadata).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
         .updatedAt(archive.getUpdatedAt()).build();

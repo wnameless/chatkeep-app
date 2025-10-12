@@ -52,10 +52,10 @@ Upload and process a new conversation archive from markdown format.
 
 ---
 
-### 2. Get Archive by ID
+### 2. Get Archive by ID (Lightweight)
 **GET** `/api/v1/archives/{id}`
 
-Retrieve a specific archive by ID. Increments view count.
+Retrieve a specific archive by ID with **lightweight response** - includes all metadata, conversation summary, and workarounds, but **excludes** artifact and attachment content (metadata only). Increments view count.
 
 **Response (200 OK):**
 ```json
@@ -63,11 +63,60 @@ Retrieve a specific archive by ID. Increments view count.
   "success": true,
   "data": {
     "id": "67890abcdef",
+    "archiveVersion": "1.0",
+    "archiveType": "conversation_summary",
     "title": "Conversation Title",
-    // ... full archive details
+    "conversationDate": "2025-10-12",
+    "tags": ["ai", "development"],
+    "originalPlatform": "Claude",
+    "archiveCompleteness": "COMPLETE",
+    "attachmentCount": 2,
+    "artifactCount": 3,
+    "summary": {
+      "initialQuery": { ... },
+      "keyInsights": { ... },
+      "followUpExplorations": { ... },
+      "references": [ ... ]
+    },
+    "artifacts": [
+      {
+        "type": "code",
+        "title": "Data Processing Script",
+        "language": "python",
+        "version": "final",
+        "iterations": "3",
+        "evolutionNotes": "..."
+        // Note: "content" field is NOT included
+      }
+    ],
+    "attachments": [
+      {
+        "filename": "document1.pdf",
+        "isSummarized": false,
+        "originalSize": "2.5 MB",
+        "summarizationLevel": null,
+        "contentPreserved": null,
+        "processingLimitation": null
+        // Note: "content" field is NOT included
+      }
+    ],
+    "workarounds": [ ... ],
+    "userId": "user123",
+    "isPublic": false,
+    "viewCount": 15,
+    "createdAt": "2025-10-12T08:45:30Z",
+    "updatedAt": "2025-10-12T08:45:30Z"
   }
 }
 ```
+
+**Benefits of Lightweight Response:**
+- ✅ Includes conversation summary (essential context)
+- ✅ Includes artifact/attachment metadata (titles, filenames, types)
+- ✅ Includes workarounds (processing context)
+- ⚡ Excludes large content fields (90%+ bandwidth reduction)
+- 📱 Perfect for browsing/listing views
+- 🔄 Load content on-demand via separate endpoints
 
 **Error Responses:**
 - `404 Not Found` - Archive does not exist
@@ -75,7 +124,71 @@ Retrieve a specific archive by ID. Increments view count.
 
 ---
 
-### 3. Get All Archives (Paginated)
+### 3. Get Artifact Content
+**GET** `/api/v1/archives/{id}/artifacts/{index}`
+
+Retrieve the full content of a specific artifact by its index (0-based).
+
+**Path Parameters:**
+- `id` (required) - Archive ID
+- `index` (required) - Artifact index (0-based, order matches metadata list)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "type": "code",
+    "title": "Data Processing Script",
+    "language": "python",
+    "version": "final",
+    "iterations": "3",
+    "evolutionNotes": "Final version after debugging...",
+    "content": "def process_data(input_file):\n    # Full code here..."
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Archive does not exist
+- `400 Bad Request` - Invalid artifact index
+- `500 Internal Server Error` - Server error
+
+---
+
+### 4. Get Attachment Content
+**GET** `/api/v1/archives/{id}/attachments/{index}`
+
+Retrieve the full content of a specific attachment by its index (0-based).
+
+**Path Parameters:**
+- `id` (required) - Archive ID
+- `index` (required) - Attachment index (0-based, order matches metadata list)
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "filename": "diagram.png",
+    "content": "iVBORw0KGgoAAAANSUhEUgAAAA...",  // Base64 encoded or markdown
+    "isSummarized": false,
+    "originalSize": "125 KB",
+    "summarizationLevel": null,
+    "contentPreserved": null,
+    "processingLimitation": null
+  }
+}
+```
+
+**Error Responses:**
+- `404 Not Found` - Archive does not exist
+- `400 Bad Request` - Invalid attachment index
+- `500 Internal Server Error` - Server error
+
+---
+
+### 5. Get All Archives (Paginated)
 **GET** `/api/v1/archives?page=0&size=20&sort=createdAt,desc`
 
 Retrieve all archives with pagination and sorting.
@@ -117,7 +230,7 @@ Retrieve all archives with pagination and sorting.
 
 ---
 
-### 4. Get Archives by User
+### 6. Get Archives by User
 **GET** `/api/v1/archives/user/{userId}`
 
 Retrieve all archives created by a specific user.
@@ -138,7 +251,7 @@ Retrieve all archives created by a specific user.
 
 ---
 
-### 5. Search Archives
+### 7. Search Archives
 **GET** `/api/v1/archives/search?title=keyword`
 **GET** `/api/v1/archives/search?tag=tagname`
 
@@ -167,7 +280,7 @@ Search archives by title or tag. Requires at least one parameter.
 
 ---
 
-### 6. Get Public Archives
+### 8. Get Public Archives
 **GET** `/api/v1/archives/public?page=0&size=20`
 
 Retrieve public archives (paginated).
@@ -190,7 +303,7 @@ Retrieve public archives (paginated).
 
 ---
 
-### 7. Update Archive Visibility
+### 9. Update Archive Visibility
 **PATCH** `/api/v1/archives/{id}/visibility?isPublic=true`
 
 Update whether an archive is public or private.
@@ -216,7 +329,7 @@ Update whether an archive is public or private.
 
 ---
 
-### 8. Delete Archive
+### 10. Delete Archive
 **DELETE** `/api/v1/archives/{id}`
 
 Permanently delete an archive.
@@ -245,6 +358,46 @@ All API responses follow this structure:
   "message": "Optional message",
   "data": { ... }  // Response data or null
 }
+```
+
+---
+
+## Lazy Loading Pattern
+
+To optimize bandwidth and performance, the API implements a **lazy loading pattern** for artifacts and attachments:
+
+### 1. Initial Browse (Lightweight)
+When viewing an archive, call `GET /api/v1/archives/{id}` to receive:
+- ✅ All metadata
+- ✅ Conversation summary
+- ✅ Artifact/attachment metadata (titles, filenames, types)
+- ✅ Workarounds
+- ❌ NO artifact/attachment content
+
+### 2. On-Demand Content Loading
+When user clicks to view a specific artifact or attachment:
+- Call `GET /api/v1/archives/{id}/artifacts/{index}` for artifact content
+- Call `GET /api/v1/archives/{id}/attachments/{index}` for attachment content
+
+### 3. Benefits
+- **Bandwidth**: 90%+ reduction when browsing
+- **Performance**: Faster initial page loads
+- **Mobile-friendly**: Lower data usage
+- **Progressive**: Only pay for what you view
+
+### Usage Example Flow
+```javascript
+// 1. Load archive (lightweight)
+const archive = await fetch('/api/v1/archives/abc123');
+// archive.artifacts = [{ title: "Script", type: "code" }]  // NO content
+
+// 2. User clicks on first artifact
+const artifact = await fetch('/api/v1/archives/abc123/artifacts/0');
+// artifact.content = "def process():\n..."  // Full content loaded
+
+// 3. User clicks on second attachment
+const attachment = await fetch('/api/v1/archives/abc123/attachments/1');
+// attachment.content = "base64encodedimage..."  // Full content loaded
 ```
 
 ---
@@ -310,6 +463,24 @@ curl -X POST http://localhost:8080/api/v1/archives \
     "markdownContent": "---\nARCHIVE_FORMAT_VERSION: 1.0\n...",
     "userId": "testuser"
   }'
+```
+
+### Example: Get Archive (Lightweight)
+```bash
+# Returns metadata only (no artifact/attachment content)
+curl http://localhost:8080/api/v1/archives/abc123
+```
+
+### Example: Get Artifact Content
+```bash
+# Get first artifact's content (index 0)
+curl http://localhost:8080/api/v1/archives/abc123/artifacts/0
+```
+
+### Example: Get Attachment Content
+```bash
+# Get second attachment's content (index 1)
+curl http://localhost:8080/api/v1/archives/abc123/attachments/1
 ```
 
 ### Example: Get All Archives
