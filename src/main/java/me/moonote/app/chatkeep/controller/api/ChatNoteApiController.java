@@ -44,9 +44,16 @@ public class ChatNoteApiController {
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadChatNote(
       @RequestBody UploadChatNoteRequest request) {
     try {
-      log.info("Received archive upload request");
-      String userId = request.getUserId() != null ? request.getUserId() : "anonymous";
+      // Get current user from security context (works for both anonymous and authenticated users)
+      String userId = me.moonote.app.chatkeep.security.SecurityUtils.getCurrentUserId();
 
+      if (userId == null) {
+        log.error("Upload attempted without authenticated user");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(ApiResponse.error("User not authenticated. Please provide X-Anonymous-User-Id header or login."));
+      }
+
+      log.info("Received archive upload request for user: {}", userId);
       ChatNoteDetailResponse response =
           chatNoteService.uploadChatNote(request.getMarkdownContent(), userId);
 

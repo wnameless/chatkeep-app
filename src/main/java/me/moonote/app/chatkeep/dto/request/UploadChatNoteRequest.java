@@ -15,6 +15,5 @@ import lombok.experimental.FieldDefaults;
 public class UploadChatNoteRequest {
 
   String markdownContent;
-  String userId; // Optional - for multi-user support
 
 }
