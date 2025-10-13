@@ -1,11 +1,15 @@
 package me.moonote.app.chatkeep.service;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,10 +95,13 @@ public class MarkdownChatNotePreprocessor {
     LocalDate conversationDate = extractConversationDate(content);
     List<String> tags = extractTags(content);
 
+    // Parse CREATED_DATE with flexible format support
+    LocalDate createdDate = parseFlexibleDate(String.valueOf(yamlMap.get("CREATED_DATE")));
+
     return ChatNoteMetadataDto.builder()
         .archiveVersion(String.valueOf(yamlMap.get("ARCHIVE_FORMAT_VERSION")))
         .archiveType(String.valueOf(yamlMap.get("ARCHIVE_TYPE")))
-        .createdDate(LocalDate.parse(String.valueOf(yamlMap.get("CREATED_DATE"))))
+        .createdDate(createdDate)
         .originalPlatform(String.valueOf(yamlMap.get("ORIGINAL_PLATFORM")))
         .attachmentCount((Integer) yamlMap.get("ATTACHMENT_COUNT"))
         .artifactCount((Integer) yamlMap.get("ARTIFACT_COUNT"))
@@ -130,6 +137,52 @@ public class MarkdownChatNotePreprocessor {
       return Arrays.stream(tagsStr.split(",")).map(String::trim).collect(Collectors.toList());
     }
     return Collections.emptyList();
+  }
+
+  /**
+   * Parse date with flexible format support.
+   *
+   * Supports: - ISO 8601: 2025-10-02 - Java Date.toString(): Thu Oct 02 08:00:00 CST 2025 - Other
+   * common formats
+   */
+  private LocalDate parseFlexibleDate(String dateStr) {
+    if (dateStr == null || dateStr.equals("null") || dateStr.trim().isEmpty()) {
+      return LocalDate.now();
+    }
+
+    // Try ISO 8601 format first (YYYY-MM-DD)
+    try {
+      return LocalDate.parse(dateStr.trim());
+    } catch (DateTimeParseException e) {
+      // Continue to next format
+    }
+
+    // Try Java Date.toString() format: "EEE MMM dd HH:mm:ss zzz yyyy"
+    // Example: "Thu Oct 02 08:00:00 CST 2025"
+    try {
+      DateTimeFormatter formatter =
+          DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+      ZonedDateTime zdt = ZonedDateTime.parse(dateStr.trim(), formatter);
+      return zdt.toLocalDate();
+    } catch (DateTimeParseException e) {
+      // Continue to next format
+    }
+
+    // Try other common formats
+    String[] patterns = {"yyyy/MM/dd", "dd/MM/yyyy", "MM/dd/yyyy", "dd-MM-yyyy", "MM-dd-yyyy"};
+
+    for (String pattern : patterns) {
+      try {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        return LocalDate.parse(dateStr.trim(), formatter);
+      } catch (DateTimeParseException e) {
+        // Continue to next format
+      }
+    }
+
+    // If all parsing fails, log warning and return current date
+    log.warn("Failed to parse date '{}', using current date", dateStr);
+    return LocalDate.now();
   }
 
   private ConversationSummaryDto parseSummary(String content) {

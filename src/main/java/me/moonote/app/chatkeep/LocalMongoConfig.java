@@ -2,7 +2,6 @@ package me.moonote.app.chatkeep;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -15,9 +14,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
-@Profile("local-mongodb")
 @EnableMongoAuditing
-// @EnableAutoConfiguration(exclude = EmbeddedMongoAutoConfiguration.class)
 @Configuration
 public class LocalMongoConfig extends AbstractMongoClientConfiguration {
 

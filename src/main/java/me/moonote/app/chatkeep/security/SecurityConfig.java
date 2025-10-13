@@ -32,14 +32,8 @@ public class SecurityConfig {
 
         // Authorization rules
         .authorizeHttpRequests(auth -> auth
-            // Public endpoints
-            .requestMatchers("/", "/login", "/error", "/webjars/**", "/css/**", "/js/**",
-                "/images/**", "/favicon.ico")
-            .permitAll()
-            // API endpoints - allow both authenticated and anonymous users
-            .requestMatchers("/api/**").permitAll()
-            // All other requests require authentication
-            .anyRequest().authenticated())
+            // Allow all endpoints - anonymous users are handled by AnonymousUserFilter
+            .anyRequest().permitAll())
 
         // OAuth2 login configuration
         .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(
