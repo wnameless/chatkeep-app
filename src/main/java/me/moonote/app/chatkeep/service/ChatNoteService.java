@@ -47,7 +47,7 @@ public class ChatNoteService {
 
     // Convert to entity and save
     ChatNoteDto chatNoteDto = validationResult.getChatNoteDto();
-    ChatNote entity = mapper.toEntity(chatNoteDto, userId);
+    ChatNote entity = mapper.toEntity(chatNoteDto, userId, markdownContent);
     ChatNote saved = repository.save(entity);
 
     log.info("Chat note saved successfully with id: {}", saved.getId());
@@ -464,11 +464,36 @@ public class ChatNoteService {
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(artifactMetadata)
         .attachments(attachmentMetadata).workarounds(archive.getWorkarounds())
+        .conversationContent(extractConversationContent(archive.getMarkdownContent()))
+        .fullMarkdown(archive.getMarkdownContent())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
         .isFavorite(archive.getIsFavorite()).trashedAt(archive.getTrashedAt())
         .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
         .updatedAt(archive.getUpdatedAt()).build();
+  }
+
+  /**
+   * Extract conversation content (without YAML frontmatter, artifacts, and attachments)
+   * Used for displaying the main conversation in the modal
+   */
+  private String extractConversationContent(String markdownContent) {
+    if (markdownContent == null || markdownContent.trim().isEmpty()) {
+      return "";
+    }
+
+    String content = markdownContent;
+
+    // Remove YAML frontmatter
+    content = content.replaceFirst("(?s)^---\\s*\\n.*?\\n---\\s*\\n", "");
+
+    // Remove artifacts section and everything after
+    content = content.replaceFirst("(?s)\\n---\\s*\\n## (?:Conversation )?Artifacts.*$", "");
+
+    // If no artifacts section, try removing attachments section
+    content = content.replaceFirst("(?s)\\n---\\s*\\n## Attachments.*$", "");
+
+    return content.trim();
   }
 
 }

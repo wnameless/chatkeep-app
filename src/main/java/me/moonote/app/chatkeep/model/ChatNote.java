@@ -45,6 +45,9 @@ public class ChatNote {
   List<Attachment> attachments;
   List<Workaround> workarounds;
 
+  // Original markdown content (for display and download)
+  String markdownContent;
+
   // Metadata for web app
   @CreatedDate
   Instant createdAt;

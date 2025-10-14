@@ -27,7 +27,7 @@ import me.moonote.app.chatkeep.model.Workaround;
 @Component
 public class ChatNoteMapper {
 
-  public ChatNote toEntity(ChatNoteDto dto, String userId) {
+  public ChatNote toEntity(ChatNoteDto dto, String userId, String markdownContent) {
     return ChatNote.builder().archiveVersion(dto.getMetadata().getArchiveVersion())
         .archiveType(dto.getMetadata().getArchiveType())
         .createdDate(dto.getMetadata().getCreatedDate())
@@ -41,7 +41,9 @@ public class ChatNoteMapper {
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())
         .summary(toSummary(dto.getSummary())).artifacts(toArtifacts(dto.getArtifacts()))
         .attachments(toAttachments(dto.getAttachments()))
-        .workarounds(toWorkarounds(dto.getWorkarounds())).userId(userId)
+        .workarounds(toWorkarounds(dto.getWorkarounds()))
+        .markdownContent(markdownContent) // Store original markdown
+        .userId(userId)
         .isPublic(false) // Default to private
         .isArchived(false) // Default to active (not archived)
         .isTrashed(false) // Default to not trashed
