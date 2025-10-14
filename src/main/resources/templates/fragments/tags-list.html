@@ -6,19 +6,13 @@
 <div th:fragment="tags">
     <!-- Check if tags list is not empty -->
     <th:block th:if="${tags != null && !tags.isEmpty()}">
-        <div th:each="tagInfo : ${tags}">
+        <div th:each="tagEntry : ${tags}">
             <label class="flex items-center py-1.5 px-2 ml-6 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
                 <input type="checkbox"
-                       th:value="${tagInfo.name}"
-                       th:data-tag="${tagInfo.name}"
-                       class="tag-checkbox rounded text-primary-500 focus:ring-primary-400 mr-2"
-                       hx:get="@{/fragments/filter/tags}"
-                       hx-trigger="change"
-                       hx-target="#notes-grid"
-                       hx-swap="innerHTML"
-                       hx-include="[name='selectedTags']">
-                <span class="text-sm text-gray-700 dark:text-gray-300" th:text="${tagInfo.name}">java</span>
-                <span class="ml-auto text-xs text-gray-500 dark:text-gray-400" th:text="${tagInfo.count}">5</span>
+                       th:value="${tagEntry.key}"
+                       class="tag-checkbox rounded text-primary-500 focus:ring-primary-400 mr-2">
+                <span class="text-sm text-gray-700 dark:text-gray-300" th:text="${tagEntry.key}">java</span>
+                <span class="ml-auto text-xs text-gray-500 dark:text-gray-400" th:text="${tagEntry.value}">5</span>
             </label>
         </div>
     </th:block>

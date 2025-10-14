@@ -82,29 +82,20 @@ function initializeTags() {
 }
 
 function loadTagsViaHTMX() {
-    // Fetch tags via API and populate dynamically
-    const userId = getUserId();
-    if (!userId) return;
+    // Fetch tags via HTMX fragment (uses SecurityUtils.getCurrentUserId())
+    htmx.ajax('GET', '/fragments/tags', {
+        target: '#tags-container',
+        swap: 'innerHTML'
+    }).then(() => {
+        // Hide loading message after tags are loaded
+        const tagsLoading = document.getElementById('tags-loading');
+        if (tagsLoading) tagsLoading.classList.add('hidden');
 
-    fetch(`/api/v1/chat-notes/user/${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.data) {
-                const tagsMap = new Map();
-
-                // Count occurrences of each tag
-                data.data.forEach(note => {
-                    if (note.tags) {
-                        note.tags.forEach(tag => {
-                            tagsMap.set(tag, (tagsMap.get(tag) || 0) + 1);
-                        });
-                    }
-                });
-
-                renderTagsInSidebar(tagsMap);
-            }
-        })
-        .catch(err => console.error('Error loading tags:', err));
+        // Attach event listeners to newly loaded checkboxes
+        document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleTagFilterChange);
+        });
+    });
 }
 
 function renderTagsInSidebar(tagsMap) {
@@ -142,10 +133,9 @@ function handleTagFilterChange() {
 
     if (selectedTags.length > 0) {
         clearFiltersContainer?.classList.remove('hidden');
-        // Trigger HTMX request with selected tags
+        // Trigger HTMX request with selected tags (OR operation for multiple tags)
         const tagsParam = selectedTags.join(',');
-        const userId = getUserId();
-        htmx.ajax('GET', `/fragments/filter/tags?tags=${tagsParam}&operator=OR&userId=${userId}`, {
+        htmx.ajax('GET', `/fragments/filter/tags?tags=${tagsParam}&operator=OR`, {
             target: '#notes-grid',
             swap: 'innerHTML'
         });

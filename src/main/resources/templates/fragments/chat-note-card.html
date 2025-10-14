@@ -117,7 +117,7 @@
 
         <!-- Share (if public) -->
         <button th:if="${note.isPublic}" th:data-note-id="${note.id}"
-          th:attr="onclick=${'event.stopPropagation(); copyShareLink(\'' + note.id + '\')'}"
+          th:attr="onclick=${'event.stopPropagation(); copyShareLink(''' + note.id + ''')'}"
           title="Copy share link"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors rounded">
           <i class="fas fa-share"></i>
