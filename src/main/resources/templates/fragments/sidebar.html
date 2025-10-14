@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+  <aside th:fragment="sidebar" id="sidebar"
+    class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto no-scrollbar transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:static inset-y-0 left-0 z-40">
+
+    <nav class="py-4">
+
+      <!-- ChatNotes (Default View) -->
+      <a href="#" hx:get="@{/fragments/chat-notes(filter='chatnotes')}" hx-target="#notes-grid"
+        hx-push-url="false"
+        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active">
+        <i class="fas fa-notes-medical w-6 text-lg"></i>
+        <span class="ml-3 font-medium">ChatNotes</span>
+        <span class="ml-auto text-sm text-gray-500 dark:text-gray-400" id="chatnotes-count">0</span>
+      </a>
+
+      <!-- Favorite -->
+      <a href="#" hx:get="@{/fragments/chat-notes(filter='favorites')}" hx-target="#notes-grid"
+        hx-push-url="false"
+        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <i class="fas fa-star w-6 text-lg"></i>
+        <span class="ml-3 font-medium">Favorites</span>
+        <span class="ml-auto text-sm text-gray-500 dark:text-gray-400" id="favorites-count">0</span>
+      </a>
+
+      <!-- Shared (Public ChatNotes) -->
+      <a href="#" hx:get="@{/fragments/chat-notes(filter='shared')}" hx-target="#notes-grid"
+        hx-push-url="false"
+        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <i class="fas fa-share-nodes w-6 text-lg"></i>
+        <span class="ml-3 font-medium">Shared</span>
+        <span class="ml-auto text-sm text-gray-500 dark:text-gray-400" id="shared-count">0</span>
+      </a>
+
+      <!-- Archive -->
+      <a href="#" hx:get="@{/fragments/chat-notes(filter='archive')}" hx-target="#notes-grid"
+        hx-push-url="false"
+        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <i class="fas fa-archive w-6 text-lg"></i>
+        <span class="ml-3 font-medium">Archive</span>
+        <span class="ml-auto text-sm text-gray-500 dark:text-gray-400" id="archive-count">0</span>
+      </a>
+
+      <!-- Trash -->
+      <a href="#" hx:get="@{/fragments/chat-notes(filter='trash')}" hx-target="#notes-grid"
+        hx-push-url="false"
+        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+        <i class="fas fa-trash w-6 text-lg"></i>
+        <span class="ml-3 font-medium">Trash</span>
+        <span class="ml-auto text-sm text-gray-500 dark:text-gray-400" id="trash-count">0</span>
+      </a>
+
+      <!-- Separator -->
+      <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+      <!-- Tags Section (Expandable) -->
+      <div class="px-4 py-2">
+        <button id="tags-toggle"
+          class="flex items-center justify-between w-full text-left text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <div class="flex items-center">
+            <i class="fas fa-tags w-6 text-lg"></i>
+            <span class="ml-3 font-medium">Tags</span>
+          </div>
+          <i class="fas fa-chevron-down text-sm transition-transform duration-200"
+            id="tags-chevron"></i>
+        </button>
+
+        <!-- Tags List (Collapsible) -->
+        <div id="tags-list" class="mt-2 space-y-1 hidden">
+          <!-- Tags will be dynamically loaded here -->
+          <div id="tags-loading" class="text-sm text-gray-500 dark:text-gray-400 ml-9">
+            Loading tags...
+          </div>
+
+          <!-- Tag Filter Options (OR filtering) -->
+          <div id="tags-container" class="space-y-1">
+            <!-- Example tag structure (will be populated dynamically):
+                    <label class="flex items-center py-1.5 px-2 ml-6 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+                        <input type="checkbox" value="java" class="tag-checkbox rounded text-primary-500 focus:ring-primary-400 mr-2">
+                        <span class="text-sm text-gray-700 dark:text-gray-300">java</span>
+                        <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">5</span>
+                    </label>
+                    -->
+          </div>
+
+          <!-- Clear Filters Button -->
+          <div id="clear-filters-container" class="hidden ml-6 mt-2">
+            <button id="clear-filters-btn" hx:get="@{/fragments/chat-notes}" hx-target="#notes-grid"
+              hx-swap="innerHTML"
+              class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+              <i class="fas fa-times-circle mr-1"></i>
+              Clear filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Separator -->
+      <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+      <!-- Storage Info (Optional) -->
+      <div class="px-4 py-2 text-xs text-gray-500 dark:text-gray-400">
+        <div class="flex items-center justify-between">
+          <span>Total Notes</span>
+          <span id="total-notes-count" class="font-semibold">0</span>
+        </div>
+      </div>
+
+      <!-- Hidden div to listen for count updates -->
+      <div hx:get="@{/fragments/sidebar-counts}" hx-trigger="updateCounts from:body" hx-swap="none"
+        style="display:none;"></div>
+
+    </nav>
+
+  </aside>
+
+  <!-- Sidebar Overlay (Mobile) -->
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden">
+  </div>
+
+</body>
+
+</html>

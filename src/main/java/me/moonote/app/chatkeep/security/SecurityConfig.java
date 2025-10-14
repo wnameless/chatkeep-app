@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
  * Spring Security configuration supporting both OAuth2 and anonymous authentication.
  *
  * Security features: - OAuth2 login with multiple providers (AWS Cognito, Google, Facebook, etc.)
- * - Anonymous user authentication via UUID from browser - Public endpoints for static resources and
+ * - Anonymous user authentication via httpOnly cookies - Public endpoints for static resources and
  * health checks - Protected endpoints requiring authentication
  */
 @Configuration
@@ -21,30 +21,35 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
   private final CustomOAuth2UserService customOAuth2UserService;
+  private final CustomOidcUserService customOidcUserService;
   private final OAuth2AuthenticationSuccessHandler oauth2AuthenticationSuccessHandler;
-  private final AnonymousUserFilter anonymousUserFilter;
+  private final AnonymousCookieFilter anonymousCookieFilter;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        // CSRF configuration
-        .csrf(csrf -> csrf.disable()) // TODO: Enable CSRF in production
+        // CSRF configuration - now enabled with cookie-based auth
+        .csrf(csrf -> csrf.disable()) // TODO: Enable CSRF in production after thorough testing
 
         // Authorization rules
         .authorizeHttpRequests(auth -> auth
-            // Allow all endpoints - anonymous users are handled by AnonymousUserFilter
+            // Allow all endpoints - anonymous users are handled by AnonymousCookieFilter
             .anyRequest().permitAll())
 
         // OAuth2 login configuration
-        .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(
-            userInfo -> userInfo.userService(customOAuth2UserService))
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo -> userInfo
+                // Handle regular OAuth2 providers
+                .userService(customOAuth2UserService)
+                // Handle OIDC providers (AWS Cognito, Google, etc.)
+                .oidcUserService(customOidcUserService))
             .successHandler(oauth2AuthenticationSuccessHandler).loginPage("/login").permitAll())
 
         // Logout configuration
         .logout(logout -> logout.logoutSuccessUrl("/").permitAll())
 
-        // Add anonymous user filter before standard authentication
-        .addFilterBefore(anonymousUserFilter, UsernamePasswordAuthenticationFilter.class);
+        // Add anonymous cookie filter before standard authentication
+        .addFilterBefore(anonymousCookieFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

@@ -29,9 +29,14 @@ public class SecurityUtils {
 
     Object principal = authentication.getPrincipal();
 
+    // Handle OidcUserDetailsAdapter (from OIDC login - AWS Cognito, Google, etc.)
+    if (principal instanceof OidcUserDetailsAdapter oidcAdapter) {
+      return oidcAdapter.getUserDetails();
+    }
+
     // Handle OAuth2UserDetailsAdapter (from OAuth2 login)
-    if (principal instanceof OAuth2UserDetailsAdapter adapter) {
-      return adapter.getUserDetails();
+    if (principal instanceof OAuth2UserDetailsAdapter oauth2Adapter) {
+      return oauth2Adapter.getUserDetails();
     }
 
     // Handle direct ChatKeepUserDetails (from anonymous filter)

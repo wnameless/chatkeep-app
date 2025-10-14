@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.service.UserMigrationService;
@@ -16,9 +15,8 @@ import me.moonote.app.chatkeep.service.UserMigrationService;
 /**
  * Handles successful OAuth2 authentication and anonymous user migration.
  *
- * This handler: 1. Checks if there's an anonymous UUID in the session 2. If yes, migrates the
- * anonymous user's ChatNotes to the authenticated user 3. Clears the anonymous UUID from the
- * session 4. Redirects to the home page
+ * This handler: 1. Checks for anonymous session cookie 2. If exists, migrates anonymous user's
+ * ChatNotes to authenticated user 3. Deletes the anonymous cookie 4. Redirects to home page
  */
 @Component
 @RequiredArgsConstructor
@@ -27,41 +25,38 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
   private final UserMigrationService userMigrationService;
 
-  private static final String ANONYMOUS_UUID_SESSION_KEY = "anonymousUuid";
-
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
       Authentication authentication) throws IOException, ServletException {
 
-    HttpSession session = request.getSession(false);
+    // Check for anonymous session cookie
+    String anonymousUuid = AnonymousCookieFilter.getAnonymousUuidFromCookie(request);
 
-    // Check if there's an anonymous UUID in the session
-    if (session != null) {
-      String anonymousUuid = (String) session.getAttribute(ANONYMOUS_UUID_SESSION_KEY);
+    if (anonymousUuid != null && !anonymousUuid.isBlank()) {
+      try {
+        // Extract OAuth2 user info
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        String providerId = oauth2User.getAttribute("sub");
+        String email = oauth2User.getAttribute("email");
+        String username = extractUsername(oauth2User);
 
-      if (anonymousUuid != null && !anonymousUuid.isBlank()) {
-        try {
-          // Extract OAuth2 user info
-          OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-          String providerId = oauth2User.getAttribute("sub");
-          String email = oauth2User.getAttribute("email");
-          String username = extractUsername(oauth2User);
+        // Extract provider name from authentication
+        String provider = extractProviderName(authentication);
 
-          // Extract provider name from authentication
-          String provider = extractProviderName(authentication);
+        // Migrate anonymous user to authenticated user
+        log.info("Migrating anonymous user {} to authenticated user", anonymousUuid);
+        userMigrationService.migrateAnonymousUser(anonymousUuid, provider, providerId, email,
+            username);
 
-          // Migrate anonymous user to authenticated user
-          log.info("Migrating anonymous user {} to authenticated user", anonymousUuid);
-          userMigrationService.migrateAnonymousUser(anonymousUuid, provider, providerId, email,
-              username);
+        // Delete anonymous cookie (user is now authenticated)
+        AnonymousCookieFilter.deleteAnonymousCookie(response);
 
-          // Clear anonymous UUID from session
-          session.removeAttribute(ANONYMOUS_UUID_SESSION_KEY);
-          log.info("Successfully migrated anonymous user {} to authenticated user", anonymousUuid);
-        } catch (Exception e) {
-          log.error("Failed to migrate anonymous user", e);
-          // Continue with authentication even if migration fails
-        }
+        log.info("Successfully migrated anonymous user {} and deleted cookie", anonymousUuid);
+      } catch (Exception e) {
+        // Delete anonymous cookie (user is now authenticated)
+        AnonymousCookieFilter.deleteAnonymousCookie(response);
+        log.error("Failed to migrate anonymous user", e);
+        // Continue with authentication even if migration fails
       }
     }
 
@@ -90,12 +85,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
    */
   private String extractUsername(OAuth2User oauth2User) {
     String name = oauth2User.getAttribute("name");
-    if (name != null)
-      return name;
+    if (name != null) return name;
 
     String username = oauth2User.getAttribute("preferred_username");
-    if (username != null)
-      return username;
+    if (username != null) return username;
 
     String email = oauth2User.getAttribute("email");
     if (email != null && email.contains("@")) {

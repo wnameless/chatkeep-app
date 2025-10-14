@@ -30,6 +30,7 @@ public class ChatNoteResponse {
   Boolean isArchived;
   Boolean isTrashed;
   Boolean isFavorite;
+  String contentPreview; // First ~200 characters of content for card display
   Instant createdAt;
   Instant updatedAt;
 

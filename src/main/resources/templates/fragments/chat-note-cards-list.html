@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- List View - ChatNote Cards Fragment -->
+<th:block th:fragment="list-cards">
+    <!-- Check if notes list is not empty -->
+    <th:block th:if="${notes != null && !notes.isEmpty()}">
+        <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}"></div>
+    </th:block>
+
+    <!-- Empty state -->
+    <th:block th:unless="${notes != null && !notes.isEmpty()}">
+        <div class="text-center py-20">
+            <i class="fas fa-inbox text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">No ChatNotes yet</p>
+            <p class="text-sm text-gray-500 dark:text-gray-500">
+                Click the <i class="fas fa-plus"></i> button to import your first archive
+            </p>
+        </div>
+    </th:block>
+</th:block>
+
+</body>
+</html>

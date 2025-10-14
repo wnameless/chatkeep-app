@@ -122,4 +122,64 @@ public class ChatNoteMapper {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Generate a content preview from the conversation summary
+   * Takes first ~200 characters for card display
+   */
+  public String generateContentPreview(ChatNote chatNote) {
+    if (chatNote.getSummary() == null) return "";
+
+    StringBuilder preview = new StringBuilder();
+
+    // Try initial query description first
+    if (chatNote.getSummary().getInitialQuery() != null
+        && chatNote.getSummary().getInitialQuery().getDescription() != null) {
+      preview.append(chatNote.getSummary().getInitialQuery().getDescription());
+    }
+
+    // If still short, add key insights description
+    if (preview.length() < 100 && chatNote.getSummary().getKeyInsights() != null
+        && chatNote.getSummary().getKeyInsights().getDescription() != null) {
+      if (preview.length() > 0) preview.append(" ");
+      preview.append(chatNote.getSummary().getKeyInsights().getDescription());
+    }
+
+    String content = preview.toString();
+    return content.length() > 200 ? content.substring(0, 200) + "..." : content;
+  }
+
+  /**
+   * Count total messages in conversation (rough estimate based on summary structure)
+   */
+  public int estimateMessageCount(ChatNote chatNote) {
+    // This is a simple estimation - can be improved with actual message parsing
+    int count = 0;
+    if (chatNote.getSummary() != null) {
+      if (chatNote.getSummary().getInitialQuery() != null) count += 2; // User + AI
+      if (chatNote.getSummary().getKeyInsights() != null) count += 4; // Multiple exchanges
+      if (chatNote.getSummary().getFollowUpExplorations() != null) count += 4;
+    }
+    return count;
+  }
+
+  /**
+   * Count total words in conversation summary
+   */
+  public int estimateWordCount(ChatNote chatNote) {
+    int wordCount = 0;
+    if (chatNote.getSummary() != null) {
+      wordCount += countWords(chatNote.getSummary().getInitialQuery());
+      wordCount += countWords(chatNote.getSummary().getKeyInsights());
+      wordCount += countWords(chatNote.getSummary().getFollowUpExplorations());
+    }
+    return wordCount;
+  }
+
+  private int countWords(Object section) {
+    if (section == null) return 0;
+    String text = section.toString();
+    if (text.trim().isEmpty()) return 0;
+    return text.split("\\s+").length;
+  }
+
 }

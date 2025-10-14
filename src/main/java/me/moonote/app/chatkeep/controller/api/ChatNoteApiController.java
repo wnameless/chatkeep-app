@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.request.UploadChatNoteRequest;
@@ -37,8 +38,7 @@ public class ChatNoteApiController {
   private final ChatNoteService chatNoteService;
 
   /**
-   * Upload and process a new archive
-   * POST /api/v1/chat-notes
+   * Upload and process a new archive POST /api/v1/chat-notes
    */
   @PostMapping
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadChatNote(
@@ -49,8 +49,8 @@ public class ChatNoteApiController {
 
       if (userId == null) {
         log.error("Upload attempted without authenticated user");
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(ApiResponse.error("User not authenticated. Please provide X-Anonymous-User-Id header or login."));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse
+            .error("User not authenticated. Please provide X-Anonymous-User-Id header or login."));
       }
 
       log.info("Received archive upload request for user: {}", userId);
@@ -71,8 +71,62 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get archive by ID (lightweight - without artifact/attachment content)
-   * GET /api/v1/chat-notes/{id}
+   * Upload markdown file (multipart file upload)
+   * POST /api/v1/chat-notes/upload
+   */
+  @PostMapping("/upload")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadMarkdownFile(
+      @RequestParam("file") MultipartFile file) {
+    try {
+      // Get current user from security context
+      String userId = me.moonote.app.chatkeep.security.SecurityUtils.getCurrentUserId();
+
+      if (userId == null) {
+        log.error("Upload attempted without authenticated user");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse
+            .error("User not authenticated. Please provide X-Anonymous-User-Id header or login."));
+      }
+
+      // Validate file
+      if (file.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.error("File is empty"));
+      }
+
+      // Check file extension
+      String originalFilename = file.getOriginalFilename();
+      if (originalFilename == null ||
+          (!originalFilename.endsWith(".md") && !originalFilename.endsWith(".markdown"))) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ApiResponse.error("Only .md or .markdown files are allowed"));
+      }
+
+      // Read file content
+      String markdownContent = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
+
+      log.info("Received markdown file upload for user: {}, filename: {}", userId, originalFilename);
+      ChatNoteDetailResponse response = chatNoteService.uploadChatNote(markdownContent, userId);
+
+      return ResponseEntity.status(HttpStatus.CREATED)
+          .body(ApiResponse.success("Markdown file uploaded successfully", response));
+    } catch (InvalidChatNoteException e) {
+      log.error("Invalid markdown file: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.error("Invalid markdown file: " + e.getMessage()));
+    } catch (java.io.IOException e) {
+      log.error("Error reading file", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to read file: " + e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error uploading markdown file", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to upload markdown file: " + e.getMessage()));
+    }
+  }
+
+  /**
+   * Get archive by ID (lightweight - without artifact/attachment content) GET
+   * /api/v1/chat-notes/{id}
    */
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse<ChatNoteDetailLightResponse>> getArchive(
@@ -91,8 +145,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get artifact content by index
-   * GET /api/v1/chat-notes/{id}/artifacts/{index}
+   * Get artifact content by index GET /api/v1/chat-notes/{id}/artifacts/{index}
    */
   @GetMapping("/{id}/artifacts/{index}")
   public ResponseEntity<ApiResponse<Artifact>> getArtifactContent(@PathVariable String id,
@@ -113,8 +166,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get attachment content by index
-   * GET /api/v1/chat-notes/{id}/attachments/{index}
+   * Get attachment content by index GET /api/v1/chat-notes/{id}/attachments/{index}
    */
   @GetMapping("/{id}/attachments/{index}")
   public ResponseEntity<ApiResponse<Attachment>> getAttachmentContent(@PathVariable String id,
@@ -135,17 +187,16 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get all archives (paginated)
-   * GET /api/v1/chat-notes?page=0&size=20&sort=createdAt,desc
+   * Get all archives (paginated) GET /api/v1/chat-notes?page=0&size=20&sort=createdAt,desc
    */
   @GetMapping
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllChatNotes(
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,
       @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
     try {
-      Sort.Direction direction = sort.length > 1 && sort[1].equalsIgnoreCase("asc")
-          ? Sort.Direction.ASC
-          : Sort.Direction.DESC;
+      Sort.Direction direction =
+          sort.length > 1 && sort[1].equalsIgnoreCase("asc") ? Sort.Direction.ASC
+              : Sort.Direction.DESC;
       Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
 
       Page<ChatNoteResponse> archives = chatNoteService.getAllChatNotes(pageable);
@@ -158,8 +209,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get archives by user ID
-   * GET /api/v1/chat-notes/user/{userId}
+   * Get archives by user ID GET /api/v1/chat-notes/user/{userId}
    */
   @GetMapping("/user/{userId}")
   public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getArchivesByUser(
@@ -175,13 +225,11 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Search archives by title
-   * GET /api/v1/chat-notes/search?title=keyword
+   * Search archives by title GET /api/v1/chat-notes/search?title=keyword
    */
   @GetMapping("/search")
   public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> searchArchives(
-      @RequestParam(required = false) String title,
-      @RequestParam(required = false) String tag) {
+      @RequestParam(required = false) String title, @RequestParam(required = false) String tag) {
     try {
       java.util.List<ChatNoteResponse> archives;
 
@@ -203,8 +251,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get public archives
-   * GET /api/v1/chat-notes/public?page=0&size=20
+   * Get public archives GET /api/v1/chat-notes/public?page=0&size=20
    */
   @GetMapping("/public")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getPublicChatNotes(
@@ -223,8 +270,8 @@ public class ChatNoteApiController {
   // ==================== Tag-Based Filtering Endpoints ====================
 
   /**
-   * Filter chat notes by multiple tags (global)
-   * GET /api/v1/chat-notes/filter/tags?tags=java,spring&operator=AND
+   * Filter chat notes by multiple tags (global) GET
+   * /api/v1/chat-notes/filter/tags?tags=java,spring&operator=AND
    */
   @GetMapping("/filter/tags")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterByTags(
@@ -243,8 +290,8 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Filter chat notes by tags for a specific user
-   * GET /api/v1/chat-notes/user/{userId}/filter/tags?tags=java,spring&operator=AND&lifecycle=active
+   * Filter chat notes by tags for a specific user GET
+   * /api/v1/chat-notes/user/{userId}/filter/tags?tags=java,spring&operator=AND&lifecycle=active
    */
   @GetMapping("/user/{userId}/filter/tags")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterByTagsForUser(
@@ -257,8 +304,7 @@ public class ChatNoteApiController {
       Page<ChatNoteResponse> chatNotes;
 
       if ("active".equalsIgnoreCase(lifecycle)) {
-        chatNotes =
-            chatNoteService.filterActiveByTagsForUser(userId, tags, operator, pageable);
+        chatNotes = chatNoteService.filterActiveByTagsForUser(userId, tags, operator, pageable);
       } else if ("all".equalsIgnoreCase(lifecycle)) {
         chatNotes = chatNoteService.filterByTagsForUser(userId, tags, operator, pageable);
       } else {
@@ -275,8 +321,8 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Filter active (not archived, not trashed) chat notes by tags (global)
-   * GET /api/v1/chat-notes/filter/tags/active?tags=java,spring&operator=OR
+   * Filter active (not archived, not trashed) chat notes by tags (global) GET
+   * /api/v1/chat-notes/filter/tags/active?tags=java,spring&operator=OR
    */
   @GetMapping("/filter/tags/active")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterActiveByTags(
@@ -296,8 +342,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Update archive visibility
-   * PATCH /api/v1/chat-notes/{id}/visibility
+   * Update archive visibility PATCH /api/v1/chat-notes/{id}/visibility
    */
   @PatchMapping("/{id}/visibility")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateVisibility(
@@ -318,15 +363,15 @@ public class ChatNoteApiController {
   // ==================== Favorites Management Endpoints ====================
 
   /**
-   * Toggle favorite status (star/unstar)
-   * PATCH /api/v1/chat-notes/{id}/favorite
+   * Toggle favorite status (star/unstar) PATCH /api/v1/chat-notes/{id}/favorite
    */
   @PatchMapping("/{id}/favorite")
-  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> toggleFavorite(
-      @PathVariable String id, @RequestParam Boolean isFavorite) {
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> toggleFavorite(@PathVariable String id,
+      @RequestParam Boolean isFavorite) {
     try {
       ChatNoteDetailResponse response = chatNoteService.toggleFavorite(id, isFavorite);
-      return ResponseEntity.ok(ApiResponse.success("Favorite status updated successfully", response));
+      return ResponseEntity
+          .ok(ApiResponse.success("Favorite status updated successfully", response));
     } catch (ChatNoteNotFoundException e) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
           .body(ApiResponse.error("Chat note not found: " + id));
@@ -338,8 +383,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get all favorite chat notes for a user
-   * GET /api/v1/chat-notes/user/{userId}/favorites
+   * Get all favorite chat notes for a user GET /api/v1/chat-notes/user/{userId}/favorites
    */
   @GetMapping("/user/{userId}/favorites")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getFavoriteChatNotes(
@@ -357,8 +401,8 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get favorite active chat notes for a user (not archived, not trashed)
-   * GET /api/v1/chat-notes/user/{userId}/favorites/active
+   * Get favorite active chat notes for a user (not archived, not trashed) GET
+   * /api/v1/chat-notes/user/{userId}/favorites/active
    */
   @GetMapping("/user/{userId}/favorites/active")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getFavoriteActiveChatNotes(
@@ -377,8 +421,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Delete archive
-   * DELETE /api/v1/chat-notes/{id}
+   * Delete archive DELETE /api/v1/chat-notes/{id}
    */
   @DeleteMapping("/{id}")
   public ResponseEntity<ApiResponse<Void>> deleteChatNote(@PathVariable String id) {
@@ -398,8 +441,7 @@ public class ChatNoteApiController {
   // ==================== Lifecycle Management Endpoints ====================
 
   /**
-   * Update archive status (archive/unarchive)
-   * PATCH /api/v1/chat-notes/{id}/archive
+   * Update archive status (archive/unarchive) PATCH /api/v1/chat-notes/{id}/archive
    */
   @PatchMapping("/{id}/archive")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateArchiveStatus(
@@ -419,8 +461,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Move chat note to trash (soft delete)
-   * PATCH /api/v1/chat-notes/{id}/trash
+   * Move chat note to trash (soft delete) PATCH /api/v1/chat-notes/{id}/trash
    */
   @PatchMapping("/{id}/trash")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> moveToTrash(@PathVariable String id) {
@@ -438,8 +479,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Restore chat note from trash
-   * PATCH /api/v1/chat-notes/{id}/restore
+   * Restore chat note from trash PATCH /api/v1/chat-notes/{id}/restore
    */
   @PatchMapping("/{id}/restore")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> restoreFromTrash(
@@ -458,8 +498,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Permanently delete chat note (hard delete)
-   * DELETE /api/v1/chat-notes/{id}/permanent
+   * Permanently delete chat note (hard delete) DELETE /api/v1/chat-notes/{id}/permanent
    */
   @DeleteMapping("/{id}/permanent")
   public ResponseEntity<ApiResponse<Void>> permanentlyDeleteChatNote(@PathVariable String id) {
@@ -477,8 +516,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get active chat notes for a user
-   * GET /api/v1/chat-notes/user/{userId}/active
+   * Get active chat notes for a user GET /api/v1/chat-notes/user/{userId}/active
    */
   @GetMapping("/user/{userId}/active")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getActiveChatNotes(
@@ -496,8 +534,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get archived chat notes for a user
-   * GET /api/v1/chat-notes/user/{userId}/archived
+   * Get archived chat notes for a user GET /api/v1/chat-notes/user/{userId}/archived
    */
   @GetMapping("/user/{userId}/archived")
   public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getArchivedChatNotes(
@@ -513,8 +550,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get trashed chat notes for a user
-   * GET /api/v1/chat-notes/user/{userId}/trash
+   * Get trashed chat notes for a user GET /api/v1/chat-notes/user/{userId}/trash
    */
   @GetMapping("/user/{userId}/trash")
   public ResponseEntity<ApiResponse<java.util.List<ChatNoteResponse>>> getTrashedChatNotes(
@@ -530,8 +566,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get all archived chat notes (paginated) - admin/global view
-   * GET /api/v1/chat-notes/archived
+   * Get all archived chat notes (paginated) - admin/global view GET /api/v1/chat-notes/archived
    */
   @GetMapping("/archived")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllArchivedChatNotes(
@@ -548,8 +583,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Get all trashed chat notes (paginated) - admin/global view
-   * GET /api/v1/chat-notes/trash
+   * Get all trashed chat notes (paginated) - admin/global view GET /api/v1/chat-notes/trash
    */
   @GetMapping("/trash")
   public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> getAllTrashedChatNotes(

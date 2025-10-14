@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+  <!-- ChatNote Card Fragment -->
+  <th:block th:fragment="card(note)">
+    <div
+      class="chat-note-card group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer masonry-item"
+      th:id="'card-' + ${note.id}" hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
+      hx-target="#modal-container" hx-swap="innerHTML">
+
+      <!-- Card Content -->
+      <div class="p-4">
+
+        <!-- Title -->
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2"
+          th:text="${note.title}">
+          ChatNote Title
+        </h3>
+
+        <!-- Conversation Date -->
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-3"
+          th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">
+          Jan 15, 2025
+        </p>
+
+        <!-- Content Preview (First N characters) -->
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-3"
+          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 150) : 'No preview available'}">
+          This is a preview of the chat note content that shows the first few lines...
+        </p>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-1.5 mb-3"
+          th:if="${note.tags != null && !note.tags.isEmpty()}">
+          <span th:each="tag : ${note.tags}" th:text="${tag}"
+            class="inline-block px-2 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
+            tag
+          </span>
+        </div>
+
+        <!-- Status Icons (Always Visible) -->
+        <div class="flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
+          <!-- Favorite Star -->
+          <div th:if="${note.isFavorite}" class="flex items-center">
+            <i class="fas fa-star text-yellow-500 mr-1"></i>
+          </div>
+
+          <!-- Artifact Count -->
+          <div th:if="${note.artifactCount > 0}" class="flex items-center"
+            th:title="'Artifacts: ' + ${note.artifactCount}">
+            <i class="fas fa-file-code mr-1"></i>
+            <span th:text="${note.artifactCount}">0</span>
+          </div>
+
+          <!-- Attachment Count -->
+          <div th:if="${note.attachmentCount > 0}" class="flex items-center"
+            th:title="'Attachments: ' + ${note.attachmentCount}">
+            <i class="fas fa-paperclip mr-1"></i>
+            <span th:text="${note.attachmentCount}">0</span>
+          </div>
+
+          <!-- Public Badge -->
+          <div th:if="${note.isPublic}"
+            class="flex items-center text-green-600 dark:text-green-400">
+            <i class="fas fa-globe mr-1"></i>
+            <span>Public</span>
+          </div>
+
+          <!-- Archived Badge -->
+          <div th:if="${note.isArchived}"
+            class="flex items-center text-blue-600 dark:text-blue-400">
+            <i class="fas fa-archive mr-1"></i>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons (Visible on Hover) -->
+      <div
+        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center space-x-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-1"
+        onclick="event.stopPropagation()">
+
+        <!-- Favorite / Unfavorite -->
+        <button
+          hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML"
+          th:title="${note.isFavorite ? 'Remove from favorites' : 'Add to favorites'}"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors rounded">
+          <i th:class="${note.isFavorite ? 'fas fa-star' : 'far fa-star'}"></i>
+        </button>
+
+        <!-- Archive / Unarchive -->
+        <button
+          hx:post="@{/fragments/chat-notes/{id}/archive(id=${note.id},isArchived=${!note.isArchived})}"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML"
+          th:title="${note.isArchived ? 'Unarchive' : 'Archive'}"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors rounded">
+          <i th:class="${note.isArchived ? 'fas fa-box-open' : 'fas fa-archive'}"></i>
+        </button>
+
+        <!-- Trash / Restore -->
+        <button th:if="${!note.isTrashed}"
+          hx:post="@{/fragments/chat-notes/{id}/trash(id=${note.id})}"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML" title="Move to trash"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded">
+          <i class="fas fa-trash"></i>
+        </button>
+
+        <button th:if="${note.isTrashed}"
+          hx:post="@{/fragments/chat-notes/{id}/restore(id=${note.id})}"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML" title="Restore from trash"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors rounded">
+          <i class="fas fa-undo"></i>
+        </button>
+
+        <!-- Share (if public) -->
+        <button th:if="${note.isPublic}" th:data-note-id="${note.id}"
+          th:attr="onclick=${'event.stopPropagation(); copyShareLink(\'' + note.id + '\')'}"
+          title="Copy share link"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors rounded">
+          <i class="fas fa-share"></i>
+        </button>
+
+        <!-- Download -->
+        <button th:data-note-id="${note.id}"
+          th:attr="onclick=${'event.stopPropagation(); downloadChatNote(''' + note.id + ''')'}"
+          title="Download markdown"
+          class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors rounded">
+          <i class="fas fa-download"></i>
+        </button>
+
+        <!-- More Menu -->
+        <div class="relative more-menu-container">
+          <button th:data-note-id="${note.id}"
+            th:attr="onclick=${'event.stopPropagation(); toggleMoreMenu(''' + note.id + ''')'}"
+            title="More options"
+            class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded">
+            <i class="fas fa-ellipsis-v"></i>
+          </button>
+
+          <!-- More Menu Dropdown -->
+          <div th:id="'more-menu-' + ${note.id}"
+            class="more-menu hidden absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+            <div class="py-1">
+              <!-- Toggle Public/Private -->
+              <button
+                hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
+                hx-target="closest .chat-note-card" hx-swap="outerHTML"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i th:class="${note.isPublic ? 'fas fa-lock' : 'fas fa-globe'}" class="w-4"></i>
+                <span th:text="${note.isPublic ? 'Make Private' : 'Make Public'}">Make Public</span>
+              </button>
+
+              <!-- Edit -->
+              <button th:data-note-id="${note.id}"
+                th:attr="onclick=${'editChatNote(''' + note.id + ''')'}"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-edit w-4"></i>
+                <span>Edit</span>
+              </button>
+
+              <!-- Duplicate -->
+              <button th:data-note-id="${note.id}"
+                th:attr="onclick=${'duplicateChatNote(''' + note.id + ''')'}"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-copy w-4"></i>
+                <span>Duplicate</span>
+              </button>
+
+              <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+              <!-- Permanent Delete (only show in trash view) -->
+              <button th:if="${note.isTrashed}"
+                hx:delete="@{/fragments/chat-notes/{id}/permanent(id=${note.id})}"
+                hx-target="closest .chat-note-card" hx-swap="outerHTML"
+                hx-confirm="Are you sure you want to permanently delete this note? This action cannot be undone."
+                class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-trash-alt w-4"></i>
+                <span>Delete Forever</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </th:block>
+
+  <!-- List View Card (Alternative Layout) -->
+  <div th:fragment="list-card(note)"
+    class="chat-note-card group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer list-view-item mb-3"
+    th:id="'card-' + ${note.id}" hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
+    hx-target="#modal-container" hx-swap="innerHTML">
+
+    <div class="flex p-4">
+      <!-- Left Section: Main Content -->
+      <div class="flex-1">
+        <!-- Title -->
+        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1"
+          th:text="${note.title}">
+          ChatNote Title
+        </h3>
+
+        <!-- Content Preview -->
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2"
+          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 200) : 'No preview available'}">
+          Content preview...
+        </p>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-1.5" th:if="${note.tags != null && !note.tags.isEmpty()}">
+          <span th:each="tag : ${note.tags}" th:text="${tag}"
+            class="inline-block px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
+            tag
+          </span>
+        </div>
+      </div>
+
+      <!-- Right Section: Meta Info + Actions -->
+      <div class="flex flex-col items-end justify-between ml-4 min-w-[140px]">
+        <!-- Date -->
+        <p class="text-xs text-gray-500 dark:text-gray-400"
+          th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">
+          Jan 15, 2025
+        </p>
+
+        <!-- Status Icons -->
+        <div class="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+          <span th:if="${note.isFavorite}"><i class="fas fa-star text-yellow-500"></i></span>
+          <span th:if="${note.artifactCount > 0}"><i class="fas fa-file-code"></i>
+            [[${note.artifactCount}]]</span>
+          <span th:if="${note.attachmentCount > 0}"><i class="fas fa-paperclip"></i>
+            [[${note.attachmentCount}]]</span>
+          <span th:if="${note.isPublic}"><i
+              class="fas fa-globe text-green-600 dark:text-green-400"></i></span>
+        </div>
+
+        <!-- Action Buttons (Always visible in list view on right) -->
+        <div
+          class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          onclick="event.stopPropagation()">
+          <!-- Reuse same action buttons as grid view -->
+          <button
+            hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
+            hx-target="closest .chat-note-card" hx-swap="outerHTML"
+            class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-yellow-500 transition-colors rounded">
+            <i th:class="${note.isFavorite ? 'fas fa-star' : 'far fa-star'}" class="text-sm"></i>
+          </button>
+          <button
+            onclick="event.stopPropagation(); toggleMoreMenu(this.closest('.chat-note-card').id.replace('card-', ''))"
+            class="p-1.5 text-gray-600 dark:text-gray-300 hover:text-gray-900 transition-colors rounded">
+            <i class="fas fa-ellipsis-v text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

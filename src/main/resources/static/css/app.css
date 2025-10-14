@@ -1,0 +1,170 @@
+/**
+ * ChatKeep - Custom CSS
+ * Additional styles beyond Tailwind CSS
+ */
+
+/* Smooth transitions */
+* {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+/* Active sidebar item */
+.sidebar-nav-item.active {
+    @apply bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-400;
+}
+
+/* View toggle active state */
+.view-toggle.active {
+    @apply bg-white dark:bg-gray-600;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Prose styling for markdown content */
+.prose {
+    max-width: 65ch;
+}
+
+.prose p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+    font-weight: 600;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+.prose h1 {
+    font-size: 2.25em;
+}
+
+.prose h2 {
+    font-size: 1.875em;
+}
+
+.prose h3 {
+    font-size: 1.5em;
+}
+
+.prose code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+.prose pre {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 1em;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+
+.prose pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.prose ul, .prose ol {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+    padding-left: 1.625em;
+}
+
+.prose li {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+/* Dark mode prose */
+.dark .prose {
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.dark .prose code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .prose pre {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .prose h1, .dark .prose h2, .dark .prose h3, .dark .prose h4 {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Ensure modals are above everything */
+#modal-container {
+    z-index: 9999;
+}
+
+/* Card hover effects */
+.chat-note-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.chat-note-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}

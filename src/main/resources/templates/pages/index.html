@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/base :: main(~{:: section})}">
+
+<body>
+
+  <section>
+    <!-- Workspace Container -->
+    <div class="workspace-container">
+
+      <!-- View Header (Optional) -->
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100" id="view-title">
+          ChatNotes
+        </h2>
+        <div class="text-sm text-gray-500 dark:text-gray-400" id="notes-count-display">
+          Loading...
+        </div>
+      </div>
+
+      <!-- ChatNotes Grid (Masonry Layout) -->
+      <div id="notes-grid" class="masonry-grid" hx-get="/fragments/chat-notes" hx-trigger="load"
+        hx-swap="innerHTML">
+        <!-- Loading State -->
+        <div class="col-span-full flex items-center justify-center py-20">
+          <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-4xl text-primary-500 mb-4"></i>
+            <p class="text-gray-600 dark:text-gray-400">Loading your ChatNotes...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</body>
+
+</html>
