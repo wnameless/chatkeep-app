@@ -56,6 +56,59 @@ public class ChatNoteService {
   }
 
   /**
+   * Copy a public chat note to the user's workspace
+   * Used when anonymous/logged-in users want to save a shared note to their own workspace
+   */
+  public ChatNoteDetailResponse copyChatNoteToWorkspace(String sourceNoteId, String userId) {
+    log.info("Copying chat note {} to workspace for user: {}", sourceNoteId, userId);
+
+    // Get the source note
+    ChatNote sourceNote = repository.findById(sourceNoteId)
+        .orElseThrow(() -> new ChatNoteNotFoundException(sourceNoteId));
+
+    // Verify the source note is public
+    if (!Boolean.TRUE.equals(sourceNote.getIsPublic())) {
+      throw new IllegalArgumentException("Cannot copy a non-public chat note");
+    }
+
+    // Create a new note entity by copying all fields from source
+    // Use builder to create a clean copy without the ID (so MongoDB generates a new one)
+    ChatNote copiedNote = ChatNote.builder()
+        .archiveVersion(sourceNote.getArchiveVersion())
+        .archiveType(sourceNote.getArchiveType())
+        .createdDate(sourceNote.getCreatedDate())
+        .originalPlatform(sourceNote.getOriginalPlatform())
+        .attachmentCount(sourceNote.getAttachmentCount())
+        .artifactCount(sourceNote.getArtifactCount())
+        .chatNoteCompleteness(sourceNote.getChatNoteCompleteness())
+        .workaroundsCount(sourceNote.getWorkaroundsCount())
+        .totalFileSize(sourceNote.getTotalFileSize())
+        .title(sourceNote.getTitle())
+        .conversationDate(sourceNote.getConversationDate())
+        .tags(sourceNote.getTags() != null ? List.copyOf(sourceNote.getTags()) : null)
+        .summary(sourceNote.getSummary())
+        .artifacts(sourceNote.getArtifacts() != null ? List.copyOf(sourceNote.getArtifacts()) : null)
+        .attachments(sourceNote.getAttachments() != null ? List.copyOf(sourceNote.getAttachments()) : null)
+        .workarounds(sourceNote.getWorkarounds() != null ? List.copyOf(sourceNote.getWorkarounds()) : null)
+        .markdownContent(sourceNote.getMarkdownContent())
+        .userId(userId) // Assign to the requesting user
+        .isPublic(false) // Set as private by default
+        .isArchived(false)
+        .isTrashed(false)
+        .isFavorite(false)
+        .trashedAt(null)
+        .viewCount(0L)
+        .build();
+
+    // Save the copied note
+    ChatNote saved = repository.save(copiedNote);
+
+    log.info("Chat note copied successfully with new id: {}", saved.getId());
+
+    return toDetailResponse(saved);
+  }
+
+  /**
    * Get archive by ID (lightweight - without artifact/attachment content)
    */
   public ChatNoteDetailLightResponse getChatNoteById(String id) {

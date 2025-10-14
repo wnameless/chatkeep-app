@@ -39,6 +39,7 @@ public class ChatNoteApiController {
 
   /**
    * Upload and process a new archive POST /api/v1/chat-notes
+   * Also supports copying an existing public note to user's workspace
    */
   @PostMapping
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadChatNote(
@@ -53,6 +54,16 @@ public class ChatNoteApiController {
             .error("User not authenticated. Please provide X-Anonymous-User-Id header or login."));
       }
 
+      // Check if this is a copy request
+      if (request.getSourceNoteId() != null && Boolean.TRUE.equals(request.getCopyFromPublic())) {
+        log.info("Received copy request for note: {} by user: {}", request.getSourceNoteId(), userId);
+        ChatNoteDetailResponse response =
+            chatNoteService.copyChatNoteToWorkspace(request.getSourceNoteId(), userId);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.success("Chat note copied to workspace successfully", response));
+      }
+
+      // Standard upload
       log.info("Received archive upload request for user: {}", userId);
       ChatNoteDetailResponse response =
           chatNoteService.uploadChatNote(request.getMarkdownContent(), userId);
@@ -63,6 +74,10 @@ public class ChatNoteApiController {
       log.error("Invalid archive: {}", e.getMessage());
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.error("Invalid archive: " + e.getMessage()));
+    } catch (ChatNoteNotFoundException e) {
+      log.error("Source note not found: {}", e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Source note not found: " + e.getMessage()));
     } catch (Exception e) {
       log.error("Error uploading archive", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

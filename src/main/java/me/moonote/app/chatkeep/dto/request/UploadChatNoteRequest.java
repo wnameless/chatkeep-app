@@ -16,4 +16,8 @@ public class UploadChatNoteRequest {
 
   String markdownContent;
 
+  // For copying an existing note to the user's workspace
+  String sourceNoteId;
+  Boolean copyFromPublic;
+
 }

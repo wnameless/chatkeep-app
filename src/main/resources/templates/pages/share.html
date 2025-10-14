@@ -164,18 +164,26 @@
                     copyFromPublic: true
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Failed to copy ChatNote');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
+                // API returns { success: true, message: "...", data: {...} }
                 if (data.success) {
                     alert('ChatNote copied to your workspace!');
                     window.location.href = '/';
                 } else {
-                    alert('Error copying ChatNote: ' + data.message);
+                    alert('Error copying ChatNote: ' + (data.message || 'Unknown error'));
                 }
             })
             .catch(err => {
                 console.error('Error copying ChatNote:', err);
-                alert('Failed to copy ChatNote');
+                alert('Failed to copy ChatNote: ' + err.message);
             });
         }
 
