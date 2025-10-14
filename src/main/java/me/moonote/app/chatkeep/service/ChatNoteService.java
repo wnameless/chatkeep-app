@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.ChatNoteDto;
+import me.moonote.app.chatkeep.dto.response.ArtifactMetadata;
+import me.moonote.app.chatkeep.dto.response.AttachmentMetadata;
 import me.moonote.app.chatkeep.dto.response.ChatNoteDetailLightResponse;
 import me.moonote.app.chatkeep.dto.response.ChatNoteDetailResponse;
 import me.moonote.app.chatkeep.dto.response.ChatNoteResponse;
-import me.moonote.app.chatkeep.dto.response.ArtifactMetadata;
-import me.moonote.app.chatkeep.dto.response.AttachmentMetadata;
 import me.moonote.app.chatkeep.mapper.ChatNoteMapper;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
@@ -41,8 +41,8 @@ public class ChatNoteService {
 
     if (!validationResult.isValid()) {
       log.warn("Chat note validation failed: {}", validationResult.getErrors());
-      throw new InvalidChatNoteException("Chat note validation failed: "
-          + String.join(", ", validationResult.getErrors()));
+      throw new InvalidChatNoteException(
+          "Chat note validation failed: " + String.join(", ", validationResult.getErrors()));
     }
 
     // Convert to entity and save
@@ -56,8 +56,8 @@ public class ChatNoteService {
   }
 
   /**
-   * Copy a public chat note to the user's workspace
-   * Used when anonymous/logged-in users want to save a shared note to their own workspace
+   * Copy a public chat note to the user's workspace Used when anonymous/logged-in users want to
+   * save a shared note to their own workspace
    */
   public ChatNoteDetailResponse copyChatNoteToWorkspace(String sourceNoteId, String userId) {
     log.info("Copying chat note {} to workspace for user: {}", sourceNoteId, userId);
@@ -73,32 +73,27 @@ public class ChatNoteService {
 
     // Create a new note entity by copying all fields from source
     // Use builder to create a clean copy without the ID (so MongoDB generates a new one)
-    ChatNote copiedNote = ChatNote.builder()
-        .archiveVersion(sourceNote.getArchiveVersion())
-        .archiveType(sourceNote.getArchiveType())
-        .createdDate(sourceNote.getCreatedDate())
+    ChatNote copiedNote = ChatNote.builder().archiveVersion(sourceNote.getArchiveVersion())
+        .archiveType(sourceNote.getArchiveType()).createdDate(sourceNote.getCreatedDate())
         .originalPlatform(sourceNote.getOriginalPlatform())
         .attachmentCount(sourceNote.getAttachmentCount())
         .artifactCount(sourceNote.getArtifactCount())
         .chatNoteCompleteness(sourceNote.getChatNoteCompleteness())
         .workaroundsCount(sourceNote.getWorkaroundsCount())
-        .totalFileSize(sourceNote.getTotalFileSize())
-        .title(sourceNote.getTitle())
+        .totalFileSize(sourceNote.getTotalFileSize()).title(sourceNote.getTitle())
         .conversationDate(sourceNote.getConversationDate())
         .tags(sourceNote.getTags() != null ? List.copyOf(sourceNote.getTags()) : null)
         .summary(sourceNote.getSummary())
-        .artifacts(sourceNote.getArtifacts() != null ? List.copyOf(sourceNote.getArtifacts()) : null)
-        .attachments(sourceNote.getAttachments() != null ? List.copyOf(sourceNote.getAttachments()) : null)
-        .workarounds(sourceNote.getWorkarounds() != null ? List.copyOf(sourceNote.getWorkarounds()) : null)
-        .markdownContent(sourceNote.getMarkdownContent())
-        .userId(userId) // Assign to the requesting user
+        .artifacts(
+            sourceNote.getArtifacts() != null ? List.copyOf(sourceNote.getArtifacts()) : null)
+        .attachments(
+            sourceNote.getAttachments() != null ? List.copyOf(sourceNote.getAttachments()) : null)
+        .workarounds(
+            sourceNote.getWorkarounds() != null ? List.copyOf(sourceNote.getWorkarounds()) : null)
+        .markdownContent(sourceNote.getMarkdownContent()).userId(userId) // Assign to the requesting
+                                                                         // user
         .isPublic(false) // Set as private by default
-        .isArchived(false)
-        .isTrashed(false)
-        .isFavorite(false)
-        .trashedAt(null)
-        .viewCount(0L)
-        .build();
+        .isArchived(false).isTrashed(false).isFavorite(false).trashedAt(null).viewCount(0L).build();
 
     // Save the copied note
     ChatNote saved = repository.save(copiedNote);
@@ -112,8 +107,7 @@ public class ChatNoteService {
    * Get archive by ID (lightweight - without artifact/attachment content)
    */
   public ChatNoteDetailLightResponse getChatNoteById(String id) {
-    ChatNote archive =
-        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+    ChatNote archive = repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     // Increment view count
     archive.setViewCount(archive.getViewCount() + 1);
@@ -144,8 +138,7 @@ public class ChatNoteService {
     ChatNote archive =
         repository.findById(archiveId).orElseThrow(() -> new ChatNoteNotFoundException(archiveId));
 
-    if (archive.getAttachments() == null || index < 0
-        || index >= archive.getAttachments().size()) {
+    if (archive.getAttachments() == null || index < 0 || index >= archive.getAttachments().size()) {
       throw new IllegalArgumentException(
           "Invalid attachment index: " + index + " for archive: " + archiveId);
     }
@@ -183,8 +176,8 @@ public class ChatNoteService {
   }
 
   /**
-   * Comprehensive search across title, tags, and content
-   * Searches only user's active notes (not archived, not trashed)
+   * Comprehensive search across title, tags, and content Searches only user's active notes (not
+   * archived, not trashed)
    */
   public List<ChatNoteResponse> searchUserChatNotes(String userId, String query) {
     if (query == null || query.trim().isEmpty()) {
@@ -194,8 +187,7 @@ public class ChatNoteService {
     String searchQuery = query.trim();
     log.info("Searching user {} chat notes with query: {}", userId, searchQuery);
 
-    return repository.searchActiveByUserId(userId, searchQuery).stream()
-        .map(this::toResponse)
+    return repository.searchActiveByUserId(userId, searchQuery).stream().map(this::toResponse)
         .toList();
   }
 
@@ -203,8 +195,7 @@ public class ChatNoteService {
    * Update archive visibility
    */
   public ChatNoteDetailResponse updateVisibility(String id, Boolean isPublic) {
-    ChatNote archive =
-        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+    ChatNote archive = repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     archive.setIsPublic(isPublic);
     ChatNote updated = repository.save(archive);
@@ -448,7 +439,8 @@ public class ChatNoteService {
    * Purge old trashed chat notes (trashed > 30 days ago) - for scheduled job
    */
   public int purgeOldTrashedNotes() {
-    java.time.Instant cutoffDate = java.time.Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS);
+    java.time.Instant cutoffDate =
+        java.time.Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS);
     List<ChatNote> oldTrashedNotes = repository.findByIsTrashedTrueAndTrashedAtBefore(cutoffDate);
 
     int count = oldTrashedNotes.size();
@@ -468,8 +460,8 @@ public class ChatNoteService {
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
         .viewCount(archive.getViewCount()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
-        .isFavorite(archive.getIsFavorite())
-        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
+        .isFavorite(archive.getIsFavorite()).createdAt(archive.getCreatedAt())
+        .updatedAt(archive.getUpdatedAt()).build();
   }
 
   private ChatNoteDetailResponse toDetailResponse(ChatNote archive) {
@@ -518,17 +510,16 @@ public class ChatNoteService {
         .tags(archive.getTags()).summary(archive.getSummary()).artifacts(artifactMetadata)
         .attachments(attachmentMetadata).workarounds(archive.getWorkarounds())
         .conversationContent(extractConversationContent(archive.getMarkdownContent()))
-        .fullMarkdown(archive.getMarkdownContent())
-        .userId(archive.getUserId()).isPublic(archive.getIsPublic())
-        .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
-        .isFavorite(archive.getIsFavorite()).trashedAt(archive.getTrashedAt())
-        .viewCount(archive.getViewCount()).createdAt(archive.getCreatedAt())
-        .updatedAt(archive.getUpdatedAt()).build();
+        .fullMarkdown(archive.getMarkdownContent()).userId(archive.getUserId())
+        .isPublic(archive.getIsPublic()).isArchived(archive.getIsArchived())
+        .isTrashed(archive.getIsTrashed()).isFavorite(archive.getIsFavorite())
+        .trashedAt(archive.getTrashedAt()).viewCount(archive.getViewCount())
+        .createdAt(archive.getCreatedAt()).updatedAt(archive.getUpdatedAt()).build();
   }
 
   /**
-   * Extract conversation content (without YAML frontmatter, artifacts, and attachments)
-   * Used for displaying the main conversation in the modal
+   * Extract conversation content (without YAML frontmatter, artifacts, and attachments) Used for
+   * displaying the main conversation in the modal
    */
   private String extractConversationContent(String markdownContent) {
     if (markdownContent == null || markdownContent.trim().isEmpty()) {

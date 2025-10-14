@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
 
-<!-- List View - ChatNote Cards Fragment -->
-<th:block th:fragment="list-cards">
+  <!-- List View - ChatNote Cards Fragment -->
+  <th:block th:fragment="list-cards">
     <!-- Check if notes list is not empty -->
     <th:block th:if="${notes != null && !notes.isEmpty()}">
-        <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}"></div>
+      <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}">
+      </div>
     </th:block>
 
     <!-- Empty state -->
     <th:block th:unless="${notes != null && !notes.isEmpty()}">
-        <div class="col-span-full flex items-center justify-center min-h-[400px]">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-12 max-w-md">
-                <div class="text-center">
-                    <div class="mb-6">
-                        <i th:class="${'fas text-7xl text-gray-300 dark:text-gray-600 ' +
+      <div class="col-span-full flex items-center justify-center min-h-[400px]">
+        <div
+          class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-12 max-w-md">
+          <div class="text-center">
+            <div class="mb-6">
+              <i th:class="${'fas text-7xl text-gray-300 dark:text-gray-600 ' +
                           (filter == 'favorites' ? 'fa-star' :
                            filter == 'trash' ? 'fa-trash' :
                            filter == 'archived' ? 'fa-archive' :
                            'fa-inbox')}"></i>
-                    </div>
-                    <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3"
-                        th:text="${filter == 'favorites' ? 'No Favorites yet' :
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3" th:text="${filter == 'favorites' ? 'No Favorites yet' :
                                   filter == 'trash' ? 'Trash is empty' :
                                   filter == 'archived' ? 'No Archived notes' :
                                   'No ChatNotes yet'}">
-                        No ChatNotes yet
-                    </h3>
-                    <th:block th:if="${filter == null || filter == 'active' || filter == ''}">
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">
-                            Get started by importing your first conversation archive
-                        </p>
-                        <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-                            <span>Click the</span>
-                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary-500 text-white">
-                                <i class="fas fa-plus text-xs"></i>
-                            </span>
-                            <span>button to begin</span>
-                        </div>
-                    </th:block>
-                    <th:block th:if="${filter == 'favorites'}">
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Star important notes to find them quickly here
-                        </p>
-                    </th:block>
-                    <th:block th:if="${filter == 'trash'}">
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Deleted notes will appear here for 30 days before permanent removal
-                        </p>
-                    </th:block>
-                    <th:block th:if="${filter == 'archived'}">
-                        <p class="text-gray-600 dark:text-gray-400">
-                            Archive old notes to keep your workspace organized
-                        </p>
-                    </th:block>
-                </div>
-            </div>
+              No ChatNotes yet
+            </h3>
+            <th:block th:if="${filter == null || filter == 'active' || filter == ''}">
+              <p class="text-gray-600 dark:text-gray-400 mb-4">
+                Get started by importing your first conversation archive
+              </p>
+              <div
+                class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500">
+                <span>Click the</span>
+                <span
+                  class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary-500 text-white">
+                  <i class="fas fa-plus text-xs"></i>
+                </span>
+                <span>button to begin</span>
+              </div>
+            </th:block>
+            <th:block th:if="${filter == 'favorites'}">
+              <p class="text-gray-600 dark:text-gray-400">
+                Star important notes to find them quickly here
+              </p>
+            </th:block>
+            <th:block th:if="${filter == 'trash'}">
+              <p class="text-gray-600 dark:text-gray-400">
+                Deleted notes will appear here for 30 days before permanent removal
+              </p>
+            </th:block>
+            <th:block th:if="${filter == 'archived'}">
+              <p class="text-gray-600 dark:text-gray-400">
+                Archive old notes to keep your workspace organized
+              </p>
+            </th:block>
+          </div>
         </div>
+      </div>
     </th:block>
-</th:block>
+  </th:block>
 
 </body>
+
 </html>

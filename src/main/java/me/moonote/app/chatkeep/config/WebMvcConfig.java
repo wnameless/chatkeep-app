@@ -31,10 +31,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
   /**
    * Interceptor to change locale based on 'lang' query parameter.
    *
-   * Examples: - /: English (default)
-   * - /?lang=en: English
-   * - /?lang=zh_TW: Traditional Chinese
-   * - /?lang=zh_CN: Simplified Chinese
+   * Examples: - /: English (default) - /?lang=en: English - /?lang=zh_TW: Traditional Chinese -
+   * /?lang=zh_CN: Simplified Chinese
    */
   @Bean
   public LocaleChangeInterceptor localeChangeInterceptor() {

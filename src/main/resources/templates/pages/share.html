@@ -1,203 +1,212 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle} ?: 'ChatKeep - Shared Note'">ChatKeep - Shared Note</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle} ?: 'ChatKeep - Shared Note'">ChatKeep - Shared Note</title>
 
-    <!-- PWA Meta -->
-    <meta name="description" content="Shared ChatNote from ChatKeep">
-    <meta name="theme-color" content="#F59E0B">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/images/ChatKeep_icon_light.png">
+  <!-- PWA Meta -->
+  <meta name="description" content="Shared ChatNote from ChatKeep">
+  <meta name="theme-color" content="#F59E0B">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/images/ChatKeep_icon_light.png">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Marked.js for markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@14.0.0/marked.min.js"></script>
+  <!-- Marked.js for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@14.0.0/marked.min.js"></script>
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" th:href="@{/css/app.css}">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
+
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-    <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="flex items-center space-x-3">
-                <img th:src="@{/images/ChatKeep_icon_light.png}" alt="ChatKeep" class="h-8 w-8">
-                <h1 class="text-xl font-semibold text-primary-500">ChatKeep</h1>
-            </div>
+  <!-- Header -->
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <img th:src="@{/images/ChatKeep_icon_light.png}" alt="ChatKeep" class="h-8 w-8">
+        <h1 class="text-xl font-semibold text-primary-500">ChatKeep</h1>
+      </div>
 
-            <!-- Actions -->
-            <div class="flex items-center space-x-3">
-                <!-- Copy to My Workspace -->
-                <button onclick="copyToWorkspace()"
-                        class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
-                    <i class="fas fa-copy mr-2"></i>
-                    Copy to My Workspace
-                </button>
+      <!-- Actions -->
+      <div class="flex items-center space-x-3">
+        <!-- Copy to My Workspace -->
+        <button onclick="copyToWorkspace()"
+          class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
+          <i class="fas fa-copy mr-2"></i>
+          Copy to My Workspace
+        </button>
 
-                <!-- Back to Home -->
-                <a href="/"
-                   class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                    <i class="fas fa-home mr-2"></i>
-                    Home
-                </a>
-            </div>
+        <!-- Back to Home -->
+        <a href="/"
+          class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
+          <i class="fas fa-home mr-2"></i>
+          Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- ChatNote Header -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+      <!-- Title -->
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4" th:text="${note.title}">
+        ChatNote Title
+      </h1>
+
+      <!-- Metadata -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+        <div>
+          <span class="text-gray-500 dark:text-gray-400">Platform:</span>
+          <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+            th:text="${note.originalPlatform}">Claude</span>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-4 py-8">
-
-        <!-- ChatNote Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <!-- Title -->
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4"
-                th:text="${note.title}">
-                ChatNote Title
-            </h1>
-
-            <!-- Metadata -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Platform:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-                          th:text="${note.originalPlatform}">Claude</span>
-                </div>
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Date:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-                          th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15, 2025</span>
-                </div>
-                <div th:if="${note.artifactCount > 0}">
-                    <span class="text-gray-500 dark:text-gray-400">Artifacts:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-                          th:text="${note.artifactCount}">0</span>
-                </div>
-                <div th:if="${note.attachmentCount > 0}">
-                    <span class="text-gray-500 dark:text-gray-400">Attachments:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-                          th:text="${note.attachmentCount}">0</span>
-                </div>
-            </div>
-
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2" th:if="${note.tags != null && !note.tags.isEmpty()}">
-                <span th:each="tag : ${note.tags}"
-                      th:text="${tag}"
-                      class="inline-block px-3 py-1 text-sm font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full">
-                    tag
-                </span>
-            </div>
+        <div>
+          <span class="text-gray-500 dark:text-gray-400">Date:</span>
+          <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+            th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15,
+            2025</span>
         </div>
-
-        <!-- Conversation Content -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div class="prose dark:prose-invert max-w-none" id="markdown-content">
-                <!-- Rendered markdown content will be inserted here -->
-                <p>Loading content...</p>
-            </div>
+        <div th:if="${note.artifactCount > 0}">
+          <span class="text-gray-500 dark:text-gray-400">Artifacts:</span>
+          <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+            th:text="${note.artifactCount}">0</span>
         </div>
-
-        <!-- Artifacts Section (if any) -->
-        <div th:if="${note.artifactCount > 0}" class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                <i class="fas fa-file-code text-primary-500 mr-2"></i>
-                Artifacts
-            </h2>
-            <!-- Artifacts list would go here -->
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Artifacts are included in the downloadable archive.</p>
+        <div th:if="${note.attachmentCount > 0}">
+          <span class="text-gray-500 dark:text-gray-400">Attachments:</span>
+          <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+            th:text="${note.attachmentCount}">0</span>
         </div>
+      </div>
 
-        <!-- Share Info -->
-        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div class="flex items-center text-blue-800 dark:text-blue-300">
-                <i class="fas fa-info-circle mr-3"></i>
-                <p class="text-sm">
-                    This is a publicly shared ChatNote. Copy it to your workspace to edit or add it to your collection.
-                </p>
-            </div>
-        </div>
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2" th:if="${note.tags != null && !note.tags.isEmpty()}">
+        <span th:each="tag : ${note.tags}" th:text="${tag}"
+          class="inline-block px-3 py-1 text-sm font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full">
+          tag
+        </span>
+      </div>
+    </div>
 
-    </main>
+    <!-- Conversation Content -->
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div class="prose dark:prose-invert max-w-none" id="markdown-content">
+        <!-- Rendered markdown content will be inserted here -->
+        <p>Loading content...</p>
+      </div>
+    </div>
 
-    <!-- Scripts -->
-    <script th:inline="javascript">
-        // Note data from server
-        const noteId = /*[[${note.id}]]*/ null;
-        const noteContent = /*[[${note.conversationContent}]]*/ '';
+    <!-- Artifacts Section (if any) -->
+    <div th:if="${note.artifactCount > 0}"
+      class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <i class="fas fa-file-code text-primary-500 mr-2"></i>
+        Artifacts
+      </h2>
+      <!-- Artifacts list would go here -->
+      <p class="text-gray-500 dark:text-gray-400 text-sm">Artifacts are included in the downloadable
+        archive.</p>
+    </div>
 
-        // Render markdown on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            if (noteContent && typeof marked !== 'undefined') {
-                marked.setOptions({
-                    breaks: true,
-                    gfm: true
-                });
-                const html = marked.parse(noteContent || 'Content not available');
-                document.getElementById('markdown-content').innerHTML = html;
-            }
+    <!-- Share Info -->
+    <div
+      class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+      <div class="flex items-center text-blue-800 dark:text-blue-300">
+        <i class="fas fa-info-circle mr-3"></i>
+        <p class="text-sm">
+          This is a publicly shared ChatNote. Copy it to your workspace to edit or add it to your
+          collection.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Scripts -->
+  <script th:inline="javascript">
+    // Note data from server
+    const noteId = /*[[${note.id}]]*/ null;
+    const noteContent = /*[[${note.conversationContent}]]*/ '';
+
+    // Render markdown on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      if (noteContent && typeof marked !== 'undefined') {
+        marked.setOptions({
+          breaks: true,
+          gfm: true
         });
+        const html = marked.parse(noteContent || 'Content not available');
+        document.getElementById('markdown-content').innerHTML = html;
+      }
+    });
 
-        // Copy to workspace function
-        function copyToWorkspace() {
-            const anonymousUserId = localStorage.getItem('chatkeep_anonymous_user_id') || generateUUID();
-            localStorage.setItem('chatkeep_anonymous_user_id', anonymousUserId);
+    // Copy to workspace function
+    function copyToWorkspace() {
+      const anonymousUserId = localStorage.getItem('chatkeep_anonymous_user_id') || generateUUID();
+      localStorage.setItem('chatkeep_anonymous_user_id', anonymousUserId);
 
-            // Duplicate the note for the current user
-            fetch('/api/v1/chat-notes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Anonymous-User-Id': anonymousUserId
-                },
-                body: JSON.stringify({
-                    sourceNoteId: noteId,
-                    copyFromPublic: true
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw new Error(err.message || 'Failed to copy ChatNote');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                // API returns { success: true, message: "...", data: {...} }
-                if (data.success) {
-                    alert('ChatNote copied to your workspace!');
-                    window.location.href = '/';
-                } else {
-                    alert('Error copying ChatNote: ' + (data.message || 'Unknown error'));
-                }
-            })
-            .catch(err => {
-                console.error('Error copying ChatNote:', err);
-                alert('Failed to copy ChatNote: ' + err.message);
+      // Duplicate the note for the current user
+      fetch('/api/v1/chat-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Anonymous-User-Id': anonymousUserId
+        },
+        body: JSON.stringify({
+          sourceNoteId: noteId,
+          copyFromPublic: true
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(err => {
+              throw new Error(err.message || 'Failed to copy ChatNote');
             });
-        }
+          }
+          return response.json();
+        })
+        .then(data => {
+          // API returns { success: true, message: "...", data: {...} }
+          if (data.success) {
+            alert('ChatNote copied to your workspace!');
+            window.location.href = '/';
+          } else {
+            alert('Error copying ChatNote: ' + (data.message || 'Unknown error'));
+          }
+        })
+        .catch(err => {
+          console.error('Error copying ChatNote:', err);
+          alert('Failed to copy ChatNote: ' + err.message);
+        });
+    }
 
-        function generateUUID() {
-            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-                return crypto.randomUUID();
-            }
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-    </script>
+    function generateUUID() {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+  </script>
 
 </body>
+
 </html>

@@ -38,8 +38,8 @@ public class ChatNoteApiController {
   private final ChatNoteService chatNoteService;
 
   /**
-   * Upload and process a new archive POST /api/v1/chat-notes
-   * Also supports copying an existing public note to user's workspace
+   * Upload and process a new archive POST /api/v1/chat-notes Also supports copying an existing
+   * public note to user's workspace
    */
   @PostMapping
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadChatNote(
@@ -56,7 +56,8 @@ public class ChatNoteApiController {
 
       // Check if this is a copy request
       if (request.getSourceNoteId() != null && Boolean.TRUE.equals(request.getCopyFromPublic())) {
-        log.info("Received copy request for note: {} by user: {}", request.getSourceNoteId(), userId);
+        log.info("Received copy request for note: {} by user: {}", request.getSourceNoteId(),
+            userId);
         ChatNoteDetailResponse response =
             chatNoteService.copyChatNoteToWorkspace(request.getSourceNoteId(), userId);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -86,8 +87,7 @@ public class ChatNoteApiController {
   }
 
   /**
-   * Upload markdown file (multipart file upload)
-   * POST /api/v1/chat-notes/upload
+   * Upload markdown file (multipart file upload) POST /api/v1/chat-notes/upload
    */
   @PostMapping("/upload")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> uploadMarkdownFile(
@@ -110,8 +110,8 @@ public class ChatNoteApiController {
 
       // Check file extension
       String originalFilename = file.getOriginalFilename();
-      if (originalFilename == null ||
-          (!originalFilename.endsWith(".md") && !originalFilename.endsWith(".markdown"))) {
+      if (originalFilename == null
+          || (!originalFilename.endsWith(".md") && !originalFilename.endsWith(".markdown"))) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ApiResponse.error("Only .md or .markdown files are allowed"));
       }
@@ -119,7 +119,8 @@ public class ChatNoteApiController {
       // Read file content
       String markdownContent = new String(file.getBytes(), java.nio.charset.StandardCharsets.UTF_8);
 
-      log.info("Received markdown file upload for user: {}, filename: {}", userId, originalFilename);
+      log.info("Received markdown file upload for user: {}, filename: {}", userId,
+          originalFilename);
       ChatNoteDetailResponse response = chatNoteService.uploadChatNote(markdownContent, userId);
 
       return ResponseEntity.status(HttpStatus.CREATED)

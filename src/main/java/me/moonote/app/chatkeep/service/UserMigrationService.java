@@ -50,8 +50,7 @@ public class UserMigrationService {
     User anonymousUser = userRepository.findByAnonymousUuid(anonymousUuid).orElse(null);
 
     // Find or create authenticated user
-    User authenticatedUser =
-        findOrCreateAuthenticatedUser(provider, providerId, email, username);
+    User authenticatedUser = findOrCreateAuthenticatedUser(provider, providerId, email, username);
 
     // If anonymous user exists, transfer their ChatNotes
     if (anonymousUser != null && !anonymousUser.getId().equals(authenticatedUser.getId())) {
@@ -99,9 +98,8 @@ public class UserMigrationService {
    * Link a new OAuth2 provider to an existing user.
    */
   private void linkOAuthProvider(User user, String provider, String providerId, String email) {
-    OAuthProvider oauthProvider = OAuthProvider.builder().provider(provider)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider oauthProvider = OAuthProvider.builder().provider(provider).providerId(providerId)
+        .providerEmail(email).linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
     user.getOauthProviders().add(oauthProvider);
 
@@ -120,12 +118,11 @@ public class UserMigrationService {
    */
   private User createNewAuthenticatedUser(String provider, String providerId, String email,
       String username) {
-    OAuthProvider oauthProvider = OAuthProvider.builder().provider(provider)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider oauthProvider = OAuthProvider.builder().provider(provider).providerId(providerId)
+        .providerEmail(email).linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
-    User newUser = User.builder().email(email).username(username)
-        .userType(UserType.AUTHENTICATED).registeredAt(Instant.now()).build();
+    User newUser = User.builder().email(email).username(username).userType(UserType.AUTHENTICATED)
+        .registeredAt(Instant.now()).build();
 
     newUser.getOauthProviders().add(oauthProvider);
 

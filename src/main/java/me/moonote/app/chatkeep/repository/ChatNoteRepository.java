@@ -8,12 +8,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
-import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.ChatNote;
+import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 
 @Repository
-public interface ChatNoteRepository
-    extends MongoRepository<ChatNote, String> {
+public interface ChatNoteRepository extends MongoRepository<ChatNote, String> {
 
   // Find by user
   List<ChatNote> findByUserId(String userId);
@@ -70,8 +69,7 @@ public interface ChatNoteRepository
   List<ChatNote> searchActiveTitleByUserId(String userId, String keyword);
 
   // Comprehensive search (title, tags, content) - user-scoped, active notes only
-  @Query("{ 'userId': ?0, $or: [ "
-      + "{ 'title': { $regex: ?1, $options: 'i' } }, "
+  @Query("{ 'userId': ?0, $or: [ " + "{ 'title': { $regex: ?1, $options: 'i' } }, "
       + "{ 'tags': { $regex: ?1, $options: 'i' } }, "
       + "{ 'conversationContent': { $regex: ?1, $options: 'i' } } "
       + "], 'isArchived': false, 'isTrashed': false }")

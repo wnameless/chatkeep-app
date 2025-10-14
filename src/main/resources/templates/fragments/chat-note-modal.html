@@ -1,273 +1,273 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
 
-<!-- ChatNote Modal Fragment -->
-<div th:fragment="modal(note)"
-     id="chat-note-modal"
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-     onclick="if(event.target === this) closeChatNoteModal()">
+  <!-- ChatNote Modal Fragment -->
+  <div th:fragment="modal(note)" id="chat-note-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    onclick="if(event.target === this) closeChatNoteModal()">
 
     <!-- Modal Container -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
-         onclick="event.stopPropagation()">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
+      onclick="event.stopPropagation()">
 
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <!-- Title -->
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4"
-                th:text="${note.title}">
-                ChatNote Title
-            </h2>
+      <!-- Modal Header -->
+      <div
+        class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <!-- Title -->
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4"
+          th:text="${note.title}">
+          ChatNote Title
+        </h2>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center space-x-2">
-                <!-- Edit Button -->
-                <button th:attr="onclick=${'enterEditMode(''' + note.id + ''')' }"
-                        id="edit-mode-btn"
-                        class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
-                    <i class="fas fa-edit mr-1"></i>
-                    Edit
-                </button>
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-2">
+          <!-- Edit Button -->
+          <button th:attr="onclick=${'enterEditMode(''' + note.id + ''')' }" id="edit-mode-btn"
+            class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
+            <i class="fas fa-edit mr-1"></i>
+            Edit
+          </button>
 
-                <!-- Save Button (Hidden initially) -->
-                <button th:attr="onclick=${'saveChatNote(''' + note.id + ''')' }"
-                        id="save-mode-btn"
-                        class="hidden px-4 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
-                    <i class="fas fa-save mr-1"></i>
-                    Save
-                </button>
+          <!-- Save Button (Hidden initially) -->
+          <button th:attr="onclick=${'saveChatNote(''' + note.id + ''')' }" id="save-mode-btn"
+            class="hidden px-4 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
+            <i class="fas fa-save mr-1"></i>
+            Save
+          </button>
 
-                <!-- Cancel Button (Hidden initially) -->
-                <button onclick="exitEditMode()"
-                        id="cancel-mode-btn"
-                        class="hidden px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                    Cancel
-                </button>
+          <!-- Cancel Button (Hidden initially) -->
+          <button onclick="exitEditMode()" id="cancel-mode-btn"
+            class="hidden px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
+            Cancel
+          </button>
 
-                <!-- Close Button -->
-                <button onclick="closeChatNoteModal()"
-                        class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
+          <!-- Close Button -->
+          <button onclick="closeChatNoteModal()"
+            class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Metadata Section -->
+      <div
+        class="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <!-- Platform -->
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Platform:</span>
+            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+              th:text="${note.platform}">Claude</span>
+          </div>
+
+          <!-- Conversation Date -->
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Date:</span>
+            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+              th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15,
+              2025</span>
+          </div>
+
+          <!-- Message Count -->
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Messages:</span>
+            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+              th:text="${note.messageCount}">10</span>
+          </div>
+
+          <!-- Word Count -->
+          <div>
+            <span class="text-gray-500 dark:text-gray-400">Words:</span>
+            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+              th:text="${note.wordCount}">1500</span>
+          </div>
         </div>
 
-        <!-- Metadata Section -->
-        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                <!-- Platform -->
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Platform:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100" th:text="${note.platform}">Claude</span>
-                </div>
-
-                <!-- Conversation Date -->
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Date:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-                          th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15, 2025</span>
-                </div>
-
-                <!-- Message Count -->
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Messages:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100" th:text="${note.messageCount}">10</span>
-                </div>
-
-                <!-- Word Count -->
-                <div>
-                    <span class="text-gray-500 dark:text-gray-400">Words:</span>
-                    <span class="ml-2 font-medium text-gray-900 dark:text-gray-100" th:text="${note.wordCount}">1500</span>
-                </div>
-            </div>
-
-            <!-- Tags -->
-            <div class="mt-2 flex flex-wrap gap-1.5" th:if="${note.tags != null && !note.tags.isEmpty()}">
-                <span th:each="tag : ${note.tags}"
-                      th:text="${tag}"
-                      class="inline-block px-2 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
-                    tag
-                </span>
-            </div>
-
-            <!-- Status Flags -->
-            <div class="mt-2 flex items-center space-x-3 text-xs">
-                <!-- Public/Private Toggle -->
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox"
-                           th:checked="${note.isPublic}"
-                           hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
-                           hx-trigger="change"
-                           hx-target="#chat-note-modal"
-                           hx-swap="outerHTML"
-                           class="sr-only peer">
-                    <div class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">
-                        <i class="fas fa-globe mr-1"></i>Public
-                    </span>
-                </label>
-
-                <!-- Favorite Toggle -->
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox"
-                           th:checked="${note.isFavorite}"
-                           hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
-                           hx-trigger="change"
-                           hx-target="#chat-note-modal"
-                           hx-swap="outerHTML"
-                           class="sr-only peer">
-                    <div class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500"></div>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">
-                        <i class="fas fa-star mr-1"></i>Favorite
-                    </span>
-                </label>
-
-                <!-- Download Button -->
-                <button th:attr="onclick=${'downloadChatNote(''' + note.id + ''')' }"
-                        class="text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
-                    <i class="fas fa-download mr-1"></i>Download
-                </button>
-
-                <!-- Copy Share Link (if public) -->
-                <button th:if="${note.isPublic}"
-                        th:attr="onclick=${'copyShareLink(''' + note.id + ''')' }"
-                        class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors">
-                    <i class="fas fa-share mr-1"></i>Share Link
-                </button>
-            </div>
+        <!-- Tags -->
+        <div class="mt-2 flex flex-wrap gap-1.5"
+          th:if="${note.tags != null && !note.tags.isEmpty()}">
+          <span th:each="tag : ${note.tags}" th:text="${tag}"
+            class="inline-block px-2 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
+            tag
+          </span>
         </div>
 
-        <!-- Tab Navigation -->
-        <div class="flex border-b border-gray-200 dark:border-gray-700 px-6">
-            <button class="tab-button active px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
-                    data-tab="content">
-                Content
-            </button>
-            <button class="tab-button px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent"
-                    data-tab="artifacts"
-                    th:if="${note.artifactCount > 0}">
-                Artifacts <span class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded" th:text="${note.artifactCount}">0</span>
-            </button>
-            <button class="tab-button px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent"
-                    data-tab="attachments"
-                    th:if="${note.attachmentCount > 0}">
-                Attachments <span class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded" th:text="${note.attachmentCount}">0</span>
-            </button>
+        <!-- Status Flags -->
+        <div class="mt-2 flex items-center space-x-3 text-xs">
+          <!-- Public/Private Toggle -->
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" th:checked="${note.isPublic}"
+              hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
+              hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
+              class="sr-only peer">
+            <div
+              class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500">
+            </div>
+            <span class="ml-2 text-gray-700 dark:text-gray-300">
+              <i class="fas fa-globe mr-1"></i>Public
+            </span>
+          </label>
+
+          <!-- Favorite Toggle -->
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" th:checked="${note.isFavorite}"
+              hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
+              hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
+              class="sr-only peer">
+            <div
+              class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500">
+            </div>
+            <span class="ml-2 text-gray-700 dark:text-gray-300">
+              <i class="fas fa-star mr-1"></i>Favorite
+            </span>
+          </label>
+
+          <!-- Download Button -->
+          <button th:attr="onclick=${'downloadChatNote(''' + note.id + ''')' }"
+            class="text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
+            <i class="fas fa-download mr-1"></i>Download
+          </button>
+
+          <!-- Copy Share Link (if public) -->
+          <button th:if="${note.isPublic}"
+            th:attr="onclick=${'copyShareLink(''' + note.id + ''')' }"
+            class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors">
+            <i class="fas fa-share mr-1"></i>Share Link
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex border-b border-gray-200 dark:border-gray-700 px-6">
+        <button
+          class="tab-button active px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+          data-tab="content">
+          Content
+        </button>
+        <button
+          class="tab-button px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent"
+          data-tab="artifacts" th:if="${note.artifactCount > 0}">
+          Artifacts <span class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded"
+            th:text="${note.artifactCount}">0</span>
+        </button>
+        <button
+          class="tab-button px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border-b-2 border-transparent"
+          data-tab="attachments" th:if="${note.attachmentCount > 0}">
+          Attachments <span class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded"
+            th:text="${note.attachmentCount}">0</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="flex-1 overflow-y-auto px-6 py-4" id="tab-content-area">
+
+        <!-- Content Tab (Default) -->
+        <div id="content-tab" class="tab-content">
+          <!-- View Mode -->
+          <div id="content-view-mode">
+            <div class="prose dark:prose-invert max-w-none" id="markdown-content">
+              <!-- Rendered markdown content will be inserted here -->
+            </div>
+          </div>
+
+          <!-- Edit Mode (Hidden by default) -->
+          <div id="content-edit-mode" class="hidden">
+            <!-- Split-pane editor will be inserted here -->
+          </div>
         </div>
 
-        <!-- Tab Content Area -->
-        <div class="flex-1 overflow-y-auto px-6 py-4" id="tab-content-area">
-
-            <!-- Content Tab (Default) -->
-            <div id="content-tab" class="tab-content">
-                <!-- View Mode -->
-                <div id="content-view-mode">
-                    <div class="prose dark:prose-invert max-w-none"
-                         id="markdown-content">
-                        <!-- Rendered markdown content will be inserted here -->
+        <!-- Artifacts Tab -->
+        <div id="artifacts-tab" class="tab-content hidden">
+          <div class="space-y-3">
+            <!-- Artifact list will be dynamically loaded -->
+            <div th:if="${note.artifacts != null && !note.artifacts.isEmpty()}">
+              <div th:each="artifact, iterStat : ${note.artifacts}"
+                class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <!-- Artifact Header (Collapsible) -->
+                <button th:attr="onclick=${'toggleArtifact(' + iterStat.index + ')' }"
+                  th:data-note-id="${note.id}" th:data-artifact-index="${iterStat.index}"
+                  hx:get="@{/fragments/artifact/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
+                  hx-trigger="click once" th:hx-target="'#artifact-content-' + ${iterStat.index}"
+                  hx-swap="innerHTML"
+                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-file-code text-primary-500"></i>
+                    <div class="text-left">
+                      <p class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                        th:text="${artifact.title ?: 'Artifact ' + (iterStat.index + 1)}">
+                        Artifact 1
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400"
+                        th:text="${artifact.type}">
+                        code
+                      </p>
                     </div>
-                </div>
+                  </div>
+                  <i th:id="'artifact-chevron-' + ${iterStat.index}"
+                    class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
+                </button>
 
-                <!-- Edit Mode (Hidden by default) -->
-                <div id="content-edit-mode" class="hidden">
-                    <!-- Split-pane editor will be inserted here -->
+                <!-- Artifact Content (Collapsible - Lazy Loaded) -->
+                <div th:id="'artifact-content-' + ${iterStat.index}"
+                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
+              </div>
             </div>
-
-            <!-- Artifacts Tab -->
-            <div id="artifacts-tab" class="tab-content hidden">
-                <div class="space-y-3">
-                    <!-- Artifact list will be dynamically loaded -->
-                    <div th:if="${note.artifacts != null && !note.artifacts.isEmpty()}">
-                        <div th:each="artifact, iterStat : ${note.artifacts}"
-                             class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                            <!-- Artifact Header (Collapsible) -->
-                            <button th:attr="onclick=${'toggleArtifact(' + iterStat.index + ')' }"
-                                    th:data-note-id="${note.id}"
-                                    th:data-artifact-index="${iterStat.index}"
-                                    hx:get="@{/fragments/artifact/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
-                                    hx-trigger="click once"
-                                    th:hx-target="'#artifact-content-' + ${iterStat.index}"
-                                    hx-swap="innerHTML"
-                                    class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-file-code text-primary-500"></i>
-                                    <div class="text-left">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                           th:text="${artifact.title ?: 'Artifact ' + (iterStat.index + 1)}">
-                                            Artifact 1
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400"
-                                           th:text="${artifact.type}">
-                                            code
-                                        </p>
-                                    </div>
-                                </div>
-                                <i th:id="'artifact-chevron-' + ${iterStat.index}"
-                                   class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
-                            </button>
-
-                            <!-- Artifact Content (Collapsible - Lazy Loaded) -->
-                            <div th:id="'artifact-content-' + ${iterStat.index}"
-                                 class="hidden px-4 py-3 bg-white dark:bg-gray-800">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attachments Tab -->
-            <div id="attachments-tab" class="tab-content hidden">
-                <div class="space-y-3">
-                    <!-- Attachment list will be dynamically loaded -->
-                    <div th:if="${note.attachments != null && !note.attachments.isEmpty()}">
-                        <div th:each="attachment, iterStat : ${note.attachments}"
-                             class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                            <!-- Attachment Header (Collapsible) -->
-                            <button th:attr="onclick=${'toggleAttachment(' + iterStat.index + ')' }"
-                                    th:data-note-id="${note.id}"
-                                    th:data-attachment-index="${iterStat.index}"
-                                    hx:get="@{/fragments/attachment/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
-                                    hx-trigger="click once"
-                                    th:hx-target="'#attachment-content-' + ${iterStat.index}"
-                                    hx-swap="innerHTML"
-                                    class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-paperclip text-primary-500"></i>
-                                    <div class="text-left">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                                           th:text="${attachment.filename}">
-                                            document.pdf
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400"
-                                           th:text="${attachment.originalType}">
-                                            PDF
-                                        </p>
-                                    </div>
-                                </div>
-                                <i th:id="'attachment-chevron-' + ${iterStat.index}"
-                                   class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
-                            </button>
-
-                            <!-- Attachment Content (Collapsible - Lazy Loaded) -->
-                            <div th:id="'attachment-content-' + ${iterStat.index}"
-                                 class="hidden px-4 py-3 bg-white dark:bg-gray-800">
-                                <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+          </div>
         </div>
+
+        <!-- Attachments Tab -->
+        <div id="attachments-tab" class="tab-content hidden">
+          <div class="space-y-3">
+            <!-- Attachment list will be dynamically loaded -->
+            <div th:if="${note.attachments != null && !note.attachments.isEmpty()}">
+              <div th:each="attachment, iterStat : ${note.attachments}"
+                class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <!-- Attachment Header (Collapsible) -->
+                <button th:attr="onclick=${'toggleAttachment(' + iterStat.index + ')' }"
+                  th:data-note-id="${note.id}" th:data-attachment-index="${iterStat.index}"
+                  hx:get="@{/fragments/attachment/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
+                  hx-trigger="click once" th:hx-target="'#attachment-content-' + ${iterStat.index}"
+                  hx-swap="innerHTML"
+                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <div class="flex items-center space-x-3">
+                    <i class="fas fa-paperclip text-primary-500"></i>
+                    <div class="text-left">
+                      <p class="text-sm font-medium text-gray-900 dark:text-gray-100"
+                        th:text="${attachment.filename}">
+                        document.pdf
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400"
+                        th:text="${attachment.originalType}">
+                        PDF
+                      </p>
+                    </div>
+                  </div>
+                  <i th:id="'attachment-chevron-' + ${iterStat.index}"
+                    class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
+                </button>
+
+                <!-- Attachment Content (Collapsible - Lazy Loaded) -->
+                <div th:id="'attachment-content-' + ${iterStat.index}"
+                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
 
     </div>
 
     <!-- Initialize modal and render markdown content -->
     <script th:inline="javascript">
-    (function() {
+      (function () {
         const noteId = /*[[${note.id}]]*/ '';
         const conversationContent = /*[[${conversationContent}]]*/ '';
 
@@ -276,20 +276,21 @@
 
         // Render markdown content using marked.js
         if (typeof marked !== 'undefined' && conversationContent) {
-            marked.setOptions({
-                breaks: true,
-                gfm: true
-            });
-            const html = marked.parse(conversationContent);
-            document.getElementById('markdown-content').innerHTML = html;
+          marked.setOptions({
+            breaks: true,
+            gfm: true
+          });
+          const html = marked.parse(conversationContent);
+          document.getElementById('markdown-content').innerHTML = html;
         } else {
-            document.getElementById('markdown-content').innerHTML =
-                '<p class="text-gray-500 dark:text-gray-400">Content not available</p>';
+          document.getElementById('markdown-content').innerHTML =
+            '<p class="text-gray-500 dark:text-gray-400">Content not available</p>';
         }
-    })();
+      })();
     </script>
 
-</div>
+  </div>
 
 </body>
+
 </html>

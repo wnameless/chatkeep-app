@@ -9,8 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.service.ChatNoteService;
 
 /**
- * Home Controller - Renders main pages
- * Responsible for serving full HTML pages (not fragments)
+ * Home Controller - Renders main pages Responsible for serving full HTML pages (not fragments)
  */
 @Slf4j
 @Controller
@@ -20,8 +19,7 @@ public class HomeController {
   private final ChatNoteService chatNoteService;
 
   /**
-   * Home page - Shows active ChatNotes
-   * GET /
+   * Home page - Shows active ChatNotes GET /
    */
   @GetMapping("/")
   public String home(Model model) {
@@ -32,8 +30,7 @@ public class HomeController {
   }
 
   /**
-   * Favorites page
-   * GET /favorites
+   * Favorites page GET /favorites
    */
   @GetMapping("/favorites")
   public String favorites(Model model) {
@@ -44,8 +41,7 @@ public class HomeController {
   }
 
   /**
-   * Shared (Public) ChatNotes page
-   * GET /shared
+   * Shared (Public) ChatNotes page GET /shared
    */
   @GetMapping("/shared")
   public String shared(Model model) {
@@ -56,8 +52,7 @@ public class HomeController {
   }
 
   /**
-   * Archive page
-   * GET /archive
+   * Archive page GET /archive
    */
   @GetMapping("/archive")
   public String archive(Model model) {
@@ -68,8 +63,7 @@ public class HomeController {
   }
 
   /**
-   * Trash page
-   * GET /trash
+   * Trash page GET /trash
    */
   @GetMapping("/trash")
   public String trash(Model model) {
@@ -80,8 +74,7 @@ public class HomeController {
   }
 
   /**
-   * Public ChatNote sharing page
-   * GET /share/{id}
+   * Public ChatNote sharing page GET /share/{id}
    */
   @GetMapping("/share/{id}")
   public String shareView(@PathVariable String id, Model model) {
@@ -109,8 +102,7 @@ public class HomeController {
   }
 
   /**
-   * OAuth2 Login page
-   * GET /login
+   * OAuth2 Login page GET /login
    */
   @GetMapping("/login")
   public String login(Model model) {

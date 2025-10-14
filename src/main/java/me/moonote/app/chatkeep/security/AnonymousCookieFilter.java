@@ -21,14 +21,12 @@ import me.moonote.app.chatkeep.repository.UserRepository;
 /**
  * Security filter that handles anonymous user authentication via httpOnly cookies.
  *
- * This filter:
- * 1. Checks for ANONYMOUS_SESSION httpOnly cookie
- * 2. If missing, generates UUID and sets httpOnly cookie (1 year expiry)
- * 3. If exists, finds or creates anonymous user in database
- * 4. Sets Spring Security context with anonymous user details
+ * This filter: 1. Checks for ANONYMOUS_SESSION httpOnly cookie 2. If missing, generates UUID and
+ * sets httpOnly cookie (1 year expiry) 3. If exists, finds or creates anonymous user in database 4.
+ * Sets Spring Security context with anonymous user details
  *
- * The UUID is server-generated and stored in httpOnly cookie for security.
- * JavaScript cannot access the cookie (XSS protection).
+ * The UUID is server-generated and stored in httpOnly cookie for security. JavaScript cannot access
+ * the cookie (XSS protection).
  */
 @Component
 @RequiredArgsConstructor
@@ -49,8 +47,8 @@ public class AnonymousCookieFilter extends OncePerRequestFilter {
     // Skip anonymous authentication if user is already authenticated via OAuth2
     // Check if authentication exists, is authenticated, and is NOT Spring's default
     // AnonymousAuthenticationToken
-    boolean isAlreadyAuthenticated =
-        authentication != null && authentication.isAuthenticated() && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
+    boolean isAlreadyAuthenticated = authentication != null && authentication.isAuthenticated()
+        && !(authentication instanceof org.springframework.security.authentication.AnonymousAuthenticationToken);
 
     if (isAlreadyAuthenticated) {
       log.debug("Skipping anonymous authentication - user already authenticated: {}",
@@ -76,8 +74,8 @@ public class AnonymousCookieFilter extends OncePerRequestFilter {
 
       // Create authentication token
       ChatKeepUserDetails userDetails = new ChatKeepUserDetails(user);
-      UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-          userDetails, null, userDetails.getAuthorities());
+      UsernamePasswordAuthenticationToken authToken =
+          new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
       authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
       // Set authentication in security context

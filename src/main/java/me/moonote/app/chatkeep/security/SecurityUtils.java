@@ -6,8 +6,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * Utility class for Spring Security operations.
  *
- * Provides convenient methods for: - Extracting current user from SecurityContext - Getting user
- * ID for database queries - Checking authentication status
+ * Provides convenient methods for: - Extracting current user from SecurityContext - Getting user ID
+ * for database queries - Checking authentication status
  */
 public class SecurityUtils {
 

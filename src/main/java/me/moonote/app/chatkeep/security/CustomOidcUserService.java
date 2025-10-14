@@ -18,8 +18,8 @@ import me.moonote.app.chatkeep.repository.UserRepository;
 /**
  * Custom OIDC user service that handles OpenID Connect authentication (e.g., AWS Cognito).
  *
- * This service handles OIDC providers (which extend OAuth2 with ID tokens) and wraps the OIDC
- * user in our custom ChatKeepUserDetails for consistent user management.
+ * This service handles OIDC providers (which extend OAuth2 with ID tokens) and wraps the OIDC user
+ * in our custom ChatKeepUserDetails for consistent user management.
  *
  * Similar to CustomOAuth2UserService but for OIDC-specific flows.
  */
@@ -47,8 +47,7 @@ public class CustomOidcUserService extends OidcUserService {
     // Extract email from OIDC user claims
     String email = oidcUser.getEmail();
 
-    log.info("OIDC authentication: provider={}, sub={}, email={}", providerName, providerId,
-        email);
+    log.info("OIDC authentication: provider={}, sub={}, email={}", providerName, providerId, email);
 
     // Find or create user account
     User user = findOrCreateUser(providerName, providerId, email, oidcUser);
@@ -105,9 +104,9 @@ public class CustomOidcUserService extends OidcUserService {
    * Link a new OAuth2 provider to an existing user account.
    */
   private void linkNewProvider(User user, String providerName, String providerId, String email) {
-    OAuthProvider newProvider = OAuthProvider.builder().provider(providerName)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider newProvider =
+        OAuthProvider.builder().provider(providerName).providerId(providerId).providerEmail(email)
+            .linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
     user.getOauthProviders().add(newProvider);
 
@@ -126,16 +125,15 @@ public class CustomOidcUserService extends OidcUserService {
    */
   private User createNewAuthenticatedUser(String providerName, String providerId, String email,
       OidcUser oidcUser) {
-    OAuthProvider oauthProvider = OAuthProvider.builder().provider(providerName)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider oauthProvider =
+        OAuthProvider.builder().provider(providerName).providerId(providerId).providerEmail(email)
+            .linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
     // Extract username/name from OIDC claims
     String username = extractUsername(oidcUser);
 
-    User newUser = User.builder().email(email).username(username)
-        .userType(UserType.AUTHENTICATED).oauthProviders(new ArrayList<>())
-        .registeredAt(Instant.now()).build();
+    User newUser = User.builder().email(email).username(username).userType(UserType.AUTHENTICATED)
+        .oauthProviders(new ArrayList<>()).registeredAt(Instant.now()).build();
 
     newUser.getOauthProviders().add(oauthProvider);
 
@@ -148,21 +146,17 @@ public class CustomOidcUserService extends OidcUserService {
   private String extractUsername(OidcUser oidcUser) {
     // Try standard OIDC claims
     String name = oidcUser.getFullName();
-    if (name != null)
-      return name;
+    if (name != null) return name;
 
     String preferredUsername = oidcUser.getPreferredUsername();
-    if (preferredUsername != null)
-      return preferredUsername;
+    if (preferredUsername != null) return preferredUsername;
 
     String givenName = oidcUser.getGivenName();
-    if (givenName != null)
-      return givenName;
+    if (givenName != null) return givenName;
 
     // Try Cognito-specific claims
     String cognitoUsername = oidcUser.getClaim("cognito:username");
-    if (cognitoUsername != null)
-      return cognitoUsername;
+    if (cognitoUsername != null) return cognitoUsername;
 
     // Fallback to email prefix
     String email = oidcUser.getEmail();

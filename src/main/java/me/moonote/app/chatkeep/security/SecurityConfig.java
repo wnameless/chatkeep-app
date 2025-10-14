@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 /**
  * Spring Security configuration supporting both OAuth2 and anonymous authentication.
  *
- * Security features: - OAuth2 login with multiple providers (AWS Cognito, Google, Facebook, etc.)
- * - Anonymous user authentication via httpOnly cookies - Public endpoints for static resources and
+ * Security features: - OAuth2 login with multiple providers (AWS Cognito, Google, Facebook, etc.) -
+ * Anonymous user authentication via httpOnly cookies - Public endpoints for static resources and
  * health checks - Protected endpoints requiring authentication
  */
 @Configuration
@@ -37,12 +37,11 @@ public class SecurityConfig {
             .anyRequest().permitAll())
 
         // OAuth2 login configuration
-        .oauth2Login(oauth2 -> oauth2
-            .userInfoEndpoint(userInfo -> userInfo
-                // Handle regular OAuth2 providers
-                .userService(customOAuth2UserService)
-                // Handle OIDC providers (AWS Cognito, Google, etc.)
-                .oidcUserService(customOidcUserService))
+        .oauth2Login(oauth2 -> oauth2.userInfoEndpoint(userInfo -> userInfo
+            // Handle regular OAuth2 providers
+            .userService(customOAuth2UserService)
+            // Handle OIDC providers (AWS Cognito, Google, etc.)
+            .oidcUserService(customOidcUserService))
             .successHandler(oauth2AuthenticationSuccessHandler).loginPage("/login").permitAll())
 
         // Logout configuration

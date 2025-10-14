@@ -17,8 +17,8 @@ import me.moonote.app.chatkeep.repository.UserRepository;
 /**
  * Custom OAuth2 user service that handles multi-provider authentication.
  *
- * Supports multiple OAuth2 providers (AWS Cognito, Google, Facebook, GitHub, etc.) and allows
- * users to link multiple providers to a single account.
+ * Supports multiple OAuth2 providers (AWS Cognito, Google, Facebook, GitHub, etc.) and allows users
+ * to link multiple providers to a single account.
  *
  * This service: 1. Extracts provider name and user ID from OAuth2 authentication 2. Finds or
  * creates user account 3. Links the OAuth2 provider to the user account 4. Returns
@@ -36,8 +36,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     OAuth2User oauth2User = super.loadUser(userRequest);
 
     // Extract provider name (e.g., "cognito", "google", "facebook")
-    String providerName =
-        userRequest.getClientRegistration().getRegistrationId().toLowerCase();
+    String providerName = userRequest.getClientRegistration().getRegistrationId().toLowerCase();
 
     // Extract provider-specific user ID (the "sub" claim from JWT)
     String providerId = oauth2User.getAttribute("sub");
@@ -98,9 +97,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
    * Link a new OAuth2 provider to an existing user account.
    */
   private void linkNewProvider(User user, String providerName, String providerId, String email) {
-    OAuthProvider newProvider = OAuthProvider.builder().provider(providerName)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider newProvider =
+        OAuthProvider.builder().provider(providerName).providerId(providerId).providerEmail(email)
+            .linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
     user.getOauthProviders().add(newProvider);
 
@@ -119,16 +118,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
    */
   private User createNewAuthenticatedUser(String providerName, String providerId, String email,
       OAuth2User oauth2User) {
-    OAuthProvider oauthProvider = OAuthProvider.builder().provider(providerName)
-        .providerId(providerId).providerEmail(email).linkedAt(Instant.now())
-        .lastUsedAt(Instant.now()).build();
+    OAuthProvider oauthProvider =
+        OAuthProvider.builder().provider(providerName).providerId(providerId).providerEmail(email)
+            .linkedAt(Instant.now()).lastUsedAt(Instant.now()).build();
 
     // Extract username/name from OAuth2 attributes
     String username = extractUsername(oauth2User);
 
-    User newUser = User.builder().email(email).username(username)
-        .userType(UserType.AUTHENTICATED).oauthProviders(new ArrayList<>())
-        .registeredAt(Instant.now()).build();
+    User newUser = User.builder().email(email).username(username).userType(UserType.AUTHENTICATED)
+        .oauthProviders(new ArrayList<>()).registeredAt(Instant.now()).build();
 
     newUser.getOauthProviders().add(oauthProvider);
 
@@ -141,16 +139,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
   private String extractUsername(OAuth2User oauth2User) {
     // Try common attribute names
     String name = oauth2User.getAttribute("name");
-    if (name != null)
-      return name;
+    if (name != null) return name;
 
     String username = oauth2User.getAttribute("preferred_username");
-    if (username != null)
-      return username;
+    if (username != null) return username;
 
     String givenName = oauth2User.getAttribute("given_name");
-    if (givenName != null)
-      return givenName;
+    if (givenName != null) return givenName;
 
     // Fallback to email prefix
     String email = oauth2User.getAttribute("email");

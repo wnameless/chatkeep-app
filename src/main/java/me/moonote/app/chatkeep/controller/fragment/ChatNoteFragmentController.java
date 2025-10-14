@@ -309,8 +309,8 @@ public class ChatNoteFragmentController {
   // ==================== Search & Filter ====================
 
   /**
-   * Search chat notes GET /fragments/search?query=keyword
-   * Comprehensive search across title, tags, and content for user's active notes
+   * Search chat notes GET /fragments/search?query=keyword Comprehensive search across title, tags,
+   * and content for user's active notes
    */
   @GetMapping("/search")
   public String search(@RequestParam String query, Model model, HttpSession session) {
@@ -329,7 +329,8 @@ public class ChatNoteFragmentController {
     // If query is empty, return active notes (same as default view)
     if (query == null || query.trim().isEmpty()) {
       Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
-      List<ChatNoteResponse> notes = chatNoteService.getActiveChatNotes(userId, pageable).getContent();
+      List<ChatNoteResponse> notes =
+          chatNoteService.getActiveChatNotes(userId, pageable).getContent();
 
       // Add content previews
       notes = notes.stream().map(note -> {
@@ -379,8 +380,7 @@ public class ChatNoteFragmentController {
   }
 
   /**
-   * Get tags list for sidebar GET /fragments/tags
-   * Returns tag checkboxes with counts
+   * Get tags list for sidebar GET /fragments/tags Returns tag checkboxes with counts
    */
   @GetMapping("/tags")
   public String getTags(Model model) {
@@ -397,7 +397,8 @@ public class ChatNoteFragmentController {
     try {
       // Get all active chat notes for the user
       Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "createdAt"));
-      List<ChatNoteResponse> notes = chatNoteService.getActiveChatNotes(userId, pageable).getContent();
+      List<ChatNoteResponse> notes =
+          chatNoteService.getActiveChatNotes(userId, pageable).getContent();
 
       // Count tag occurrences
       Map<String, Long> tagsMap = new HashMap<>();
@@ -410,12 +411,10 @@ public class ChatNoteFragmentController {
       });
 
       // Sort by count descending, then alphabetically
-      List<Map.Entry<String, Long>> sortedTags = tagsMap.entrySet().stream()
-          .sorted((a, b) -> {
-            int countCompare = b.getValue().compareTo(a.getValue());
-            return countCompare != 0 ? countCompare : a.getKey().compareTo(b.getKey());
-          })
-          .collect(Collectors.toList());
+      List<Map.Entry<String, Long>> sortedTags = tagsMap.entrySet().stream().sorted((a, b) -> {
+        int countCompare = b.getValue().compareTo(a.getValue());
+        return countCompare != 0 ? countCompare : a.getKey().compareTo(b.getKey());
+      }).collect(Collectors.toList());
 
       model.addAttribute("tags", sortedTags);
       return "fragments/tags-list";

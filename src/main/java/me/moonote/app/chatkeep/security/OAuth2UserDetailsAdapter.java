@@ -8,8 +8,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 /**
  * Adapter that allows ChatKeepUserDetails to be used as an OAuth2User.
  *
- * This is necessary because Spring Security OAuth2 expects OAuth2User interface, but we want to
- * use our custom ChatKeepUserDetails for consistent user handling.
+ * This is necessary because Spring Security OAuth2 expects OAuth2User interface, but we want to use
+ * our custom ChatKeepUserDetails for consistent user handling.
  */
 public class OAuth2UserDetailsAdapter implements OAuth2User {
 

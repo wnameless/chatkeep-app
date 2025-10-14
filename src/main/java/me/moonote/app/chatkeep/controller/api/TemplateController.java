@@ -22,8 +22,7 @@ public class TemplateController {
   private static final String TEMPLATE_PATH = "ai-specs/conversation_archive_template.md";
 
   /**
-   * Get conversation archive template
-   * GET /api/v1/templates/archive
+   * Get conversation archive template GET /api/v1/templates/archive
    *
    * Returns the markdown template file as plain text for users to copy and use.
    */
@@ -37,20 +36,15 @@ public class TemplateController {
 
       if (!resource.exists()) {
         log.error("Template file not found at: {}", TEMPLATE_PATH);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body("Template file not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Template file not found");
       }
 
       // Read template content
-      String templateContent = new String(
-          resource.getInputStream().readAllBytes(),
-          StandardCharsets.UTF_8
-      );
+      String templateContent =
+          new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
       log.info("Successfully loaded archive template ({} bytes)", templateContent.length());
-      return ResponseEntity.ok()
-          .contentType(MediaType.TEXT_PLAIN)
-          .body(templateContent);
+      return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(templateContent);
 
     } catch (IOException e) {
       log.error("Error reading template file", e);

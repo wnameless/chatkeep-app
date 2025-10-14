@@ -4,19 +4,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
-import me.moonote.app.chatkeep.dto.ChatNoteDto;
 import me.moonote.app.chatkeep.dto.ArtifactDto;
 import me.moonote.app.chatkeep.dto.AttachmentDto;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
 import me.moonote.app.chatkeep.dto.ConversationSummaryDto;
 import me.moonote.app.chatkeep.dto.FollowUpSectionDto;
 import me.moonote.app.chatkeep.dto.InsightsSectionDto;
 import me.moonote.app.chatkeep.dto.QuerySectionDto;
 import me.moonote.app.chatkeep.dto.ReferenceDto;
 import me.moonote.app.chatkeep.dto.WorkaroundDto;
-import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
+import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.ConversationSummary;
 import me.moonote.app.chatkeep.model.FollowUpSection;
 import me.moonote.app.chatkeep.model.InsightsSection;
@@ -41,10 +41,10 @@ public class ChatNoteMapper {
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())
         .summary(toSummary(dto.getSummary())).artifacts(toArtifacts(dto.getArtifacts()))
         .attachments(toAttachments(dto.getAttachments()))
-        .workarounds(toWorkarounds(dto.getWorkarounds()))
-        .markdownContent(markdownContent) // Store original markdown
-        .userId(userId)
-        .isPublic(false) // Default to private
+        .workarounds(toWorkarounds(dto.getWorkarounds())).markdownContent(markdownContent) // Store
+                                                                                           // original
+                                                                                           // markdown
+        .userId(userId).isPublic(false) // Default to private
         .isArchived(false) // Default to active (not archived)
         .isTrashed(false) // Default to not trashed
         .isFavorite(false) // Default to not favorited
@@ -125,8 +125,8 @@ public class ChatNoteMapper {
   }
 
   /**
-   * Generate a content preview from the conversation summary
-   * Takes first ~200 characters for card display
+   * Generate a content preview from the conversation summary Takes first ~200 characters for card
+   * display
    */
   public String generateContentPreview(ChatNote chatNote) {
     if (chatNote.getSummary() == null) return "";

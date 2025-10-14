@@ -11,8 +11,8 @@ import me.moonote.app.chatkeep.model.UserType;
 /**
  * Custom UserDetails implementation that wraps both anonymous and authenticated users.
  *
- * Provides a unified interface for Spring Security to handle both: - Anonymous users (identified
- * by UUID from browser LocalStorage) - Authenticated users (logged in via OAuth2 providers)
+ * Provides a unified interface for Spring Security to handle both: - Anonymous users (identified by
+ * UUID from browser LocalStorage) - Authenticated users (logged in via OAuth2 providers)
  */
 public class ChatKeepUserDetails implements UserDetails {
 

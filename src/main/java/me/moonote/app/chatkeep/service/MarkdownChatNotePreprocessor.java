@@ -19,10 +19,10 @@ import org.yaml.snakeyaml.Yaml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.moonote.app.chatkeep.dto.ChatNoteDto;
-import me.moonote.app.chatkeep.dto.ChatNoteMetadataDto;
 import me.moonote.app.chatkeep.dto.ArtifactDto;
 import me.moonote.app.chatkeep.dto.AttachmentDto;
+import me.moonote.app.chatkeep.dto.ChatNoteDto;
+import me.moonote.app.chatkeep.dto.ChatNoteMetadataDto;
 import me.moonote.app.chatkeep.dto.ConversationSummaryDto;
 import me.moonote.app.chatkeep.dto.FollowUpSectionDto;
 import me.moonote.app.chatkeep.dto.InsightsSectionDto;
@@ -100,8 +100,7 @@ public class MarkdownChatNotePreprocessor {
 
     return ChatNoteMetadataDto.builder()
         .archiveVersion(String.valueOf(yamlMap.get("ARCHIVE_FORMAT_VERSION")))
-        .archiveType(String.valueOf(yamlMap.get("ARCHIVE_TYPE")))
-        .createdDate(createdDate)
+        .archiveType(String.valueOf(yamlMap.get("ARCHIVE_TYPE"))).createdDate(createdDate)
         .originalPlatform(String.valueOf(yamlMap.get("ORIGINAL_PLATFORM")))
         .attachmentCount((Integer) yamlMap.get("ATTACHMENT_COUNT"))
         .artifactCount((Integer) yamlMap.get("ARTIFACT_COUNT"))
@@ -194,8 +193,8 @@ public class MarkdownChatNotePreprocessor {
 
   private QuerySectionDto parseInitialQuery(String content) {
     // Extract section content between "## Initial Query" and next "##" or "---"
-    Pattern sectionPattern = Pattern.compile(
-        "## Initial Query\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
+    Pattern sectionPattern =
+        Pattern.compile("## Initial Query\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
     Matcher matcher = sectionPattern.matcher(content);
 
     if (!matcher.find()) {
@@ -205,27 +204,28 @@ public class MarkdownChatNotePreprocessor {
     String sectionContent = matcher.group(1).trim();
 
     // Extract description (everything before artifacts/attachments references)
-    Pattern descPattern = Pattern.compile("^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))", Pattern.DOTALL);
+    Pattern descPattern = Pattern.compile(
+        "^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))",
+        Pattern.DOTALL);
     Matcher descMatcher = descPattern.matcher(sectionContent);
     String description = descMatcher.find() ? descMatcher.group(1).trim() : sectionContent;
 
     // Extract attachments referenced (flexible format - with or without brackets)
-    List<String> attachmentsReferenced = extractReferencedItems(sectionContent, "Attachments referenced");
+    List<String> attachmentsReferenced =
+        extractReferencedItems(sectionContent, "Attachments referenced");
 
     // Extract artifacts created/referenced (flexible format)
-    List<String> artifactsCreated = extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
+    List<String> artifactsCreated =
+        extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
 
-    return QuerySectionDto.builder()
-        .description(description)
-        .attachmentsReferenced(attachmentsReferenced)
-        .artifactsCreated(artifactsCreated)
-        .build();
+    return QuerySectionDto.builder().description(description)
+        .attachmentsReferenced(attachmentsReferenced).artifactsCreated(artifactsCreated).build();
   }
 
   private InsightsSectionDto parseKeyInsights(String content) {
     // Extract section content between "## Key Insights" and next "##" or "---"
-    Pattern sectionPattern = Pattern.compile(
-        "## Key Insights\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
+    Pattern sectionPattern =
+        Pattern.compile("## Key Insights\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
     Matcher matcher = sectionPattern.matcher(content);
 
     if (!matcher.find()) {
@@ -235,7 +235,9 @@ public class MarkdownChatNotePreprocessor {
     String sectionContent = matcher.group(1).trim();
 
     // Extract description (everything before artifacts/attachments references)
-    Pattern descPattern = Pattern.compile("^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))", Pattern.DOTALL);
+    Pattern descPattern = Pattern.compile(
+        "^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))",
+        Pattern.DOTALL);
     Matcher descMatcher = descPattern.matcher(sectionContent);
     String description = descMatcher.find() ? descMatcher.group(1).trim() : sectionContent;
 
@@ -248,23 +250,21 @@ public class MarkdownChatNotePreprocessor {
     }
 
     // Extract attachments referenced
-    List<String> attachmentsReferenced = extractReferencedItems(sectionContent, "Attachments referenced");
+    List<String> attachmentsReferenced =
+        extractReferencedItems(sectionContent, "Attachments referenced");
 
     // Extract artifacts created/referenced
-    List<String> artifactsCreated = extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
+    List<String> artifactsCreated =
+        extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
 
-    return InsightsSectionDto.builder()
-        .description(description)
-        .keyPoints(keyPoints)
-        .attachmentsReferenced(attachmentsReferenced)
-        .artifactsCreated(artifactsCreated)
-        .build();
+    return InsightsSectionDto.builder().description(description).keyPoints(keyPoints)
+        .attachmentsReferenced(attachmentsReferenced).artifactsCreated(artifactsCreated).build();
   }
 
   private FollowUpSectionDto parseFollowUpExplorations(String content) {
     // Extract section content between "## Follow-up Explorations" and next "##" or "---"
-    Pattern sectionPattern = Pattern.compile(
-        "## Follow-up Explorations\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
+    Pattern sectionPattern =
+        Pattern.compile("## Follow-up Explorations\\s*\\n\\n(.+?)(?=\\n##|\\n---)", Pattern.DOTALL);
     Matcher matcher = sectionPattern.matcher(content);
 
     if (!matcher.find()) {
@@ -274,21 +274,22 @@ public class MarkdownChatNotePreprocessor {
     String sectionContent = matcher.group(1).trim();
 
     // Extract description (everything before artifacts/attachments references)
-    Pattern descPattern = Pattern.compile("^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))", Pattern.DOTALL);
+    Pattern descPattern = Pattern.compile(
+        "^(.+?)(?=\\n\\*\\*(?:Attachments referenced|Artifacts (?:created|referenced)))",
+        Pattern.DOTALL);
     Matcher descMatcher = descPattern.matcher(sectionContent);
     String description = descMatcher.find() ? descMatcher.group(1).trim() : sectionContent;
 
     // Extract attachments referenced
-    List<String> attachmentsReferenced = extractReferencedItems(sectionContent, "Attachments referenced");
+    List<String> attachmentsReferenced =
+        extractReferencedItems(sectionContent, "Attachments referenced");
 
     // Extract artifacts created/referenced
-    List<String> artifactsCreated = extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
+    List<String> artifactsCreated =
+        extractReferencedItems(sectionContent, "Artifacts (?:created|referenced)");
 
-    return FollowUpSectionDto.builder()
-        .description(description)
-        .attachmentsReferenced(attachmentsReferenced)
-        .artifactsCreated(artifactsCreated)
-        .build();
+    return FollowUpSectionDto.builder().description(description)
+        .attachmentsReferenced(attachmentsReferenced).artifactsCreated(artifactsCreated).build();
   }
 
   private List<ReferenceDto> parseReferences(String content) {
@@ -307,20 +308,16 @@ public class MarkdownChatNotePreprocessor {
     Pattern mdLinkPattern = Pattern.compile("-\\s*\\[(.+?)\\]\\((.+?)\\)");
     Matcher mdLinkMatcher = mdLinkPattern.matcher(refsSection);
     while (mdLinkMatcher.find()) {
-      references.add(ReferenceDto.builder()
-          .description(mdLinkMatcher.group(1).trim())
-          .url(mdLinkMatcher.group(2).trim())
-          .build());
+      references.add(ReferenceDto.builder().description(mdLinkMatcher.group(1).trim())
+          .url(mdLinkMatcher.group(2).trim()).build());
     }
 
     // Try plain text format: - Description: URL
     Pattern plainLinkPattern = Pattern.compile("-\\s*([^:]+?):\\s*(https?://[^\\s]+)");
     Matcher plainLinkMatcher = plainLinkPattern.matcher(refsSection);
     while (plainLinkMatcher.find()) {
-      references.add(ReferenceDto.builder()
-          .description(plainLinkMatcher.group(1).trim())
-          .url(plainLinkMatcher.group(2).trim())
-          .build());
+      references.add(ReferenceDto.builder().description(plainLinkMatcher.group(1).trim())
+          .url(plainLinkMatcher.group(2).trim()).build());
     }
 
     return references;
@@ -482,14 +479,14 @@ public class MarkdownChatNotePreprocessor {
   }
 
   /**
-   * Extract referenced items (attachments/artifacts) from section content.
-   * Handles both formats:
-   * - With brackets: **Attachments referenced:** [file1.md, file2.png]
-   * - Without brackets: **Artifacts referenced:** script.sh (final version)
+   * Extract referenced items (attachments/artifacts) from section content. Handles both formats: -
+   * With brackets: **Attachments referenced:** [file1.md, file2.png] - Without brackets:
+   * **Artifacts referenced:** script.sh (final version)
    */
   private List<String> extractReferencedItems(String sectionContent, String fieldName) {
     // Pattern matches: **FieldName:** [items] or **FieldName:** items
-    Pattern pattern = Pattern.compile("\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.+?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
+    Pattern pattern = Pattern.compile(
+        "\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.+?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
     Matcher matcher = pattern.matcher(sectionContent);
 
     if (matcher.find()) {
@@ -499,9 +496,7 @@ public class MarkdownChatNotePreprocessor {
 
       if (itemsStr != null && !itemsStr.trim().isEmpty()) {
         // Split by comma and clean up
-        return Arrays.stream(itemsStr.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
+        return Arrays.stream(itemsStr.split(",")).map(String::trim).filter(s -> !s.isEmpty())
             .collect(Collectors.toList());
       }
     }
