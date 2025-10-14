@@ -433,9 +433,14 @@ public class MarkdownChatNotePreprocessor {
     boolean foundContent = false;
 
     for (String line : lines) {
-      if (!foundContent && (line.trim().startsWith("#") || line.trim().isEmpty())) {
+      String trimmed = line.trim();
+
+      // Skip evolution notes at the beginning: lines starting with # (but NOT shebangs)
+      // Shebangs start with #! and should be preserved as actual code
+      if (!foundContent && (trimmed.isEmpty() || (trimmed.startsWith("#") && !trimmed.startsWith("#!")))) {
         continue;
       }
+
       foundContent = true;
       cleaned.append(line).append("\n");
     }
