@@ -75,6 +75,7 @@ public class ChatNoteFragmentController {
       log.warn("No authenticated user");
       model.addAttribute("notes", List.of());
       model.addAttribute("viewMode", currentView);
+      model.addAttribute("filter", normalizeFilter(filter));
       return currentView.equals("list") ? "fragments/chat-note-cards-list"
           : "fragments/chat-note-cards";
     }
@@ -91,8 +92,12 @@ public class ChatNoteFragmentController {
       return note;
     }).collect(Collectors.toList());
 
+    // Normalize filter name for template
+    String normalizedFilter = normalizeFilter(filter);
+
     model.addAttribute("notes", notes);
     model.addAttribute("viewMode", currentView);
+    model.addAttribute("filter", normalizedFilter);
 
     return currentView.equals("list") ? "fragments/chat-note-cards-list"
         : "fragments/chat-note-cards";
@@ -334,6 +339,7 @@ public class ChatNoteFragmentController {
       String viewMode = (String) session.getAttribute("viewMode");
       model.addAttribute("notes", results);
       model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
+      model.addAttribute("filter", "search");
 
       return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
           : "fragments/chat-note-cards";
@@ -341,6 +347,7 @@ public class ChatNoteFragmentController {
     } catch (Exception e) {
       log.error("Error searching", e);
       model.addAttribute("notes", List.of());
+      model.addAttribute("filter", "search");
       return "fragments/chat-note-cards";
     }
   }
@@ -380,6 +387,7 @@ public class ChatNoteFragmentController {
       String viewMode = (String) session.getAttribute("viewMode");
       model.addAttribute("notes", results);
       model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
+      model.addAttribute("filter", "tags");
 
       return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
           : "fragments/chat-note-cards";
@@ -387,6 +395,7 @@ public class ChatNoteFragmentController {
     } catch (Exception e) {
       log.error("Error filtering by tags", e);
       model.addAttribute("notes", List.of());
+      model.addAttribute("filter", "tags");
       return "fragments/chat-note-cards";
     }
   }
@@ -520,6 +529,20 @@ public class ChatNoteFragmentController {
   }
 
   // ==================== Helper Methods ====================
+
+  /**
+   * Normalize filter name for template consistency
+   */
+  private String normalizeFilter(String filter) {
+    switch (filter) {
+      case "chatnotes":
+        return "active";
+      case "archive":
+        return "archived";
+      default:
+        return filter;
+    }
+  }
 
   /**
    * Build note model for Thymeleaf template
