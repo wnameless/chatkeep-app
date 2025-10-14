@@ -130,6 +130,23 @@ public class ChatNoteService {
   }
 
   /**
+   * Comprehensive search across title, tags, and content
+   * Searches only user's active notes (not archived, not trashed)
+   */
+  public List<ChatNoteResponse> searchUserChatNotes(String userId, String query) {
+    if (query == null || query.trim().isEmpty()) {
+      return List.of();
+    }
+
+    String searchQuery = query.trim();
+    log.info("Searching user {} chat notes with query: {}", userId, searchQuery);
+
+    return repository.searchActiveByUserId(userId, searchQuery).stream()
+        .map(this::toResponse)
+        .toList();
+  }
+
+  /**
    * Update archive visibility
    */
   public ChatNoteDetailResponse updateVisibility(String id, Boolean isPublic) {

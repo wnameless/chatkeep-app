@@ -310,6 +310,7 @@ public class ChatNoteFragmentController {
 
   /**
    * Search chat notes GET /fragments/search?query=keyword
+   * Comprehensive search across title, tags, and content for user's active notes
    */
   @GetMapping("/search")
   public String search(@RequestParam String query, Model model, HttpSession session) {
@@ -321,11 +322,36 @@ public class ChatNoteFragmentController {
     if (userId == null) {
       model.addAttribute("notes", List.of());
       model.addAttribute("viewMode", "masonry");
+      model.addAttribute("filter", "search");
       return "fragments/chat-note-cards";
     }
 
+    // If query is empty, return active notes (same as default view)
+    if (query == null || query.trim().isEmpty()) {
+      Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
+      List<ChatNoteResponse> notes = chatNoteService.getActiveChatNotes(userId, pageable).getContent();
+
+      // Add content previews
+      notes = notes.stream().map(note -> {
+        ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
+        if (entity != null) {
+          note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
+        }
+        return note;
+      }).collect(Collectors.toList());
+
+      String viewMode = (String) session.getAttribute("viewMode");
+      model.addAttribute("notes", notes);
+      model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
+      model.addAttribute("filter", "active");
+
+      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
+          : "fragments/chat-note-cards";
+    }
+
     try {
-      List<ChatNoteResponse> results = chatNoteService.searchByTitle(query);
+      // Use comprehensive search: title, tags, and content
+      List<ChatNoteResponse> results = chatNoteService.searchUserChatNotes(userId, query);
 
       // Add content previews
       results = results.stream().map(note -> {

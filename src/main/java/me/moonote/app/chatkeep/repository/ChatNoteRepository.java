@@ -65,6 +65,18 @@ public interface ChatNoteRepository
   // Search by title
   List<ChatNote> findByTitleContainingIgnoreCase(String keyword);
 
+  // Search by title (user-scoped, active notes only)
+  @Query("{ 'userId': ?0, 'title': { $regex: ?1, $options: 'i' }, 'isArchived': false, 'isTrashed': false }")
+  List<ChatNote> searchActiveTitleByUserId(String userId, String keyword);
+
+  // Comprehensive search (title, tags, content) - user-scoped, active notes only
+  @Query("{ 'userId': ?0, $or: [ "
+      + "{ 'title': { $regex: ?1, $options: 'i' } }, "
+      + "{ 'tags': { $regex: ?1, $options: 'i' } }, "
+      + "{ 'conversationContent': { $regex: ?1, $options: 'i' } } "
+      + "], 'isArchived': false, 'isTrashed': false }")
+  List<ChatNote> searchActiveByUserId(String userId, String keyword);
+
   // Find by date range
   List<ChatNote> findByConversationDateBetween(LocalDate start, LocalDate end);
 
