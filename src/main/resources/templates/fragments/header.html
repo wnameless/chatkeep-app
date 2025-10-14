@@ -24,33 +24,29 @@
         <h1 class="text-xl font-semibold text-primary-500 hidden sm:block">ChatKeep</h1>
       </div>
 
-      <!-- Middle Section: Search Box -->
-      <div class="flex-1 max-w-2xl mx-4 hidden md:block">
-        <div class="relative">
+      <!-- Middle Section: Search Box + Copy Template Button -->
+      <div class="flex-1 max-w-3xl mx-4 hidden md:flex items-center gap-3">
+        <div class="relative flex-1">
           <input type="text" id="search-input" name="query"
             placeholder="Search notes by title, tags, or content..." hx:get="@{/fragments/search}"
             hx-trigger="keyup changed delay:500ms" hx-target="#notes-grid" hx-swap="innerHTML"
-            class="w-full px-4 py-2 pr-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400">
+            class="w-full px-4 py-2 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400">
 
-          <!-- Right side icons inside search box -->
-          <div
-            class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-            <!-- Import Archive Button (Plus Icon) -->
+          <!-- Import Archive Button (Plus Icon) inside search box -->
+          <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
             <button id="import-archive-btn" title="Import Archive Markdown"
               class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
               <i class="fas fa-plus text-lg"></i>
             </button>
-
-            <!-- Separator -->
-            <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
-
-            <!-- Copy Template Button -->
-            <button id="copy-template-btn" title="Copy Archive Template"
-              class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
-              <i class="fas fa-copy text-lg"></i>
-            </button>
           </div>
         </div>
+
+        <!-- Copy Template Button (Standalone) -->
+        <button id="copy-template-btn" title="Copy AI Archiving Prompt Template"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-primary-400 dark:hover:border-primary-500 transition-all whitespace-nowrap">
+          <i class="fas fa-robot text-primary-500"></i>
+          <span>Archiving Prompt</span>
+        </button>
       </div>
 
       <!-- Right Section: Refresh + View Toggle + Settings + User Avatar -->
