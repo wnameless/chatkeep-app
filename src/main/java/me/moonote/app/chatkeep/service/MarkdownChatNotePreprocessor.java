@@ -325,10 +325,15 @@ public class MarkdownChatNotePreprocessor {
 
   private List<ArtifactDto> extractArtifacts(String content) {
     List<ArtifactDto> artifacts = new ArrayList<>();
+
+    // Find the end of YAML frontmatter to avoid matching examples in INSTRUCTIONS_FOR_AI
+    int yamlEnd = findYamlFrontmatterEnd(content);
+    String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
+
     Pattern artifactPattern = Pattern.compile(
         "<!-- ARTIFACT_START: (.*?) -->\\s*\\n(.*?)\\n<!-- ARTIFACT_END -->", Pattern.DOTALL);
 
-    Matcher matcher = artifactPattern.matcher(content);
+    Matcher matcher = artifactPattern.matcher(contentAfterYaml);
 
     while (matcher.find()) {
       String attributes = matcher.group(1);
@@ -349,13 +354,31 @@ public class MarkdownChatNotePreprocessor {
     return artifacts;
   }
 
+  /**
+   * Find the end position of YAML frontmatter (second "---" marker).
+   * Returns the index after the closing "---", or -1 if not found.
+   */
+  private int findYamlFrontmatterEnd(String content) {
+    Pattern yamlPattern = Pattern.compile("^---\\s*\\n.*?\\n---", Pattern.DOTALL | Pattern.MULTILINE);
+    Matcher matcher = yamlPattern.matcher(content);
+    if (matcher.find()) {
+      return matcher.end();
+    }
+    return -1;
+  }
+
   private List<AttachmentDto> extractAttachments(String content) {
     List<AttachmentDto> attachments = new ArrayList<>();
+
+    // Find the end of YAML frontmatter to avoid matching examples in INSTRUCTIONS_FOR_AI
+    int yamlEnd = findYamlFrontmatterEnd(content);
+    String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
+
     Pattern attachmentPattern = Pattern.compile(
         "<!-- MARKDOWN_START: filename=\"(.*?)\" -->\\s*\\n(.*?)\\n<!-- MARKDOWN_END: filename=\".*?\" -->",
         Pattern.DOTALL);
 
-    Matcher matcher = attachmentPattern.matcher(content);
+    Matcher matcher = attachmentPattern.matcher(contentAfterYaml);
 
     while (matcher.find()) {
       String filename = matcher.group(1);
