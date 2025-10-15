@@ -23,35 +23,18 @@ function copyShareLink(noteId) {
 // ==================== Download Actions (File Operations) ====================
 
 function downloadChatNote(noteId) {
-    // Fetch full note content and download as markdown
-    fetch(`/api/v1/chat-notes/${noteId}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const note = data.data;
-            const markdown = note.fullMarkdown || note.conversationContent || '';
-            const filename = `${note.title.replace(/[^a-z0-9]/gi, '_')}.md`;
+    // Use the dedicated download endpoint that returns markdown with proper headers
+    const downloadUrl = `/api/v1/chat-notes/${noteId}/download`;
 
-            // Create blob and trigger download
-            const blob = new Blob([markdown], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+    // Create a temporary anchor element to trigger download
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-            showToast('Downloaded successfully', 'success');
-        } else {
-            showToast('Error downloading ChatNote', 'error');
-        }
-    })
-    .catch(err => {
-        console.error('Error downloading ChatNote:', err);
-        showToast('Failed to download', 'error');
-    });
+    showToast('Download started', 'success');
 }
 
 // ==================== More Menu Toggle ====================

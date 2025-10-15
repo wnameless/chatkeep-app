@@ -203,6 +203,33 @@ public class ChatNoteApiController {
   }
 
   /**
+   * Download full markdown archive GET /api/v1/chat-notes/{id}/download
+   */
+  @GetMapping("/{id}/download")
+  public ResponseEntity<String> downloadChatNote(@PathVariable String id) {
+    try {
+      ChatNoteDetailLightResponse chatNote = chatNoteService.getChatNoteById(id);
+      String markdown = chatNote.getFullMarkdown();
+
+      // Generate safe filename from title
+      String filename = chatNote.getTitle().replaceAll("[^a-zA-Z0-9-]", "_") + ".md";
+
+      return ResponseEntity.ok()
+          .header("Content-Type", "text/markdown; charset=UTF-8")
+          .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+          .body(markdown);
+    } catch (ChatNoteNotFoundException e) {
+      log.error("Chat note not found for download: {}", id);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body("Chat note not found: " + id);
+    } catch (Exception e) {
+      log.error("Error downloading chat note", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to download chat note: " + e.getMessage());
+    }
+  }
+
+  /**
    * Get all archives (paginated) GET /api/v1/chat-notes?page=0&size=20&sort=createdAt,desc
    */
   @GetMapping
