@@ -143,8 +143,7 @@ public class MarkdownChatNotePreprocessor {
     matcher = tagsPatternWithoutBrackets.matcher(content);
     if (matcher.find()) {
       String tagsStr = matcher.group(1).trim();
-      return Arrays.stream(tagsStr.split(",")).map(String::trim)
-          .filter(s -> !s.isEmpty())
+      return Arrays.stream(tagsStr.split(",")).map(String::trim).filter(s -> !s.isEmpty())
           .collect(Collectors.toList());
     }
 
@@ -333,11 +332,8 @@ public class MarkdownChatNotePreprocessor {
       Pattern mdLinkPattern = Pattern.compile("\\[(.+?)\\]\\((.+?)\\)");
       Matcher mdLinkMatcher = mdLinkPattern.matcher(lineContent);
       if (mdLinkMatcher.find()) {
-        references.add(ReferenceDto.builder()
-            .description(mdLinkMatcher.group(1).trim())
-            .url(mdLinkMatcher.group(2).trim())
-            .type(ReferenceType.EXTERNAL_LINK)
-            .build());
+        references.add(ReferenceDto.builder().description(mdLinkMatcher.group(1).trim())
+            .url(mdLinkMatcher.group(2).trim()).type(ReferenceType.EXTERNAL_LINK).build());
         continue;
       }
 
@@ -352,22 +348,16 @@ public class MarkdownChatNotePreprocessor {
           String[] tokens = remainder.split("[\\s()]");
           String url = tokens[0].trim();
 
-          references.add(ReferenceDto.builder()
-              .description(description)
-              .url(url)
-              .type(ReferenceType.EXTERNAL_LINK)
-              .build());
+          references.add(ReferenceDto.builder().description(description).url(url)
+              .type(ReferenceType.EXTERNAL_LINK).build());
           continue;
         }
       }
 
       // Format 3: Description-only (no URL) - Descriptive reference
       // The description itself conveys the nature (concept, contextual info, etc.)
-      references.add(ReferenceDto.builder()
-          .description(lineContent)
-          .url(null)
-          .type(ReferenceType.DESCRIPTIVE)
-          .build());
+      references.add(ReferenceDto.builder().description(lineContent).url(null)
+          .type(ReferenceType.DESCRIPTIVE).build());
     }
 
     return references;
@@ -405,11 +395,12 @@ public class MarkdownChatNotePreprocessor {
   }
 
   /**
-   * Find the end position of YAML frontmatter (second "---" marker).
-   * Returns the index after the closing "---", or -1 if not found.
+   * Find the end position of YAML frontmatter (second "---" marker). Returns the index after the
+   * closing "---", or -1 if not found.
    */
   private int findYamlFrontmatterEnd(String content) {
-    Pattern yamlPattern = Pattern.compile("^---\\s*\\n.*?\\n---", Pattern.DOTALL | Pattern.MULTILINE);
+    Pattern yamlPattern =
+        Pattern.compile("^---\\s*\\n.*?\\n---", Pattern.DOTALL | Pattern.MULTILINE);
     Matcher matcher = yamlPattern.matcher(content);
     if (matcher.find()) {
       return matcher.end();
@@ -510,7 +501,8 @@ public class MarkdownChatNotePreprocessor {
 
       // Skip evolution notes at the beginning: lines starting with # (but NOT shebangs)
       // Shebangs start with #! and should be preserved as actual code
-      if (!foundContent && (trimmed.isEmpty() || (trimmed.startsWith("#") && !trimmed.startsWith("#!")))) {
+      if (!foundContent
+          && (trimmed.isEmpty() || (trimmed.startsWith("#") && !trimmed.startsWith("#!")))) {
         continue;
       }
 
@@ -546,14 +538,6 @@ public class MarkdownChatNotePreprocessor {
     if (limitationMatcher.find()) {
       builder.processingLimitation(limitationMatcher.group(1).trim());
     }
-  }
-
-  private List<String> parseList(String listStr) {
-    if (listStr == null || listStr.trim().isEmpty()) {
-      return Collections.emptyList();
-    }
-    return Arrays.stream(listStr.split(",")).map(String::trim).filter(s -> !s.isEmpty())
-        .collect(Collectors.toList());
   }
 
   /**
