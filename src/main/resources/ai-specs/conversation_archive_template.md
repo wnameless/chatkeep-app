@@ -82,8 +82,10 @@ TOTAL_FILE_SIZE: 0 KB
 
 # [Conversation Topic/Title]
 
-**Date:** YYYY-MM-DD  
+**Date:** YYYY-MM-DD
 **Tags:** [tag1, tag2, tag3]
+
+_Note: Tags can also be provided without brackets (e.g., `tag1, tag2, tag3`). Both formats are supported for maximum compatibility with different AI platforms._
 
 ---
 
@@ -121,10 +123,20 @@ TOTAL_FILE_SIZE: 0 KB
 
 ## References/Links
 
-[Any external sources, tools, documentation, or resources that were mentioned or recommended]
+[Any external sources, tools, documentation, concepts, or contextual information mentioned during the conversation]
 
-- [Link 1 with description]
-- [Link 2 with description]
+**Two types of references:**
+
+1. **External Links** (with URLs):
+   - [Link description](https://example.com)
+   - Link description: https://example.com
+
+2. **Descriptive References** (without URLs):
+   - CAP Theorem: Consistency, Availability, Partition tolerance tradeoffs
+   - MongoDB versions mentioned: 4.0 (feature A), 4.2 (feature B), current stable 8.x
+   - Design patterns, concepts, dates, or other inline metadata
+
+_Note: References can include URLs (external links) or be descriptive (concepts, theories, contextual information). Both are valuable - the description itself conveys the nature of the reference._
 
 ---
 

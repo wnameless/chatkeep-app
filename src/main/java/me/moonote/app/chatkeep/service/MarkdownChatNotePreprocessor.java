@@ -28,6 +28,7 @@ import me.moonote.app.chatkeep.dto.FollowUpSectionDto;
 import me.moonote.app.chatkeep.dto.InsightsSectionDto;
 import me.moonote.app.chatkeep.dto.QuerySectionDto;
 import me.moonote.app.chatkeep.dto.ReferenceDto;
+import me.moonote.app.chatkeep.dto.ReferenceType;
 import me.moonote.app.chatkeep.dto.WorkaroundDto;
 import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
 import me.moonote.app.chatkeep.validation.InvalidChatNoteException;
@@ -129,12 +130,24 @@ public class MarkdownChatNotePreprocessor {
   }
 
   private List<String> extractTags(String content) {
-    Pattern tagsPattern = Pattern.compile("\\*\\*Tags:\\*\\* \\[(.+?)\\]");
-    Matcher matcher = tagsPattern.matcher(content);
+    // Try with brackets first: **Tags:** [tag1, tag2, tag3]
+    Pattern tagsPatternWithBrackets = Pattern.compile("\\*\\*Tags:\\*\\* \\[(.+?)\\]");
+    Matcher matcher = tagsPatternWithBrackets.matcher(content);
     if (matcher.find()) {
       String tagsStr = matcher.group(1);
       return Arrays.stream(tagsStr.split(",")).map(String::trim).collect(Collectors.toList());
     }
+
+    // Fallback: Try without brackets: **Tags:** tag1, tag2, tag3
+    Pattern tagsPatternWithoutBrackets = Pattern.compile("\\*\\*Tags:\\*\\*\\s+(.+?)(?=\\n|$)");
+    matcher = tagsPatternWithoutBrackets.matcher(content);
+    if (matcher.find()) {
+      String tagsStr = matcher.group(1).trim();
+      return Arrays.stream(tagsStr.split(",")).map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .collect(Collectors.toList());
+    }
+
     return Collections.emptyList();
   }
 
@@ -303,21 +316,58 @@ public class MarkdownChatNotePreprocessor {
     }
 
     String refsSection = matcher.group(1);
+    String[] lines = refsSection.split("\n");
 
-    // Try markdown link format: [Description](URL)
-    Pattern mdLinkPattern = Pattern.compile("-\\s*\\[(.+?)\\]\\((.+?)\\)");
-    Matcher mdLinkMatcher = mdLinkPattern.matcher(refsSection);
-    while (mdLinkMatcher.find()) {
-      references.add(ReferenceDto.builder().description(mdLinkMatcher.group(1).trim())
-          .url(mdLinkMatcher.group(2).trim()).build());
-    }
+    for (String line : lines) {
+      String trimmedLine = line.trim();
 
-    // Try plain text format: - Description: URL
-    Pattern plainLinkPattern = Pattern.compile("-\\s*([^:]+?):\\s*(https?://[^\\s]+)");
-    Matcher plainLinkMatcher = plainLinkPattern.matcher(refsSection);
-    while (plainLinkMatcher.find()) {
-      references.add(ReferenceDto.builder().description(plainLinkMatcher.group(1).trim())
-          .url(plainLinkMatcher.group(2).trim()).build());
+      // Skip empty lines and lines that don't start with bullet point
+      if (trimmedLine.isEmpty() || !trimmedLine.startsWith("-")) {
+        continue;
+      }
+
+      // Remove bullet point and trim
+      String lineContent = trimmedLine.substring(1).trim();
+
+      // Try Format 1: Markdown link [Description](URL)
+      Pattern mdLinkPattern = Pattern.compile("\\[(.+?)\\]\\((.+?)\\)");
+      Matcher mdLinkMatcher = mdLinkPattern.matcher(lineContent);
+      if (mdLinkMatcher.find()) {
+        references.add(ReferenceDto.builder()
+            .description(mdLinkMatcher.group(1).trim())
+            .url(mdLinkMatcher.group(2).trim())
+            .type(ReferenceType.EXTERNAL_LINK)
+            .build());
+        continue;
+      }
+
+      // Try Format 2: Plain "Description: URL (optional comment)"
+      if (lineContent.contains("http://") || lineContent.contains("https://")) {
+        int colonIndex = lineContent.indexOf(':');
+        if (colonIndex > 0) {
+          String description = lineContent.substring(0, colonIndex).trim();
+          String remainder = lineContent.substring(colonIndex + 1).trim();
+
+          // Extract URL (first token, stop at space or parenthesis)
+          String[] tokens = remainder.split("[\\s()]");
+          String url = tokens[0].trim();
+
+          references.add(ReferenceDto.builder()
+              .description(description)
+              .url(url)
+              .type(ReferenceType.EXTERNAL_LINK)
+              .build());
+          continue;
+        }
+      }
+
+      // Format 3: Description-only (no URL) - Descriptive reference
+      // The description itself conveys the nature (concept, contextual info, etc.)
+      references.add(ReferenceDto.builder()
+          .description(lineContent)
+          .url(null)
+          .type(ReferenceType.DESCRIPTIVE)
+          .build());
     }
 
     return references;

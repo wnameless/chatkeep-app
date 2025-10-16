@@ -203,13 +203,31 @@
     },
     "reference": {
       "type": "object",
+      "required": [
+        "description"
+      ],
       "properties": {
-        "url": {
-          "type": "string",
-          "format": "uri"
-        },
         "description": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of the reference"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uri",
+          "description": "URL (optional for concept/contextual references)"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "EXTERNAL_LINK",
+            "DESCRIPTIVE"
+          ],
+          "default": "EXTERNAL_LINK",
+          "description": "Type of reference (URL-based or descriptive)"
         }
       }
     },

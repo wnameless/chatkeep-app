@@ -43,7 +43,12 @@ Write concise summaries for:
 - List any attachments or artifacts referenced
 
 ## Step 5: Extract References
-List all external links, documentation, tools, or resources mentioned during the conversation.
+List all external links, documentation, concepts, and contextual information mentioned during the conversation. Include two types:
+
+1. **External Links** - URLs to documentation, tools, articles (e.g., "MongoDB Documentation: https://docs.mongodb.com")
+2. **Descriptive References** - Important concepts, contextual info, or other references without URLs (e.g., "CAP Theorem: Consistency, Availability, Partition tolerance tradeoffs" or "MongoDB versions: 4.0, 4.2, 8.x")
+
+Both types are valuable and should be included. The description itself conveys the nature of the reference.
 
 ## Step 6: Preserve Conversation Artifacts
 
