@@ -6,9 +6,7 @@
   <!-- Artifact content fragment -->
   <div th:fragment="content" th:id="'artifact-container-' + ${index}">
     <!-- View Mode -->
-    <pre th:id="'artifact-view-' + ${index}" class="bg-gray-50 dark:bg-gray-900 p-4 rounded overflow-x-auto">
-      <code th:text="${artifact.content}">Artifact content will appear here</code>
-    </pre>
+    <pre th:id="'artifact-view-' + ${index}" class="bg-gray-50 dark:bg-gray-900 p-4 rounded overflow-x-auto"><code th:text="${artifact.content}">Artifact content will appear here</code></pre>
 
     <!-- Edit Mode (Hidden by default) -->
     <div th:id="'artifact-edit-' + ${index}" class="hidden">

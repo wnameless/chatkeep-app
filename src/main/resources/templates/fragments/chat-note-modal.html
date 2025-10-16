@@ -275,8 +275,8 @@
         <div id="artifacts-tab" class="tab-content hidden">
           <div class="space-y-3">
             <!-- Artifact list will be dynamically loaded -->
-            <div th:if="${note.artifacts != null && !note.artifacts.isEmpty()}">
-              <div th:each="artifact, iterStat : ${note.artifacts}"
+            <div th:if="${artifacts != null && !artifacts.isEmpty()}">
+              <div th:each="artifact, iterStat : ${artifacts}"
                 class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                 <!-- Artifact Header (Collapsible) -->
                 <button th:attr="onclick=${'toggleArtifact(' + iterStat.index + ')' }"
@@ -316,8 +316,8 @@
         <div id="attachments-tab" class="tab-content hidden">
           <div class="space-y-3">
             <!-- Attachment list will be dynamically loaded -->
-            <div th:if="${note.attachments != null && !note.attachments.isEmpty()}">
-              <div th:each="attachment, iterStat : ${note.attachments}"
+            <div th:if="${attachments != null && !attachments.isEmpty()}">
+              <div th:each="attachment, iterStat : ${attachments}"
                 class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                 <!-- Attachment Header (Collapsible) -->
                 <button th:attr="onclick=${'toggleAttachment(' + iterStat.index + ')' }"
