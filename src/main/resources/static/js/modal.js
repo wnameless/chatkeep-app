@@ -80,7 +80,7 @@ function toggleAttachment(index) {
 
 // ==================== Edit Mode ====================
 
-function enterEditMode(noteId) {
+function enterEditMode() {
     isEditMode = true;
 
     // Show save/cancel buttons, hide edit button
@@ -229,22 +229,12 @@ async function saveStructuredEdits(noteId) {
 
         if (allSuccess) {
             showToast('All changes saved successfully', 'success');
-            exitEditMode();
 
-            // Reload modal via HTMX
-            htmx.ajax('GET', `/fragments/chat-note-modal?id=${noteId}`, {
-                target: '#modal-container',
-                swap: 'innerHTML'
-            });
+            // Simple solution: Close modal and reload entire workspace
+            closeChatNoteModal();
 
-            // Reload grid via HTMX
-            htmx.ajax('GET', '/fragments/chat-notes', {
-                target: '#notes-grid',
-                swap: 'innerHTML'
-            });
-
-            // Trigger count update
-            htmx.trigger(document.body, 'updateCounts');
+            // Full page reload to ensure all changes are reflected
+            window.location.reload();
         } else {
             const failures = results.filter(r => !r.success);
             showToast(`Some updates failed: ${failures.map(f => f.message).join(', ')}`, 'error');
