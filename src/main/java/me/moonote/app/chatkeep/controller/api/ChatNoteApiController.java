@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -639,6 +640,200 @@ public class ChatNoteApiController {
       log.error("Error retrieving all trashed chat notes", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(ApiResponse.error("Failed to retrieve all trashed chat notes"));
+    }
+  }
+
+  // ==================== Field Update Endpoints ====================
+
+  /**
+   * Update chat note title PUT /api/v1/chat-notes/{id}/title
+   */
+  @PutMapping("/{id}/title")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateTitle(@PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateTitleRequest request) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.updateTitle(id, request.getTitle());
+      return ResponseEntity.ok(ApiResponse.success("Title updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating title", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update title"));
+    }
+  }
+
+  /**
+   * Update chat note tags PUT /api/v1/chat-notes/{id}/tags
+   */
+  @PutMapping("/{id}/tags")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateTags(@PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateTagsRequest request) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.updateTags(id, request.getTags());
+      return ResponseEntity.ok(ApiResponse.success("Tags updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating tags", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update tags"));
+    }
+  }
+
+  /**
+   * Update conversation date PUT /api/v1/chat-notes/{id}/conversation-date
+   */
+  @PutMapping("/{id}/conversation-date")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateConversationDate(
+      @PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateConversationDateRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateConversationDate(id, request.getConversationDate());
+      return ResponseEntity
+          .ok(ApiResponse.success("Conversation date updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating conversation date", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update conversation date"));
+    }
+  }
+
+  /**
+   * Update initial query section PUT /api/v1/chat-notes/{id}/initial-query
+   */
+  @PutMapping("/{id}/initial-query")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateInitialQuery(
+      @PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateInitialQueryRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateInitialQuery(id, request.getDescription());
+      return ResponseEntity.ok(ApiResponse.success("Initial query updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating initial query", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update initial query"));
+    }
+  }
+
+  /**
+   * Update key insights section PUT /api/v1/chat-notes/{id}/key-insights
+   */
+  @PutMapping("/{id}/key-insights")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateKeyInsights(
+      @PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateKeyInsightsRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateKeyInsights(id, request.getDescription(), request.getKeyPoints());
+      return ResponseEntity.ok(ApiResponse.success("Key insights updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating key insights", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update key insights"));
+    }
+  }
+
+  /**
+   * Update follow-up explorations section PUT /api/v1/chat-notes/{id}/follow-up
+   */
+  @PutMapping("/{id}/follow-up")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateFollowUpExplorations(
+      @PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateFollowUpRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateFollowUpExplorations(id, request.getDescription());
+      return ResponseEntity
+          .ok(ApiResponse.success("Follow-up explorations updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating follow-up explorations", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update follow-up explorations"));
+    }
+  }
+
+  /**
+   * Update references list PUT /api/v1/chat-notes/{id}/references
+   */
+  @PutMapping("/{id}/references")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateReferences(@PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateReferencesRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateReferences(id, request.getReferences());
+      return ResponseEntity.ok(ApiResponse.success("References updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error updating references", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update references"));
+    }
+  }
+
+  /**
+   * Update artifact content by index PUT /api/v1/chat-notes/{id}/artifacts/{index}
+   */
+  @PutMapping("/{id}/artifacts/{index}")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateArtifactContent(
+      @PathVariable String id, @PathVariable int index,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateContentRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateArtifactContent(id, index, request.getContent());
+      return ResponseEntity
+          .ok(ApiResponse.success("Artifact content updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error updating artifact content", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update artifact content"));
+    }
+  }
+
+  /**
+   * Update attachment content by index PUT /api/v1/chat-notes/{id}/attachments/{index}
+   */
+  @PutMapping("/{id}/attachments/{index}")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateAttachmentContent(
+      @PathVariable String id, @PathVariable int index,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateContentRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.updateAttachmentContent(id, index, request.getContent());
+      return ResponseEntity
+          .ok(ApiResponse.success("Attachment content updated successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error updating attachment content", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to update attachment content"));
     }
   }
 

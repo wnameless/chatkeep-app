@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.ChatNoteDto;
+import me.moonote.app.chatkeep.dto.ReferenceDto;
 import me.moonote.app.chatkeep.dto.response.ArtifactMetadata;
 import me.moonote.app.chatkeep.dto.response.AttachmentMetadata;
 import me.moonote.app.chatkeep.dto.response.ChatNoteDetailLightResponse;
@@ -16,6 +17,11 @@ import me.moonote.app.chatkeep.mapper.ChatNoteMapper;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
+import me.moonote.app.chatkeep.model.ConversationSummary;
+import me.moonote.app.chatkeep.model.FollowUpSection;
+import me.moonote.app.chatkeep.model.InsightsSection;
+import me.moonote.app.chatkeep.model.QuerySection;
+import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
 import me.moonote.app.chatkeep.validation.ChatNoteNotFoundException;
 import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
@@ -449,6 +455,208 @@ public class ChatNoteService {
 
     log.info("Purged {} chat notes trashed before {}", count, cutoffDate);
     return count;
+  }
+
+  // ==================== Field Update Methods ====================
+
+  /**
+   * Update chat note title
+   */
+  public ChatNoteDetailResponse updateTitle(String id, String title) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setTitle(title);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} title updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update chat note tags
+   */
+  public ChatNoteDetailResponse updateTags(String id, List<String> tags) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setTags(tags);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} tags updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update conversation date
+   */
+  public ChatNoteDetailResponse updateConversationDate(String id, java.time.LocalDate date) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    chatNote.setConversationDate(date);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} conversation date updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update initial query section
+   */
+  public ChatNoteDetailResponse updateInitialQuery(String id, String description) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getSummary() == null) {
+      chatNote.setSummary(ConversationSummary.builder().build());
+    }
+
+    QuerySection querySection = chatNote.getSummary().getInitialQuery();
+    if (querySection == null) {
+      querySection = QuerySection.builder().build();
+      chatNote.getSummary().setInitialQuery(querySection);
+    }
+
+    querySection.setDescription(description);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} initial query updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update key insights section
+   */
+  public ChatNoteDetailResponse updateKeyInsights(String id, String description,
+      List<String> keyPoints) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getSummary() == null) {
+      chatNote.setSummary(ConversationSummary.builder().build());
+    }
+
+    InsightsSection insightsSection = chatNote.getSummary().getKeyInsights();
+    if (insightsSection == null) {
+      insightsSection = InsightsSection.builder().build();
+      chatNote.getSummary().setKeyInsights(insightsSection);
+    }
+
+    insightsSection.setDescription(description);
+    insightsSection.setKeyPoints(keyPoints);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} key insights updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update follow-up explorations section
+   */
+  public ChatNoteDetailResponse updateFollowUpExplorations(String id, String description) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getSummary() == null) {
+      chatNote.setSummary(ConversationSummary.builder().build());
+    }
+
+    FollowUpSection followUpSection = chatNote.getSummary().getFollowUpExplorations();
+    if (followUpSection == null) {
+      followUpSection = FollowUpSection.builder().build();
+      chatNote.getSummary().setFollowUpExplorations(followUpSection);
+    }
+
+    followUpSection.setDescription(description);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} follow-up explorations updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update references list (replaces entire list)
+   */
+  public ChatNoteDetailResponse updateReferences(String id, List<ReferenceDto> referenceDtos) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getSummary() == null) {
+      chatNote.setSummary(ConversationSummary.builder().build());
+    }
+
+    // Convert DTOs to entity References
+    List<Reference> references = referenceDtos == null ? List.of()
+        : referenceDtos.stream()
+            .map(dto -> Reference.builder().url(dto.getUrl()).description(dto.getDescription())
+                .build())
+            .toList();
+
+    chatNote.getSummary().setReferences(references);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} references updated", id);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update artifact content by index
+   */
+  public ChatNoteDetailResponse updateArtifactContent(String id, int index, String content) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getArtifacts() == null || index < 0 || index >= chatNote.getArtifacts().size()) {
+      throw new IllegalArgumentException(
+          "Invalid artifact index: " + index + " for chat note: " + id);
+    }
+
+    Artifact artifact = chatNote.getArtifacts().get(index);
+    artifact.setContent(content);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} artifact {} content updated", id, index);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Update attachment content by index
+   */
+  public ChatNoteDetailResponse updateAttachmentContent(String id, int index, String content) {
+    ChatNote chatNote =
+        repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
+
+    if (chatNote.getAttachments() == null || index < 0
+        || index >= chatNote.getAttachments().size()) {
+      throw new IllegalArgumentException(
+          "Invalid attachment index: " + index + " for chat note: " + id);
+    }
+
+    Attachment attachment = chatNote.getAttachments().get(index);
+    attachment.setContent(content);
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Chat note {} attachment {} content updated", id, index);
+
+    return toDetailResponse(updated);
   }
 
   // ==================== Private Helper Methods ====================
