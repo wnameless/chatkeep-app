@@ -174,8 +174,100 @@
           </div>
 
           <!-- Edit Mode (Hidden by default) -->
-          <div id="content-edit-mode" class="hidden">
-            <!-- Split-pane editor will be inserted here -->
+          <div id="content-edit-mode" class="hidden space-y-6">
+
+            <!-- Title Field -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Title
+              </label>
+              <input type="text" id="edit-title" th:value="${note.title}"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+            </div>
+
+            <!-- Tags Field -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tags <span class="text-xs text-gray-500">(comma-separated)</span>
+              </label>
+              <input type="text" id="edit-tags"
+                th:value="${note.tags != null ? #strings.listJoin(note.tags, ', ') : ''}"
+                placeholder="e.g. java, spring, tutorial"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+            </div>
+
+            <!-- Conversation Date Field -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Conversation Date
+              </label>
+              <input type="date" id="edit-conversation-date"
+                th:value="${note.conversationDate}"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+            </div>
+
+            <!-- Initial Query Section -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-question-circle mr-1"></i>Initial Query
+              </label>
+              <textarea id="edit-initial-query" rows="3"
+                th:text="${note.summary?.initialQuery?.description}"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+            </div>
+
+            <!-- Key Insights Section -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-lightbulb mr-1"></i>Key Insights
+              </label>
+              <textarea id="edit-key-insights-desc" rows="3"
+                th:text="${note.summary?.keyInsights?.description}"
+                placeholder="Description of key insights..."
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-2"></textarea>
+              <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                Key Points (one per line)
+              </label>
+              <textarea id="edit-key-points" rows="4"
+                th:text="${note.summary?.keyInsights?.keyPoints != null ? #strings.listJoin(note.summary.keyInsights.keyPoints, '&#10;') : ''}"
+                placeholder="- Point 1&#10;- Point 2&#10;- Point 3"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"></textarea>
+            </div>
+
+            <!-- Follow-up Explorations Section -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-route mr-1"></i>Follow-up Explorations
+              </label>
+              <textarea id="edit-follow-up" rows="3"
+                th:text="${note.summary?.followUpExplorations?.description}"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+            </div>
+
+            <!-- References Section -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-link mr-1"></i>References
+                <span class="text-xs text-gray-500">(JSON format)</span>
+              </label>
+              <textarea id="edit-references" rows="6"
+                th:text="${referencesJson}"
+                placeholder='[{"description": "Reference 1", "url": "https://example.com"}, {"description": "Concept", "url": null}]'
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"></textarea>
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Format: Array of objects with "description" (required) and "url" (optional) fields
+              </p>
+            </div>
+
+            <!-- Save All Button -->
+            <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button th:attr="onclick=${'saveStructuredEdits(''' + note.id + ''')' }"
+                class="w-full px-4 py-3 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>
+                Save All Changes
+              </button>
+            </div>
+
           </div>
         </div>
 

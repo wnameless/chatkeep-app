@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxTrigger;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +48,7 @@ public class ChatNoteFragmentController {
   private final ChatNoteService chatNoteService;
   private final ChatNoteRepository chatNoteRepository;
   private final ChatNoteMapper chatNoteMapper;
+  private final ObjectMapper objectMapper;
 
   // ==================== Main Grid Loading ====================
 
@@ -546,8 +548,20 @@ public class ChatNoteFragmentController {
       note.setMessageCount(chatNoteMapper.estimateMessageCount(entity));
       note.setWordCount(chatNoteMapper.estimateWordCount(entity));
 
+      // Serialize references to JSON string for template
+      String referencesJson = "[]";
+      if (note.getSummary() != null && note.getSummary().getReferences() != null
+          && !note.getSummary().getReferences().isEmpty()) {
+        try {
+          referencesJson = objectMapper.writeValueAsString(note.getSummary().getReferences());
+        } catch (Exception e) {
+          log.warn("Failed to serialize references to JSON", e);
+        }
+      }
+
       model.addAttribute("note", note);
       model.addAttribute("conversationContent", note.getConversationContent());
+      model.addAttribute("referencesJson", referencesJson);
       model.addAttribute("artifacts",
           entity.getArtifacts() != null ? entity.getArtifacts() : List.of());
       model.addAttribute("attachments",
