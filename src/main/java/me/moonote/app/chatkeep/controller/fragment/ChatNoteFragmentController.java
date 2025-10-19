@@ -64,9 +64,10 @@ public class ChatNoteFragmentController {
   @GetMapping("/chat-notes")
   public String getChatNotes(@RequestParam(required = false) String view,
       @RequestParam(defaultValue = "chatnotes") String filter,
+      @RequestParam(required = false) String labelIds,
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,
       Model model, HttpSession session) {
-    log.info("Loading chat notes: view={}, filter={}", view, filter);
+    log.info("Loading chat notes: view={}, filter={}, labelIds={}", view, filter, labelIds);
 
     // Store view preference in session
     if (view != null) {
@@ -88,8 +89,17 @@ public class ChatNoteFragmentController {
           : "fragments/chat-note-cards";
     }
 
-    // Load notes based on filter
-    List<ChatNoteResponse> notes = loadNotesByFilter(filter, userId, page, size);
+    // Load notes based on filter or label
+    List<ChatNoteResponse> notes;
+    if (labelIds != null && !labelIds.isEmpty()) {
+      // Filter by label(s) - show only active notes
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+      notes = chatNoteService.filterActiveByLabelsForUser(userId, List.of(labelIds), "OR", pageable)
+          .getContent();
+    } else {
+      // Regular filter
+      notes = loadNotesByFilter(filter, userId, page, size);
+    }
 
     // Batch fetch all unique label IDs to avoid N+1 query
     Set<String> allLabelIds = notes.stream()

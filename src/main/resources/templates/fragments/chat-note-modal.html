@@ -296,7 +296,7 @@
                 <button th:attr="onclick=${'toggleArtifact(' + iterStat.index + ')' }"
                   th:data-note-id="${note.id}" th:data-artifact-index="${iterStat.index}"
                   hx:get="@{/fragments/artifact/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
-                  hx-trigger="click once" th:hx-target="'#artifact-content-' + ${iterStat.index}"
+                  hx-trigger="click once" hx:target="${'#artifact-content-' + iterStat.index}"
                   hx-swap="innerHTML"
                   class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
@@ -337,7 +337,7 @@
                 <button th:attr="onclick=${'toggleAttachment(' + iterStat.index + ')' }"
                   th:data-note-id="${note.id}" th:data-attachment-index="${iterStat.index}"
                   hx:get="@{/fragments/attachment/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
-                  hx-trigger="click once" th:hx-target="'#attachment-content-' + ${iterStat.index}"
+                  hx-trigger="click once" hx:target="${'#attachment-content-' + iterStat.index}"
                   hx-swap="innerHTML"
                   class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
