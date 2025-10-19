@@ -47,6 +47,122 @@ function initializeSidebar() {
     });
 }
 
+// ==================== Label Filtering ====================
+
+// Track selected label IDs
+const selectedLabelIds = new Set();
+
+function toggleLabelSelection(button) {
+    const labelId = button.dataset.labelId;
+    const labelColor = button.dataset.labelColor;
+    const indicator = button.querySelector('.label-indicator');
+    const colorDot = indicator.querySelector('.color-dot');
+    const checkmark = indicator.querySelector('.checkmark-icon');
+    const labelName = button.querySelector('.label-name');
+
+    // Toggle selection
+    if (selectedLabelIds.has(labelId)) {
+        // Deselect
+        selectedLabelIds.delete(labelId);
+
+        // Reset to unselected state
+        button.style.backgroundColor = '';
+        button.classList.remove('selected-label');
+        button.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-700');
+
+        // Show color dot, hide checkmark
+        colorDot.classList.remove('hidden');
+        checkmark.classList.add('hidden');
+
+        // Reset text color
+        labelName.classList.remove('text-white');
+        labelName.classList.add('text-gray-700', 'dark:text-gray-300');
+
+    } else {
+        // Select
+        selectedLabelIds.add(labelId);
+
+        // Apply selected state with label color
+        button.style.backgroundColor = labelColor;
+        button.classList.add('selected-label');
+        button.classList.remove('hover:bg-gray-100', 'dark:hover:bg-gray-700');
+
+        // Hide color dot, show checkmark
+        colorDot.classList.add('hidden');
+        checkmark.classList.remove('hidden');
+
+        // White text for selected
+        labelName.classList.add('text-white');
+        labelName.classList.remove('text-gray-700', 'dark:text-gray-300');
+    }
+
+    // Update filter and UI
+    updateLabelFilter();
+}
+
+function updateLabelFilter() {
+    const clearButton = document.getElementById('clear-label-filters');
+
+    if (selectedLabelIds.size > 0) {
+        // Show clear button
+        clearButton.classList.remove('hidden');
+
+        // Build comma-separated labelIds
+        const labelIdsParam = Array.from(selectedLabelIds).join(',');
+
+        // Trigger HTMX request to filter notes
+        htmx.ajax('GET', `/fragments/chat-notes?labelIds=${labelIdsParam}`, {
+            target: '#notes-grid',
+            swap: 'innerHTML'
+        });
+    } else {
+        // Hide clear button
+        clearButton.classList.add('hidden');
+
+        // Reload all notes (no filter)
+        htmx.ajax('GET', '/fragments/chat-notes', {
+            target: '#notes-grid',
+            swap: 'innerHTML'
+        });
+    }
+}
+
+function clearLabelFilters() {
+    // Clear all selections
+    selectedLabelIds.clear();
+
+    // Reset all label buttons to unselected state
+    document.querySelectorAll('.label-filter-btn').forEach(button => {
+        const labelColor = button.dataset.labelColor;
+        const indicator = button.querySelector('.label-indicator');
+        const colorDot = indicator.querySelector('.color-dot');
+        const checkmark = indicator.querySelector('.checkmark-icon');
+        const labelName = button.querySelector('.label-name');
+
+        // Reset styling
+        button.style.backgroundColor = '';
+        button.classList.remove('selected-label');
+        button.classList.add('hover:bg-gray-100', 'dark:hover:bg-gray-700');
+
+        // Show color dot, hide checkmark
+        colorDot.classList.remove('hidden');
+        checkmark.classList.add('hidden');
+
+        // Reset text color
+        labelName.classList.remove('text-white');
+        labelName.classList.add('text-gray-700', 'dark:text-gray-300');
+    });
+
+    // Hide clear button
+    document.getElementById('clear-label-filters').classList.add('hidden');
+
+    // Reload all notes
+    htmx.ajax('GET', '/fragments/chat-notes', {
+        target: '#notes-grid',
+        swap: 'innerHTML'
+    });
+}
+
 // ==================== Header Management ====================
 
 function initializeHeader() {

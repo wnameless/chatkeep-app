@@ -1,5 +1,6 @@
 package me.moonote.app.chatkeep.controller.fragment;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +97,10 @@ public class ChatNoteFragmentController {
     List<ChatNoteResponse> notes;
     if (labelIds != null && !labelIds.isEmpty()) {
       // Filter by label(s) - show only active notes
+      // Parse comma-separated labelIds into list (supports multiple label filtering)
+      List<String> labelIdList = Arrays.asList(labelIds.split(","));
       Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-      notes = chatNoteService.filterActiveByLabelsForUser(userId, List.of(labelIds), "OR", pageable)
+      notes = chatNoteService.filterActiveByLabelsForUser(userId, labelIdList, "OR", pageable)
           .getContent();
     } else {
       // Regular filter
