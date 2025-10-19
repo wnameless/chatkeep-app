@@ -400,8 +400,6 @@ function handleFileImport(event) {
                 target: '#notes-grid',
                 swap: 'innerHTML'
             });
-            // Trigger count update
-            htmx.trigger(document.body, 'updateCounts');
         } else {
             showToast(data.message || 'Import failed', 'error');
         }

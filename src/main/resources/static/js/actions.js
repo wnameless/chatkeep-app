@@ -102,8 +102,6 @@ function duplicateChatNote(noteId) {
                 target: '#notes-grid',
                 swap: 'innerHTML'
             });
-            // Trigger count update
-            htmx.trigger(document.body, 'updateCounts');
         } else {
             showToast('Error duplicating ChatNote', 'error');
         }

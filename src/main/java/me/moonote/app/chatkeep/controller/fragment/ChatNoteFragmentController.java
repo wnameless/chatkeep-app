@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
-import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxTrigger;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -161,7 +160,6 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/favorite")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String toggleFavorite(@PathVariable String id, @RequestParam Boolean isFavorite,
       Model model, HttpServletResponse response) {
 
@@ -196,7 +194,6 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/archive")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String toggleArchive(@PathVariable String id, @RequestParam Boolean isArchived,
       Model model, HttpServletResponse response) {
 
@@ -227,7 +224,6 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/trash")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String moveToTrash(@PathVariable String id, HttpServletResponse response) {
 
     log.info("Move to trash: id={}", id);
@@ -253,7 +249,6 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/restore")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String restoreFromTrash(@PathVariable String id, Model model,
       HttpServletResponse response) {
 
@@ -283,7 +278,6 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/visibility")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String toggleVisibility(@PathVariable String id, @RequestParam Boolean isPublic,
       Model model, HttpServletResponse response) {
 
@@ -314,7 +308,6 @@ public class ChatNoteFragmentController {
    */
   @DeleteMapping("/chat-notes/{id}/permanent")
   @HxRequest
-  @HxTrigger("updateCounts")
   public String permanentlyDelete(@PathVariable String id, HttpServletResponse response) {
 
     log.info("Permanently delete: id={}", id);
@@ -500,59 +493,6 @@ public class ChatNoteFragmentController {
       model.addAttribute("notes", List.of());
       model.addAttribute("filter", "tags");
       return "fragments/chat-note-cards";
-    }
-  }
-
-  // ==================== Sidebar Counts ====================
-
-  /**
-   * Get sidebar counts GET /fragments/sidebar-counts
-   */
-  @GetMapping("/sidebar-counts")
-  public String getSidebarCounts(Model model) {
-
-    log.info("Get sidebar counts");
-
-    String userId = SecurityUtils.getCurrentUserId();
-
-    if (userId == null) {
-      model.addAttribute("activeCount", 0L);
-      model.addAttribute("favoritesCount", 0L);
-      model.addAttribute("sharedCount", 0L);
-      model.addAttribute("archivedCount", 0L);
-      model.addAttribute("trashCount", 0L);
-      model.addAttribute("totalCount", 0L);
-      return "fragments/sidebar-counts";
-    }
-
-    try {
-      Pageable singlePage = PageRequest.of(0, 1);
-
-      long activeCount = chatNoteService.getActiveChatNotes(userId, singlePage).getTotalElements();
-      long favoritesCount =
-          chatNoteService.getFavoriteChatNotes(userId, singlePage).getTotalElements();
-      long sharedCount = chatNoteService.getPublicChatNotes(singlePage).getTotalElements();
-      long archivedCount = chatNoteService.getArchivedChatNotes(userId).size();
-      long trashCount = chatNoteService.getTrashedChatNotes(userId).size();
-
-      model.addAttribute("activeCount", activeCount);
-      model.addAttribute("favoritesCount", favoritesCount);
-      model.addAttribute("sharedCount", sharedCount);
-      model.addAttribute("archivedCount", archivedCount);
-      model.addAttribute("trashCount", trashCount);
-      model.addAttribute("totalCount", activeCount + archivedCount);
-
-      return "fragments/sidebar-counts";
-
-    } catch (Exception e) {
-      log.error("Error getting sidebar counts", e);
-      model.addAttribute("activeCount", 0L);
-      model.addAttribute("favoritesCount", 0L);
-      model.addAttribute("sharedCount", 0L);
-      model.addAttribute("archivedCount", 0L);
-      model.addAttribute("trashCount", 0L);
-      model.addAttribute("totalCount", 0L);
-      return "fragments/sidebar-counts";
     }
   }
 
