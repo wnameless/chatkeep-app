@@ -151,7 +151,7 @@
                 hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
                 hx-target="closest .chat-note-card" hx-swap="outerHTML"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
-                <i th:class="${note.isPublic ? 'fas fa-lock' : 'fas fa-globe'}" class="w-4"></i>
+                <i th:class="${note.isPublic ? 'fas fa-lock w-4' : 'fas fa-globe w-4'}"></i>
                 <span th:text="${note.isPublic ? 'Make Private' : 'Make Public'}">Make Public</span>
               </button>
 

@@ -103,14 +103,8 @@
     }
 
     /* Fix dropdown menu rendering in masonry layout */
-    .more-menu-container {
-      position: relative;
-      z-index: 50; /* Ensure container has high z-index */
-    }
-
     .more-menu {
-      z-index: 9999; /* Very high z-index to render above everything */
-      transform: translateZ(0); /* Create new stacking context for proper rendering */
+      column-count: 1 !important; /* Prevent masonry column layout from affecting menu */
     }
 
     /* List view styling */
