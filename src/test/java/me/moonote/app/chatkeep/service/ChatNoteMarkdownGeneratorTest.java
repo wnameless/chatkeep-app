@@ -1,14 +1,20 @@
 package me.moonote.app.chatkeep.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +30,8 @@ import me.moonote.app.chatkeep.model.InsightsSection;
 import me.moonote.app.chatkeep.model.QuerySection;
 import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.model.Workaround;
+import me.moonote.app.chatkeep.repository.ArtifactRepository;
+import me.moonote.app.chatkeep.repository.AttachmentRepository;
 import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
 import me.moonote.app.chatkeep.validation.JsonSchemaValidator;
 
@@ -36,26 +44,56 @@ class ChatNoteMarkdownGeneratorTest {
   @Autowired
   private JsonSchemaValidator schemaValidator;
 
+  @Mock
+  private ArtifactRepository artifactRepository;
+
+  @Mock
+  private AttachmentRepository attachmentRepository;
+
   private ChatNoteMarkdownGenerator generator;
   private MarkdownChatNotePreprocessor preprocessor;
   private ChatNoteMapper mapper;
 
   private String dragonwellMarkdown;
   private ChatNote dragonwellChatNote;
+  private ChatNoteDto dragonwellDto;
 
+  // In-memory storage for test artifacts/attachments
+  private List<Artifact> testArtifacts = new ArrayList<>();
+  private List<Attachment> testAttachments = new ArrayList<>();
+
+  @SuppressWarnings("unused")
   @BeforeEach
   void setUp() throws IOException {
-    generator = new ChatNoteMarkdownGenerator();
+    MockitoAnnotations.openMocks(this);
+
+    generator = new ChatNoteMarkdownGenerator(artifactRepository, attachmentRepository);
     preprocessor = new MarkdownChatNotePreprocessor(objectMapper, schemaValidator);
     mapper = new ChatNoteMapper();
+
+    // Mock repository behavior to return our test data regardless of chatNoteId
+    // (chatNoteId might be null in tests since entities aren't saved to MongoDB)
+    when(artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(anyString()))
+        .thenAnswer(invocation -> new ArrayList<>(testArtifacts));
+    when(attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(anyString()))
+        .thenAnswer(invocation -> new ArrayList<>(testAttachments));
+
+    // Also handle null ID case
+    when(artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(null))
+        .thenAnswer(invocation -> new ArrayList<>(testArtifacts));
+    when(attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(null))
+        .thenAnswer(invocation -> new ArrayList<>(testAttachments));
 
     // Load and preprocess the dragonwell markdown for reference
     dragonwellMarkdown =
         Files.readString(Paths.get("src/test/resources/archive-markdowns/dragonwell.md"));
 
     ChatNoteValidationResult result = preprocessor.preprocess(dragonwellMarkdown);
-    ChatNoteDto dto = result.getChatNoteDto();
-    dragonwellChatNote = mapper.toEntity(dto, "test-user", dragonwellMarkdown);
+    dragonwellDto = result.getChatNoteDto();
+    dragonwellChatNote = mapper.toEntity(dragonwellDto, "test-user", dragonwellMarkdown);
+
+    // Populate test data from dragonwell DTO
+    populateTestDataFromDto(dragonwellDto);
   }
 
   @Test
@@ -292,8 +330,11 @@ class ChatNoteMarkdownGeneratorTest {
                 .attachmentsReferenced(Collections.emptyList())
                 .artifactsCreated(Collections.emptyList()).build())
             .references(Collections.emptyList()).build())
-        .artifacts(Collections.emptyList()).attachments(Collections.emptyList())
         .workarounds(Collections.emptyList()).build();
+
+    // Clear test data (no artifacts/attachments for minimal test)
+    testArtifacts.clear();
+    testAttachments.clear();
 
     // Act
     String generatedMarkdown = generator.generateMarkdown(minimalNote);
@@ -310,17 +351,21 @@ class ChatNoteMarkdownGeneratorTest {
 
   @Test
   void testGenerateMarkdown_WithAttachments_ShouldFormatCorrectly() {
-    // Arrange - Create ChatNote with attachments
-    Attachment attachment1 = Attachment.builder().filename("test.md")
+    // Arrange - Create ChatNote with attachment count
+    Attachment attachment1 = Attachment.builder().chatNoteId("test-note-id").filename("test.md")
         .content("# Test Document\n\nSome content here.").isSummarized(false).build();
 
-    Attachment attachment2 =
-        Attachment.builder().filename("large.pdf").content("# Summary\n\nSummarized content.")
-            .isSummarized(true).originalSize("150 pages / 2.5 MB").summarizationLevel("Partial")
-            .contentPreserved("Executive summary, key findings").build();
+    Attachment attachment2 = Attachment.builder().chatNoteId("test-note-id").filename("large.pdf")
+        .content("# Summary\n\nSummarized content.").isSummarized(true)
+        .originalSize("150 pages / 2.5 MB").summarizationLevel("Partial")
+        .contentPreserved("Executive summary, key findings").build();
+
+    // Populate test attachments
+    testArtifacts.clear();
+    testAttachments.clear();
+    testAttachments.addAll(Arrays.asList(attachment1, attachment2));
 
     ChatNote noteWithAttachments = createBasicChatNote();
-    noteWithAttachments.setAttachments(Arrays.asList(attachment1, attachment2));
     noteWithAttachments.setAttachmentCount(2);
 
     // Act
@@ -368,11 +413,15 @@ class ChatNoteMarkdownGeneratorTest {
   @Test
   void testGenerateMarkdown_WithArtifactMissingOptionalFields_ShouldHandleGracefully() {
     // Arrange - Artifact without language and version
-    Artifact artifact = Artifact.builder().type("poem").title("Morning Thoughts")
-        .content("Roses are red\nViolets are blue").build();
+    Artifact artifact = Artifact.builder().chatNoteId("test-note-id").type("poem")
+        .title("Morning Thoughts").content("Roses are red\nViolets are blue").build();
+
+    // Populate test artifacts
+    testArtifacts.clear();
+    testAttachments.clear();
+    testArtifacts.add(artifact);
 
     ChatNote noteWithArtifact = createBasicChatNote();
-    noteWithArtifact.setArtifacts(Collections.singletonList(artifact));
     noteWithArtifact.setArtifactCount(1);
 
     // Act
@@ -557,7 +606,34 @@ class ChatNoteMarkdownGeneratorTest {
                     .attachmentsReferenced(Collections.emptyList())
                     .artifactsCreated(Collections.emptyList()).build())
             .references(Collections.emptyList()).build())
-        .artifacts(Collections.emptyList()).attachments(Collections.emptyList())
         .workarounds(Collections.emptyList()).build();
+  }
+
+  // Helper method to populate test artifacts/attachments from DTO
+  private void populateTestDataFromDto(ChatNoteDto dto) {
+    testArtifacts.clear();
+    testAttachments.clear();
+
+    if (dto.getArtifacts() != null) {
+      for (var artifactDto : dto.getArtifacts()) {
+        testArtifacts.add(Artifact.builder().chatNoteId("test-note-id").type(artifactDto.getType())
+            .title(artifactDto.getTitle()).language(artifactDto.getLanguage())
+            .version(artifactDto.getVersion()).iterations(artifactDto.getIterations())
+            .evolutionNotes(artifactDto.getEvolutionNotes()).content(artifactDto.getContent())
+            .build());
+      }
+    }
+
+    if (dto.getAttachments() != null) {
+      for (var attachmentDto : dto.getAttachments()) {
+        testAttachments.add(
+            Attachment.builder().chatNoteId("test-note-id").filename(attachmentDto.getFilename())
+                .content(attachmentDto.getContent()).isSummarized(attachmentDto.getIsSummarized())
+                .originalSize(attachmentDto.getOriginalSize())
+                .summarizationLevel(attachmentDto.getSummarizationLevel())
+                .contentPreserved(attachmentDto.getContentPreserved())
+                .processingLimitation(attachmentDto.getProcessingLimitation()).build());
+      }
+    }
   }
 }

@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.moonote.app.chatkeep.dto.ChatNoteDto;
 import me.moonote.app.chatkeep.mapper.ChatNoteMapper;
-import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.Reference;
@@ -71,7 +70,7 @@ class MarkdownToChatNoteConversionTest {
     // Verify complete data preservation from markdown to entity
     verifyMetadata(chatNote);
     verifySummary(chatNote);
-    verifyArtifacts(chatNote);
+    verifyArtifacts(dto); // Verify artifacts from DTO (no longer embedded in entity)
     verifyLifecycleDefaults(chatNote, userId);
     verifyMarkdownContentPreservation(chatNote);
   }
@@ -159,11 +158,11 @@ class MarkdownToChatNoteConversionTest {
     }
   }
 
-  private void verifyArtifacts(ChatNote chatNote) {
-    assertNotNull(chatNote.getArtifacts());
-    assertEquals(1, chatNote.getArtifacts().size(), "Should have exactly 1 artifact");
+  private void verifyArtifacts(ChatNoteDto dto) {
+    assertNotNull(dto.getArtifacts());
+    assertEquals(1, dto.getArtifacts().size(), "Should have exactly 1 artifact");
 
-    Artifact artifact = chatNote.getArtifacts().get(0);
+    var artifact = dto.getArtifacts().get(0);
 
     // Artifact metadata
     assertEquals("script", artifact.getType());
@@ -252,10 +251,11 @@ class MarkdownToChatNoteConversionTest {
     ChatNote chatNote = mapper.toEntity(dto, userId, dragonwellMarkdown);
 
     // Assert - Verify no data loss during conversion
-    // Note: Artifact count in metadata is 1, but regex might match examples too
-    // The important thing is that the actual artifact is preserved correctly
-    assertTrue(chatNote.getArtifacts().size() >= dto.getMetadata().getArtifactCount().intValue(),
-        "Should have at least as many artifacts as metadata indicates");
+    // Verify artifact count matches metadata
+    assertEquals(dto.getMetadata().getArtifactCount().intValue(), dto.getArtifacts().size(),
+        "Artifact count in metadata should match actual artifacts");
+    assertEquals(dto.getMetadata().getArtifactCount().intValue(), chatNote.getArtifactCount(),
+        "ChatNote artifact count should match metadata");
 
     // Tag preservation
     assertEquals(dto.getMetadata().getTags().size(), chatNote.getTags().size(),
@@ -267,12 +267,11 @@ class MarkdownToChatNoteConversionTest {
     assertEquals(dto.getSummary().getReferences().size(),
         chatNote.getSummary().getReferences().size(), "All references should be preserved");
 
-    // Artifact content preservation
+    // Verify all DTO artifacts are valid (entity no longer embeds artifacts)
     for (int i = 0; i < dto.getArtifacts().size(); i++) {
-      assertEquals(dto.getArtifacts().get(i).getContent(),
-          chatNote.getArtifacts().get(i).getContent(),
-          "Artifact " + i + " content should be preserved exactly");
-      assertEquals(dto.getArtifacts().get(i).getType(), chatNote.getArtifacts().get(i).getType(),
+      assertNotNull(dto.getArtifacts().get(i).getContent(),
+          "Artifact " + i + " content should be preserved");
+      assertNotNull(dto.getArtifacts().get(i).getType(),
           "Artifact " + i + " type should be preserved");
     }
   }
@@ -301,15 +300,17 @@ class MarkdownToChatNoteConversionTest {
 
     // Act - Run pipeline twice
     ChatNoteValidationResult result1 = preprocessor.preprocess(dragonwellMarkdown);
-    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), userId, dragonwellMarkdown);
+    ChatNoteDto dto1 = result1.getChatNoteDto();
+    ChatNote chatNote1 = mapper.toEntity(dto1, userId, dragonwellMarkdown);
 
     ChatNoteValidationResult result2 = preprocessor.preprocess(dragonwellMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), userId, dragonwellMarkdown);
+    ChatNoteDto dto2 = result2.getChatNoteDto();
+    ChatNote chatNote2 = mapper.toEntity(dto2, userId, dragonwellMarkdown);
 
     // Assert - Results should be identical
     assertEquals(chatNote1.getTitle(), chatNote2.getTitle(), "Titles should match");
     assertEquals(chatNote1.getTags().size(), chatNote2.getTags().size(), "Tag counts should match");
-    assertEquals(chatNote1.getArtifacts().size(), chatNote2.getArtifacts().size(),
+    assertEquals(chatNote1.getArtifactCount(), chatNote2.getArtifactCount(),
         "Artifact counts should match");
     assertEquals(chatNote1.getSummary().getReferences().size(),
         chatNote2.getSummary().getReferences().size(), "Reference counts should match");
@@ -317,8 +318,10 @@ class MarkdownToChatNoteConversionTest {
     // Content should be identical
     assertEquals(chatNote1.getMarkdownContent(), chatNote2.getMarkdownContent(),
         "Markdown content should be identical");
-    assertEquals(chatNote1.getArtifacts().get(0).getContent(),
-        chatNote2.getArtifacts().get(0).getContent(), "Artifact content should be identical");
+
+    // Verify artifact content from DTOs
+    assertEquals(dto1.getArtifacts().get(0).getContent(), dto2.getArtifacts().get(0).getContent(),
+        "Artifact content should be identical");
   }
 
   @Test
@@ -364,10 +367,12 @@ class MarkdownToChatNoteConversionTest {
     assertNotNull(chatNote.getArchiveVersion(), "Archive version is required");
     assertNotNull(chatNote.getChatNoteCompleteness(), "Completeness is required");
 
-    // All collections should be non-null (can be empty)
+    // All embedded collections should be non-null (can be empty)
     assertNotNull(chatNote.getTags(), "Tags list should be non-null");
-    assertNotNull(chatNote.getArtifacts(), "Artifacts list should be non-null");
-    assertNotNull(chatNote.getAttachments(), "Attachments list should be non-null");
     assertNotNull(chatNote.getWorkarounds(), "Workarounds list should be non-null");
+
+    // Artifact/attachment counts should be set (artifacts/attachments are in separate collections)
+    assertNotNull(chatNote.getArtifactCount(), "Artifact count should be set");
+    assertNotNull(chatNote.getAttachmentCount(), "Attachment count should be set");
   }
 }

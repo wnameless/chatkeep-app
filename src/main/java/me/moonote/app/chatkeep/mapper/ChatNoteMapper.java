@@ -40,8 +40,9 @@ public class ChatNoteMapper {
         .totalFileSize(dto.getMetadata().getTotalFileSize()).title(dto.getMetadata().getTitle())
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())
         .labelIds(new java.util.ArrayList<>()) // Initialize empty label list
-        .summary(toSummary(dto.getSummary())).artifacts(toArtifacts(dto.getArtifacts()))
-        .attachments(toAttachments(dto.getAttachments()))
+        .summary(toSummary(dto.getSummary()))
+        // NOTE: artifacts and attachments are now stored in separate collections
+        // They are saved by ChatNoteService after the ChatNote is created
         .workarounds(toWorkarounds(dto.getWorkarounds())).markdownContent(markdownContent) // Store
                                                                                            // original
                                                                                            // markdown

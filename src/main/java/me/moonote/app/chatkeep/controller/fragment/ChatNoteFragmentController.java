@@ -33,6 +33,8 @@ import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.model.Label;
+import me.moonote.app.chatkeep.repository.ArtifactRepository;
+import me.moonote.app.chatkeep.repository.AttachmentRepository;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
 import me.moonote.app.chatkeep.repository.LabelRepository;
 import me.moonote.app.chatkeep.security.SecurityUtils;
@@ -51,6 +53,8 @@ public class ChatNoteFragmentController {
 
   private final ChatNoteService chatNoteService;
   private final ChatNoteRepository chatNoteRepository;
+  private final ArtifactRepository artifactRepository;
+  private final AttachmentRepository attachmentRepository;
   private final ChatNoteMapper chatNoteMapper;
   private final ObjectMapper objectMapper;
   private final LabelRepository labelRepository;
@@ -466,10 +470,13 @@ public class ChatNoteFragmentController {
       model.addAttribute("note", note);
       model.addAttribute("conversationContent", note.getConversationContent());
       model.addAttribute("referencesJson", referencesJson);
-      model.addAttribute("artifacts",
-          entity.getArtifacts() != null ? entity.getArtifacts() : List.of());
-      model.addAttribute("attachments",
-          entity.getAttachments() != null ? entity.getAttachments() : List.of());
+
+      // Fetch artifacts and attachments from separate collections
+      List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(id);
+      List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(id);
+
+      model.addAttribute("artifacts", artifacts);
+      model.addAttribute("attachments", attachments);
 
       return "fragments/chat-note-modal :: modal";
 
@@ -562,9 +569,11 @@ public class ChatNoteFragmentController {
     noteData.put("isArchived", entity.getIsArchived() != null ? entity.getIsArchived() : false);
     noteData.put("isPublic", entity.getIsPublic() != null ? entity.getIsPublic() : false);
     noteData.put("isTrashed", entity.getIsTrashed() != null ? entity.getIsTrashed() : false);
-    noteData.put("artifactCount", entity.getArtifacts() != null ? entity.getArtifacts().size() : 0);
+
+    // Use counts from ChatNote entity (already stored there)
+    noteData.put("artifactCount", entity.getArtifactCount() != null ? entity.getArtifactCount() : 0);
     noteData.put("attachmentCount",
-        entity.getAttachments() != null ? entity.getAttachments().size() : 0);
+        entity.getAttachmentCount() != null ? entity.getAttachmentCount() : 0);
     return noteData;
   }
 

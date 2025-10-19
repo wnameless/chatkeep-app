@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.moonote.app.chatkeep.dto.ChatNoteDto;
-import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.model.ChatNoteCompleteness;
 import me.moonote.app.chatkeep.model.ConversationSummary;
@@ -209,25 +208,28 @@ class ChatNoteMapperTest {
   }
 
   @Test
-  void testToEntity_ShouldMapArtifacts() {
+  void testToEntity_ShouldMapArtifactCount() {
     // Arrange
     String userId = "test-user-123";
 
     // Act
     ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
 
-    // Assert
-    assertNotNull(chatNote.getArtifacts(), "Artifacts should not be null");
-    assertEquals(1, chatNote.getArtifacts().size(), "Should have exactly 1 artifact");
+    // Assert - Artifacts are no longer embedded in entity, only count is stored
+    assertEquals(1, chatNote.getArtifactCount(), "Should have artifact count of 1");
 
-    Artifact artifact = chatNote.getArtifacts().get(0);
+    // Verify artifact data is available in DTO
+    assertNotNull(chatNoteDto.getArtifacts(), "DTO artifacts should not be null");
+    assertEquals(1, chatNoteDto.getArtifacts().size(), "DTO should have exactly 1 artifact");
+
+    var artifact = chatNoteDto.getArtifacts().get(0);
     assertEquals("script", artifact.getType(), "Artifact type should match");
     assertEquals("bash", artifact.getLanguage(), "Artifact language should match");
     assertEquals("Dragonwell macOS Build Script", artifact.getTitle(),
         "Artifact title should match");
     assertEquals("final", artifact.getVersion(), "Artifact version should match");
 
-    // Verify content is mapped correctly
+    // Verify content is in DTO
     assertNotNull(artifact.getContent(), "Artifact content should not be null");
     assertTrue(artifact.getContent().startsWith("#!/bin/bash"),
         "Content should start with shebang");
@@ -236,7 +238,7 @@ class ChatNoteMapperTest {
   }
 
   @Test
-  void testToEntity_ShouldMapAttachments() {
+  void testToEntity_ShouldMapAttachmentCount() {
     // Arrange
     String userId = "test-user-123";
 
@@ -244,8 +246,12 @@ class ChatNoteMapperTest {
     ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
 
     // Assert - dragonwell.md has no attachments
-    assertNotNull(chatNote.getAttachments(), "Attachments list should not be null");
-    assertTrue(chatNote.getAttachments().isEmpty(), "Should have no attachments");
+    // Attachments are no longer embedded in entity, only count is stored
+    assertEquals(0, chatNote.getAttachmentCount(), "Should have attachment count of 0");
+
+    // Verify attachment data is available in DTO
+    assertNotNull(chatNoteDto.getAttachments(), "DTO attachments list should not be null");
+    assertTrue(chatNoteDto.getAttachments().isEmpty(), "DTO should have no attachments");
   }
 
   @Test
@@ -372,12 +378,15 @@ class ChatNoteMapperTest {
     assertNotNull(chatNote.getSummary().getFollowUpExplorations(), "Follow-up should be mapped");
     assertNotNull(chatNote.getSummary().getReferences(), "References should be mapped");
 
-    // Artifacts
-    assertNotNull(chatNote.getArtifacts(), "Artifacts should be mapped");
-    assertEquals(1, chatNote.getArtifacts().size(), "Should have exactly 1 artifact");
+    // Artifact count (artifacts are in separate collection)
+    assertEquals(1, chatNote.getArtifactCount(), "Should have artifact count of 1");
 
-    // Verify artifact data integrity
-    Artifact artifact = chatNote.getArtifacts().get(0);
+    // Verify artifact data is available in DTO
+    assertNotNull(chatNoteDto.getArtifacts(), "DTO artifacts should be mapped");
+    assertEquals(1, chatNoteDto.getArtifacts().size(), "DTO should have exactly 1 artifact");
+
+    // Verify artifact data integrity in DTO
+    var artifact = chatNoteDto.getArtifacts().get(0);
     assertNotNull(artifact.getType(), "Artifact type should be set");
     assertNotNull(artifact.getTitle(), "Artifact title should be set");
     assertNotNull(artifact.getContent(), "Artifact content should be set");

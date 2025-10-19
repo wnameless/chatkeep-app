@@ -23,6 +23,8 @@ import me.moonote.app.chatkeep.model.InsightsSection;
 import me.moonote.app.chatkeep.model.Label;
 import me.moonote.app.chatkeep.model.QuerySection;
 import me.moonote.app.chatkeep.model.Reference;
+import me.moonote.app.chatkeep.repository.ArtifactRepository;
+import me.moonote.app.chatkeep.repository.AttachmentRepository;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
 import me.moonote.app.chatkeep.repository.LabelRepository;
 import me.moonote.app.chatkeep.security.SecurityUtils;
@@ -37,6 +39,8 @@ public class ChatNoteService {
 
   private final MarkdownChatNotePreprocessor preprocessor;
   private final ChatNoteRepository repository;
+  private final ArtifactRepository artifactRepository;
+  private final AttachmentRepository attachmentRepository;
   private final ChatNoteMapper mapper;
   private final ChatNoteMarkdownGenerator markdownGenerator;
   private final LabelRepository labelRepository;
@@ -56,12 +60,41 @@ public class ChatNoteService {
           "Chat note validation failed: " + String.join(", ", validationResult.getErrors()));
     }
 
-    // Convert to entity and save
+    // Convert to entity and save ChatNote metadata
     ChatNoteDto chatNoteDto = validationResult.getChatNoteDto();
     ChatNote entity = mapper.toEntity(chatNoteDto, userId, markdownContent);
     ChatNote saved = repository.save(entity);
 
-    log.info("Chat note saved successfully with id: {}", saved.getId());
+    log.info("Chat note metadata saved successfully with id: {}", saved.getId());
+
+    // Save artifacts to separate collection
+    if (chatNoteDto.getArtifacts() != null && !chatNoteDto.getArtifacts().isEmpty()) {
+      List<Artifact> artifacts = chatNoteDto.getArtifacts().stream().map(artifactDto -> Artifact
+          .builder().chatNoteId(saved.getId()).type(artifactDto.getType())
+          .title(artifactDto.getTitle()).language(artifactDto.getLanguage())
+          .version(artifactDto.getVersion()).iterations(artifactDto.getIterations())
+          .evolutionNotes(artifactDto.getEvolutionNotes()).content(artifactDto.getContent())
+          .build()).toList();
+
+      artifactRepository.saveAll(artifacts);
+      log.info("Saved {} artifacts for chat note {}", artifacts.size(), saved.getId());
+    }
+
+    // Save attachments to separate collection
+    if (chatNoteDto.getAttachments() != null && !chatNoteDto.getAttachments().isEmpty()) {
+      List<Attachment> attachments = chatNoteDto.getAttachments().stream()
+          .map(attachmentDto -> Attachment.builder().chatNoteId(saved.getId())
+              .filename(attachmentDto.getFilename()).content(attachmentDto.getContent())
+              .isSummarized(attachmentDto.getIsSummarized())
+              .originalSize(attachmentDto.getOriginalSize())
+              .summarizationLevel(attachmentDto.getSummarizationLevel())
+              .contentPreserved(attachmentDto.getContentPreserved())
+              .processingLimitation(attachmentDto.getProcessingLimitation()).build())
+          .toList();
+
+      attachmentRepository.saveAll(attachments);
+      log.info("Saved {} attachments for chat note {}", attachments.size(), saved.getId());
+    }
 
     return toDetailResponse(saved);
   }
@@ -96,10 +129,6 @@ public class ChatNoteService {
         .tags(sourceNote.getTags() != null ? List.copyOf(sourceNote.getTags()) : null)
         .labelIds(new java.util.ArrayList<>()) // Don't copy labels (user-specific)
         .summary(sourceNote.getSummary())
-        .artifacts(
-            sourceNote.getArtifacts() != null ? List.copyOf(sourceNote.getArtifacts()) : null)
-        .attachments(
-            sourceNote.getAttachments() != null ? List.copyOf(sourceNote.getAttachments()) : null)
         .workarounds(
             sourceNote.getWorkarounds() != null ? List.copyOf(sourceNote.getWorkarounds()) : null)
         .markdownContent(sourceNote.getMarkdownContent()).userId(userId) // Assign to the requesting
@@ -111,6 +140,34 @@ public class ChatNoteService {
     ChatNote saved = repository.save(copiedNote);
 
     log.info("Chat note copied successfully with new id: {}", saved.getId());
+
+    // Copy artifacts from source to new note
+    List<Artifact> sourceArtifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(sourceNoteId);
+    if (!sourceArtifacts.isEmpty()) {
+      List<Artifact> copiedArtifacts = sourceArtifacts.stream()
+          .map(artifact -> Artifact.builder().chatNoteId(saved.getId()).type(artifact.getType())
+              .title(artifact.getTitle()).language(artifact.getLanguage())
+              .version(artifact.getVersion()).iterations(artifact.getIterations())
+              .evolutionNotes(artifact.getEvolutionNotes()).content(artifact.getContent()).build())
+          .toList();
+      artifactRepository.saveAll(copiedArtifacts);
+      log.info("Copied {} artifacts to new note {}", copiedArtifacts.size(), saved.getId());
+    }
+
+    // Copy attachments from source to new note
+    List<Attachment> sourceAttachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(sourceNoteId);
+    if (!sourceAttachments.isEmpty()) {
+      List<Attachment> copiedAttachments = sourceAttachments.stream()
+          .map(attachment -> Attachment.builder().chatNoteId(saved.getId())
+              .filename(attachment.getFilename()).content(attachment.getContent())
+              .isSummarized(attachment.getIsSummarized()).originalSize(attachment.getOriginalSize())
+              .summarizationLevel(attachment.getSummarizationLevel())
+              .contentPreserved(attachment.getContentPreserved())
+              .processingLimitation(attachment.getProcessingLimitation()).build())
+          .toList();
+      attachmentRepository.saveAll(copiedAttachments);
+      log.info("Copied {} attachments to new note {}", copiedAttachments.size(), saved.getId());
+    }
 
     return toDetailResponse(saved);
   }
@@ -132,30 +189,40 @@ public class ChatNoteService {
    * Get artifact content by archive ID and artifact index
    */
   public Artifact getArtifactContent(String archiveId, int index) {
-    ChatNote archive =
-        repository.findById(archiveId).orElseThrow(() -> new ChatNoteNotFoundException(archiveId));
+    // Verify archive exists
+    if (!repository.existsById(archiveId)) {
+      throw new ChatNoteNotFoundException(archiveId);
+    }
 
-    if (archive.getArtifacts() == null || index < 0 || index >= archive.getArtifacts().size()) {
+    // Fetch artifacts from separate collection
+    List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(archiveId);
+
+    if (index < 0 || index >= artifacts.size()) {
       throw new IllegalArgumentException(
           "Invalid artifact index: " + index + " for archive: " + archiveId);
     }
 
-    return archive.getArtifacts().get(index);
+    return artifacts.get(index);
   }
 
   /**
    * Get attachment content by archive ID and attachment index
    */
   public Attachment getAttachmentContent(String archiveId, int index) {
-    ChatNote archive =
-        repository.findById(archiveId).orElseThrow(() -> new ChatNoteNotFoundException(archiveId));
+    // Verify archive exists
+    if (!repository.existsById(archiveId)) {
+      throw new ChatNoteNotFoundException(archiveId);
+    }
 
-    if (archive.getAttachments() == null || index < 0 || index >= archive.getAttachments().size()) {
+    // Fetch attachments from separate collection
+    List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(archiveId);
+
+    if (index < 0 || index >= attachments.size()) {
       throw new IllegalArgumentException(
           "Invalid attachment index: " + index + " for archive: " + archiveId);
     }
 
-    return archive.getAttachments().get(index);
+    return attachments.get(index);
   }
 
   /**
@@ -549,6 +616,12 @@ public class ChatNoteService {
       throw new ChatNoteNotFoundException(id);
     }
 
+    // Delete related artifacts and attachments (cascading)
+    artifactRepository.deleteByChatNoteId(id);
+    attachmentRepository.deleteByChatNoteId(id);
+    log.info("Deleted artifacts and attachments for chat note {}", id);
+
+    // Delete the chat note itself
     repository.deleteById(id);
     log.info("Chat note {} permanently deleted", id);
   }
@@ -766,19 +839,27 @@ public class ChatNoteService {
    * Update artifact content by index
    */
   public ChatNoteDetailResponse updateArtifactContent(String id, int index, String content) {
+    // Verify chat note exists
     ChatNote chatNote =
         repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
-    if (chatNote.getArtifacts() == null || index < 0 || index >= chatNote.getArtifacts().size()) {
+    // Fetch artifacts from separate collection
+    List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(id);
+
+    if (index < 0 || index >= artifacts.size()) {
       throw new IllegalArgumentException(
           "Invalid artifact index: " + index + " for chat note: " + id);
     }
 
-    Artifact artifact = chatNote.getArtifacts().get(index);
+    // Update artifact content
+    Artifact artifact = artifacts.get(index);
     artifact.setContent(content);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+    artifactRepository.save(artifact);
 
+    // Invalidate markdown cache
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
     ChatNote updated = repository.save(chatNote);
+
     log.info("Chat note {} artifact {} content updated", id, index);
 
     return toDetailResponse(updated);
@@ -788,20 +869,27 @@ public class ChatNoteService {
    * Update attachment content by index
    */
   public ChatNoteDetailResponse updateAttachmentContent(String id, int index, String content) {
+    // Verify chat note exists
     ChatNote chatNote =
         repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
-    if (chatNote.getAttachments() == null || index < 0
-        || index >= chatNote.getAttachments().size()) {
+    // Fetch attachments from separate collection
+    List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(id);
+
+    if (index < 0 || index >= attachments.size()) {
       throw new IllegalArgumentException(
           "Invalid attachment index: " + index + " for chat note: " + id);
     }
 
-    Attachment attachment = chatNote.getAttachments().get(index);
+    // Update attachment content
+    Attachment attachment = attachments.get(index);
     attachment.setContent(content);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
+    attachmentRepository.save(attachment);
 
+    // Invalidate markdown cache
+    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
     ChatNote updated = repository.save(chatNote);
+
     log.info("Chat note {} attachment {} content updated", id, index);
 
     return toDetailResponse(updated);
@@ -823,6 +911,10 @@ public class ChatNoteService {
   }
 
   private ChatNoteDetailResponse toDetailResponse(ChatNote archive) {
+    // Fetch artifacts and attachments from separate collections
+    List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(archive.getId());
+    List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(archive.getId());
+
     return ChatNoteDetailResponse.builder().id(archive.getId())
         .archiveVersion(archive.getArchiveVersion()).archiveType(archive.getArchiveType())
         .createdDate(archive.getCreatedDate()).originalPlatform(archive.getOriginalPlatform())
@@ -831,8 +923,8 @@ public class ChatNoteService {
         .workaroundsCount(archive.getWorkaroundsCount()).totalFileSize(archive.getTotalFileSize())
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
         .tags(archive.getTags()).labelIds(archive.getLabelIds()) // Include labelIds
-        .summary(archive.getSummary()).artifacts(archive.getArtifacts())
-        .attachments(archive.getAttachments()).workarounds(archive.getWorkarounds())
+        .summary(archive.getSummary()).artifacts(artifacts)
+        .attachments(attachments).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())
         .isFavorite(archive.getIsFavorite()).trashedAt(archive.getTrashedAt())
@@ -841,23 +933,25 @@ public class ChatNoteService {
   }
 
   private ChatNoteDetailLightResponse toDetailLightResponse(ChatNote archive) {
+    // Fetch artifacts and attachments from separate collections
+    List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(archive.getId());
+    List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(archive.getId());
+
     // Convert artifacts to metadata only (no content)
-    List<ArtifactMetadata> artifactMetadata = archive.getArtifacts() == null ? List.of()
-        : archive.getArtifacts().stream()
-            .map(a -> ArtifactMetadata.builder().type(a.getType()).title(a.getTitle())
-                .language(a.getLanguage()).version(a.getVersion()).iterations(a.getIterations())
-                .evolutionNotes(a.getEvolutionNotes()).build())
-            .toList();
+    List<ArtifactMetadata> artifactMetadata = artifacts.stream()
+        .map(a -> ArtifactMetadata.builder().type(a.getType()).title(a.getTitle())
+            .language(a.getLanguage()).version(a.getVersion()).iterations(a.getIterations())
+            .evolutionNotes(a.getEvolutionNotes()).build())
+        .toList();
 
     // Convert attachments to metadata only (no content)
-    List<AttachmentMetadata> attachmentMetadata = archive.getAttachments() == null ? List.of()
-        : archive.getAttachments().stream()
-            .map(att -> AttachmentMetadata.builder().filename(att.getFilename())
-                .isSummarized(att.getIsSummarized()).originalSize(att.getOriginalSize())
-                .summarizationLevel(att.getSummarizationLevel())
-                .contentPreserved(att.getContentPreserved())
-                .processingLimitation(att.getProcessingLimitation()).build())
-            .toList();
+    List<AttachmentMetadata> attachmentMetadata = attachments.stream()
+        .map(att -> AttachmentMetadata.builder().filename(att.getFilename())
+            .isSummarized(att.getIsSummarized()).originalSize(att.getOriginalSize())
+            .summarizationLevel(att.getSummarizationLevel())
+            .contentPreserved(att.getContentPreserved())
+            .processingLimitation(att.getProcessingLimitation()).build())
+        .toList();
 
     return ChatNoteDetailLightResponse.builder().id(archive.getId())
         .archiveVersion(archive.getArchiveVersion()).archiveType(archive.getArchiveType())

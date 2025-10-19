@@ -45,8 +45,8 @@ public class ChatNote {
 
   // Embedded documents
   ConversationSummary summary;
-  List<Artifact> artifacts;
-  List<Attachment> attachments;
+  // NOTE: artifacts and attachments are now stored in separate collections
+  // Use ArtifactRepository and AttachmentRepository to fetch them by chatNoteId
   List<Workaround> workarounds;
 
   // Original markdown content (for display and download)

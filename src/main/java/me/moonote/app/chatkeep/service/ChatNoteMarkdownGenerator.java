@@ -3,6 +3,7 @@ package me.moonote.app.chatkeep.service;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
@@ -11,6 +12,8 @@ import me.moonote.app.chatkeep.model.InsightsSection;
 import me.moonote.app.chatkeep.model.QuerySection;
 import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.model.Workaround;
+import me.moonote.app.chatkeep.repository.ArtifactRepository;
+import me.moonote.app.chatkeep.repository.AttachmentRepository;
 
 /**
  * Service for generating archive markdown from ChatNote entities.
@@ -20,7 +23,11 @@ import me.moonote.app.chatkeep.model.Workaround;
  * original markdown content.
  */
 @Service
+@RequiredArgsConstructor
 public class ChatNoteMarkdownGenerator {
+
+  private final ArtifactRepository artifactRepository;
+  private final AttachmentRepository attachmentRepository;
 
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
   private static final String INSTRUCTIONS_FOR_AI = """
@@ -126,11 +133,13 @@ public class ChatNoteMarkdownGenerator {
     // 6. References
     markdown.append(generateReferences(chatNote.getSummary().getReferences()));
 
-    // 7. Artifacts
-    markdown.append(generateArtifacts(chatNote.getArtifacts()));
+    // 7. Artifacts (fetch from separate collection)
+    List<Artifact> artifacts = artifactRepository.findByChatNoteIdOrderByCreatedAtDesc(chatNote.getId());
+    markdown.append(generateArtifacts(artifacts));
 
-    // 8. Attachments
-    markdown.append(generateAttachments(chatNote.getAttachments()));
+    // 8. Attachments (fetch from separate collection)
+    List<Attachment> attachments = attachmentRepository.findByChatNoteIdOrderByCreatedAtDesc(chatNote.getId());
+    markdown.append(generateAttachments(attachments));
 
     // 9. Workarounds
     markdown.append(generateWorkarounds(chatNote.getWorkarounds()));
