@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Label Management Page Fragment -->
+<div th:fragment="management" class="max-w-4xl mx-auto p-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Label Management</h1>
+      <p class="mt-1 text-sm text-gray-500">Create and organize labels for your ChatNotes</p>
+    </div>
+    <button
+      hx-get="/fragments/labels/create-modal"
+      hx-target="#modal-container"
+      hx-swap="innerHTML"
+      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+      + Create Label
+    </button>
+  </div>
+
+  <!-- Label List -->
+  <div class="bg-white shadow-sm rounded-lg border border-gray-200">
+    <!-- Table Header -->
+    <div class="px-6 py-3 border-b border-gray-200 bg-gray-50">
+      <div class="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div class="col-span-1">Color</div>
+        <div class="col-span-5">Name</div>
+        <div class="col-span-2">Usage Count</div>
+        <div class="col-span-2">Created</div>
+        <div class="col-span-2 text-right">Actions</div>
+      </div>
+    </div>
+
+    <!-- No Labels Message -->
+    <div th:if="${#lists.isEmpty(labels)}" class="px-6 py-8 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No labels</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating a new label.</p>
+      <div class="mt-6">
+        <button
+          hx-get="/fragments/labels/create-modal"
+          hx-target="#modal-container"
+          hx-swap="innerHTML"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+          + Create Label
+        </button>
+      </div>
+    </div>
+
+    <!-- Label Rows -->
+    <div th:if="${!#lists.isEmpty(labels)}" id="label-table-body">
+      <div
+        th:each="label : ${labels}"
+        class="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+        <div class="grid grid-cols-12 gap-4 items-center">
+          <!-- Color -->
+          <div class="col-span-1">
+            <span
+              th:style="'background-color: ' + ${label.color}"
+              class="inline-block w-8 h-8 rounded-full border-2 border-gray-200"></span>
+          </div>
+
+          <!-- Name -->
+          <div class="col-span-5">
+            <span class="text-sm font-medium text-gray-900" th:text="${label.name}">Label Name</span>
+          </div>
+
+          <!-- Usage Count -->
+          <div class="col-span-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <span th:text="${label.usageCount} + ' ChatNote' + (${label.usageCount} != 1 ? 's' : '')">0 ChatNotes</span>
+            </span>
+          </div>
+
+          <!-- Created Date -->
+          <div class="col-span-2 text-sm text-gray-500">
+            <span th:text="${#temporals.format(label.createdAt, 'MMM d, yyyy')}">Jan 1, 2025</span>
+          </div>
+
+          <!-- Actions -->
+          <div class="col-span-2 text-right space-x-2">
+            <button
+              hx:get="@{/fragments/labels/{id}/edit-modal(id=${label.id})}"
+              hx-target="#modal-container"
+              hx-swap="innerHTML"
+              class="text-sm text-blue-600 hover:text-blue-800">
+              Edit
+            </button>
+            <button
+              hx:get="@{/fragments/labels/{id}/delete-confirm(id=${label.id})}"
+              hx-target="#modal-container"
+              hx-swap="innerHTML"
+              class="text-sm text-red-600 hover:text-red-800">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Container -->
+  <div id="modal-container"></div>
+</div>
+
+</body>
+</html>

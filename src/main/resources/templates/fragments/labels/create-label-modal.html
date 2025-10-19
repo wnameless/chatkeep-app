@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+  <!-- Create Label Modal Fragment -->
+  <div th:fragment="modal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50"
+    id="create-label-modal">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Create New Label</h3>
+        <button onclick="document.getElementById('create-label-modal').remove()"
+          class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form hx-post="/fragments/labels" hx-target="#label-list" hx-swap="outerHTML"
+        hx-on::after-request="if(event.detail.successful) document.getElementById('create-label-modal').remove()">
+
+        <!-- Label Name Input -->
+        <div class="mb-4">
+          <label for="label-name" class="block text-sm font-medium text-gray-700 mb-2">
+            Label Name
+          </label>
+          <input type="text" id="label-name" name="name" required maxlength="50"
+            placeholder="e.g., Work Projects"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autocomplete="off">
+          <p class="mt-1 text-xs text-gray-500">Case-insensitive (e.g., "Work" and "work" are
+            treated as the same)</p>
+        </div>
+
+        <!-- Color Picker -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Color
+          </label>
+          <div class="grid grid-cols-5 gap-2">
+            <label th:each="color : ${colors}" class="cursor-pointer">
+              <input type="radio" name="color" th:value="${color}" th:checked="${colorStat.first}"
+                class="hidden peer" required>
+              <div th:style="'background-color: ' + ${color}"
+                class="w-10 h-10 rounded-full border-2 border-transparent peer-checked:border-gray-900 hover:scale-110 transition-transform">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end space-x-3">
+          <button type="button" onclick="document.getElementById('create-label-modal').remove()"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+            Cancel
+          </button>
+          <button type="submit"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
+            Create Label
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+
+</html>

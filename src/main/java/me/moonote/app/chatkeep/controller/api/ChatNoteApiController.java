@@ -215,14 +215,12 @@ public class ChatNoteApiController {
       // Generate safe filename from title
       String filename = chatNote.getTitle().replaceAll("[^a-zA-Z0-9-]", "_") + ".md";
 
-      return ResponseEntity.ok()
-          .header("Content-Type", "text/markdown; charset=UTF-8")
+      return ResponseEntity.ok().header("Content-Type", "text/markdown; charset=UTF-8")
           .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
           .body(markdown);
     } catch (ChatNoteNotFoundException e) {
       log.error("Chat note not found for download: {}", id);
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
-          .body("Chat note not found: " + id);
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Chat note not found: " + id);
     } catch (Exception e) {
       log.error("Error downloading chat note", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -773,7 +771,8 @@ public class ChatNoteApiController {
    * Update references list PUT /api/v1/chat-notes/{id}/references
    */
   @PutMapping("/{id}/references")
-  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateReferences(@PathVariable String id,
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> updateReferences(
+      @PathVariable String id,
       @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.UpdateReferencesRequest request) {
     try {
       ChatNoteDetailResponse response =
@@ -834,6 +833,91 @@ public class ChatNoteApiController {
       log.error("Error updating attachment content", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(ApiResponse.error("Failed to update attachment content"));
+    }
+  }
+
+  // ==================== Label Management ====================
+
+  /**
+   * Assign labels to a chat note POST /api/v1/chat-notes/{id}/labels
+   */
+  @PostMapping("/{id}/labels")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> assignLabels(@PathVariable String id,
+      @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.AssignLabelsRequest request) {
+    try {
+      ChatNoteDetailResponse response =
+          chatNoteService.assignLabelsToNote(id, request.getLabelIds());
+      return ResponseEntity.ok(ApiResponse.success("Labels assigned successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(e.getMessage()));
+    } catch (Exception e) {
+      log.error("Error assigning labels to chat note {}", id, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to assign labels"));
+    }
+  }
+
+  /**
+   * Remove a label from a chat note DELETE /api/v1/chat-notes/{id}/labels/{labelId}
+   */
+  @DeleteMapping("/{id}/labels/{labelId}")
+  public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> removeLabel(@PathVariable String id,
+      @PathVariable String labelId) {
+    try {
+      ChatNoteDetailResponse response = chatNoteService.removeLabelFromNote(id, labelId);
+      return ResponseEntity.ok(ApiResponse.success("Label removed successfully", response));
+    } catch (ChatNoteNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(ApiResponse.error("Chat note not found: " + id));
+    } catch (Exception e) {
+      log.error("Error removing label {} from chat note {}", labelId, id, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to remove label"));
+    }
+  }
+
+  /**
+   * Filter chat notes by labels GET /api/v1/chat-notes/filter/labels?labelIds=id1,id2&operator=AND
+   */
+  @GetMapping("/filter/labels")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterByLabels(
+      @RequestParam java.util.List<String> labelIds,
+      @RequestParam(defaultValue = "AND") String operator,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+      Page<ChatNoteResponse> chatNotes =
+          chatNoteService.filterByLabels(labelIds, operator, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error filtering chat notes by labels", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to filter chat notes by labels"));
+    }
+  }
+
+  /**
+   * Filter active chat notes by labels for current user GET
+   * /api/v1/chat-notes/filter/labels/active?labelIds=id1,id2&operator=OR
+   */
+  @GetMapping("/filter/labels/active")
+  public ResponseEntity<ApiResponse<Page<ChatNoteResponse>>> filterActiveByLabels(
+      @RequestParam java.util.List<String> labelIds,
+      @RequestParam(defaultValue = "AND") String operator,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    try {
+      String userId = me.moonote.app.chatkeep.security.SecurityUtils.getCurrentUserId();
+      Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+      Page<ChatNoteResponse> chatNotes =
+          chatNoteService.filterActiveByLabelsForUser(userId, labelIds, operator, pageable);
+      return ResponseEntity.ok(ApiResponse.success(chatNotes));
+    } catch (Exception e) {
+      log.error("Error filtering active chat notes by labels", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.error("Failed to filter active chat notes by labels"));
     }
   }
 

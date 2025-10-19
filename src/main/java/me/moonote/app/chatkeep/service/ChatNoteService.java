@@ -23,6 +23,8 @@ import me.moonote.app.chatkeep.model.InsightsSection;
 import me.moonote.app.chatkeep.model.QuerySection;
 import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
+import me.moonote.app.chatkeep.repository.LabelRepository;
+import me.moonote.app.chatkeep.security.SecurityUtils;
 import me.moonote.app.chatkeep.validation.ChatNoteNotFoundException;
 import me.moonote.app.chatkeep.validation.ChatNoteValidationResult;
 import me.moonote.app.chatkeep.validation.InvalidChatNoteException;
@@ -36,6 +38,7 @@ public class ChatNoteService {
   private final ChatNoteRepository repository;
   private final ChatNoteMapper mapper;
   private final ChatNoteMarkdownGenerator markdownGenerator;
+  private final LabelRepository labelRepository;
 
   /**
    * Upload and process a markdown archive
@@ -90,6 +93,7 @@ public class ChatNoteService {
         .totalFileSize(sourceNote.getTotalFileSize()).title(sourceNote.getTitle())
         .conversationDate(sourceNote.getConversationDate())
         .tags(sourceNote.getTags() != null ? List.copyOf(sourceNote.getTags()) : null)
+        .labelIds(new java.util.ArrayList<>()) // Don't copy labels (user-specific)
         .summary(sourceNote.getSummary())
         .artifacts(
             sourceNote.getArtifacts() != null ? List.copyOf(sourceNote.getArtifacts()) : null)
@@ -308,6 +312,145 @@ public class ChatNoteService {
     } else {
       // Default to AND operation
       chatNotes = repository.findActiveByTagsContainingAllAndUserId(tags, userId, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  // ==================== Label Management ====================
+
+  /**
+   * Assign labels to a chat note
+   */
+  public ChatNoteDetailResponse assignLabelsToNote(String noteId, List<String> labelIds) {
+    ChatNote chatNote =
+        repository.findById(noteId).orElseThrow(() -> new ChatNoteNotFoundException(noteId));
+
+    String currentUserId = SecurityUtils.getCurrentUserId();
+
+    // Verify all labels exist and are owned by the current user
+    for (String labelId : labelIds) {
+      labelRepository.findById(labelId).ifPresentOrElse(label -> {
+        if (!label.getUserId().equals(currentUserId)) {
+          throw new IllegalArgumentException(
+              "Label " + labelId + " does not belong to current user");
+        }
+      }, () -> {
+        throw new IllegalArgumentException("Label not found: " + labelId);
+      });
+    }
+
+    // Initialize labelIds list if null
+    if (chatNote.getLabelIds() == null) {
+      chatNote.setLabelIds(new java.util.ArrayList<>());
+    }
+
+    // Add new labels (avoid duplicates)
+    for (String labelId : labelIds) {
+      if (!chatNote.getLabelIds().contains(labelId)) {
+        chatNote.getLabelIds().add(labelId);
+      }
+    }
+
+    ChatNote updated = repository.save(chatNote);
+    log.info("Labels {} assigned to chat note {}", labelIds, noteId);
+
+    return toDetailResponse(updated);
+  }
+
+  /**
+   * Remove a label from a chat note
+   */
+  public ChatNoteDetailResponse removeLabelFromNote(String noteId, String labelId) {
+    ChatNote chatNote =
+        repository.findById(noteId).orElseThrow(() -> new ChatNoteNotFoundException(noteId));
+
+    if (chatNote.getLabelIds() != null) {
+      chatNote.getLabelIds().remove(labelId);
+      ChatNote updated = repository.save(chatNote);
+
+      log.info("Label {} removed from chat note {}", labelId, noteId);
+      return toDetailResponse(updated);
+    }
+
+    return toDetailResponse(chatNote);
+  }
+
+  /**
+   * Filter chat notes by multiple labels with AND/OR operation
+   */
+  public Page<ChatNoteResponse> filterByLabels(List<String> labelIds, String operator,
+      Pageable pageable) {
+    if (labelIds == null || labelIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findByLabelIdsIn(labelIds, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findByLabelIdsContainingAll(labelIds, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter chat notes by labels for a specific user
+   */
+  public Page<ChatNoteResponse> filterByLabelsForUser(String userId, List<String> labelIds,
+      String operator, Pageable pageable) {
+    if (labelIds == null || labelIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findByLabelIdsInAndUserId(labelIds, userId, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findByLabelIdsContainingAllAndUserId(labelIds, userId, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter active (not archived, not trashed) chat notes by labels
+   */
+  public Page<ChatNoteResponse> filterActiveByLabels(List<String> labelIds, String operator,
+      Pageable pageable) {
+    if (labelIds == null || labelIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findActiveByLabelIdsIn(labelIds, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findActiveByLabelIdsContainingAll(labelIds, pageable);
+    }
+
+    return chatNotes.map(this::toResponse);
+  }
+
+  /**
+   * Filter active chat notes by labels for a specific user
+   */
+  public Page<ChatNoteResponse> filterActiveByLabelsForUser(String userId, List<String> labelIds,
+      String operator, Pageable pageable) {
+    if (labelIds == null || labelIds.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    Page<ChatNote> chatNotes;
+    if ("OR".equalsIgnoreCase(operator)) {
+      chatNotes = repository.findActiveByLabelIdsInAndUserId(labelIds, userId, pageable);
+    } else {
+      // Default to AND operation
+      chatNotes = repository.findActiveByLabelIdsContainingAllAndUserId(labelIds, userId, pageable);
     }
 
     return chatNotes.map(this::toResponse);
@@ -664,6 +807,7 @@ public class ChatNoteService {
   private ChatNoteResponse toResponse(ChatNote archive) {
     return ChatNoteResponse.builder().id(archive.getId()).title(archive.getTitle())
         .conversationDate(archive.getConversationDate()).tags(archive.getTags())
+        .labelIds(archive.getLabelIds()) // Include labelIds
         .originalPlatform(archive.getOriginalPlatform())
         .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .attachmentCount(archive.getAttachmentCount()).artifactCount(archive.getArtifactCount())
@@ -681,7 +825,8 @@ public class ChatNoteService {
         .chatNoteCompleteness(archive.getChatNoteCompleteness().name())
         .workaroundsCount(archive.getWorkaroundsCount()).totalFileSize(archive.getTotalFileSize())
         .title(archive.getTitle()).conversationDate(archive.getConversationDate())
-        .tags(archive.getTags()).summary(archive.getSummary()).artifacts(archive.getArtifacts())
+        .tags(archive.getTags()).labelIds(archive.getLabelIds()) // Include labelIds
+        .summary(archive.getSummary()).artifacts(archive.getArtifacts())
         .attachments(archive.getAttachments()).workarounds(archive.getWorkarounds())
         .userId(archive.getUserId()).isPublic(archive.getIsPublic())
         .isArchived(archive.getIsArchived()).isTrashed(archive.getIsTrashed())

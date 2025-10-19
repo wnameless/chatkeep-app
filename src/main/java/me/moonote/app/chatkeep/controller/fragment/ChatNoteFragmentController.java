@@ -31,8 +31,13 @@ import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
+import me.moonote.app.chatkeep.repository.LabelRepository;
 import me.moonote.app.chatkeep.security.SecurityUtils;
 import me.moonote.app.chatkeep.service.ChatNoteService;
+import me.moonote.app.chatkeep.service.LabelService;
+import me.moonote.app.chatkeep.dto.response.LabelResponse;
+import me.moonote.app.chatkeep.mapper.LabelMapper;
+import me.moonote.app.chatkeep.model.Label;
 
 /**
  * Fragment controller for HTMX-based interactions Returns fully-rendered HTML fragments via
@@ -49,6 +54,9 @@ public class ChatNoteFragmentController {
   private final ChatNoteRepository chatNoteRepository;
   private final ChatNoteMapper chatNoteMapper;
   private final ObjectMapper objectMapper;
+  private final LabelService labelService;
+  private final LabelRepository labelRepository;
+  private final LabelMapper labelMapper;
 
   // ==================== Main Grid Loading ====================
 
@@ -85,11 +93,20 @@ public class ChatNoteFragmentController {
     // Load notes based on filter
     List<ChatNoteResponse> notes = loadNotesByFilter(filter, userId, page, size);
 
-    // Add content previews
+    // Add content previews and labels
     notes = notes.stream().map(note -> {
       ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
       if (entity != null) {
         note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
+        // Populate labels
+        if (note.getLabelIds() != null && !note.getLabelIds().isEmpty()) {
+          List<LabelResponse> labels = note.getLabelIds().stream()
+            .map(labelId -> labelRepository.findById(labelId).orElse(null))
+            .filter(java.util.Objects::nonNull)
+            .map(label -> labelMapper.toResponse(label, 0)) // Usage count not needed for card display
+            .collect(Collectors.toList());
+          note.setLabels(labels);
+        }
       }
       return note;
     }).collect(Collectors.toList());
@@ -642,6 +659,20 @@ public class ChatNoteFragmentController {
     noteData.put("conversationDate", entity.getConversationDate());
     noteData.put("contentPreview", chatNoteMapper.generateContentPreview(entity));
     noteData.put("tags", entity.getTags() != null ? entity.getTags() : List.of());
+    noteData.put("labelIds", entity.getLabelIds() != null ? entity.getLabelIds() : List.of());
+
+    // Populate labels with full details
+    if (entity.getLabelIds() != null && !entity.getLabelIds().isEmpty()) {
+      List<LabelResponse> labels = entity.getLabelIds().stream()
+        .map(labelId -> labelRepository.findById(labelId).orElse(null))
+        .filter(java.util.Objects::nonNull)
+        .map(label -> labelMapper.toResponse(label, 0))
+        .collect(Collectors.toList());
+      noteData.put("labels", labels);
+    } else {
+      noteData.put("labels", List.of());
+    }
+
     noteData.put("isFavorite", entity.getIsFavorite() != null ? entity.getIsFavorite() : false);
     noteData.put("isArchived", entity.getIsArchived() != null ? entity.getIsArchived() : false);
     noteData.put("isPublic", entity.getIsPublic() != null ? entity.getIsPublic() : false);

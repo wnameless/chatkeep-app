@@ -39,6 +39,7 @@ public class ChatNoteMapper {
         .workaroundsCount(dto.getMetadata().getWorkaroundsCount())
         .totalFileSize(dto.getMetadata().getTotalFileSize()).title(dto.getMetadata().getTitle())
         .conversationDate(dto.getMetadata().getConversationDate()).tags(dto.getMetadata().getTags())
+        .labelIds(new java.util.ArrayList<>()) // Initialize empty label list
         .summary(toSummary(dto.getSummary())).artifacts(toArtifacts(dto.getArtifacts()))
         .attachments(toAttachments(dto.getAttachments()))
         .workarounds(toWorkarounds(dto.getWorkarounds())).markdownContent(markdownContent) // Store

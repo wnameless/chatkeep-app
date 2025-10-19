@@ -34,6 +34,7 @@ public class ChatNoteDetailResponse {
   String title;
   LocalDate conversationDate;
   List<String> tags;
+  List<String> labelIds; // Label IDs assigned to this note
   ConversationSummary summary;
   List<Artifact> artifacts;
   List<Attachment> attachments;

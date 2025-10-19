@@ -51,45 +51,11 @@
       <!-- Separator -->
       <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
 
-      <!-- Tags Section (Expandable) -->
-      <div class="px-4 py-2">
-        <button id="tags-toggle"
-          class="flex items-center justify-between w-full text-left text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-          <div class="flex items-center">
-            <i class="fas fa-tags w-6 text-lg"></i>
-            <span class="ml-3 font-medium">Tags</span>
-          </div>
-          <i class="fas fa-chevron-down text-sm transition-transform duration-200"
-            id="tags-chevron"></i>
-        </button>
-
-        <!-- Tags List (Collapsible) -->
-        <div id="tags-list" class="mt-2 space-y-1 hidden">
-          <!-- Tags will be dynamically loaded here -->
-          <div id="tags-loading" class="text-sm text-gray-500 dark:text-gray-400 ml-9">
-            Loading tags...
-          </div>
-
-          <!-- Tag Filter Options (OR filtering) -->
-          <div id="tags-container" class="space-y-1">
-            <!-- Example tag structure (will be populated dynamically):
-                    <label class="flex items-center py-1.5 px-2 ml-6 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                        <input type="checkbox" value="java" class="tag-checkbox rounded text-primary-500 focus:ring-primary-400 mr-2">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">java</span>
-                        <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">5</span>
-                    </label>
-                    -->
-          </div>
-
-          <!-- Clear Filters Button -->
-          <div id="clear-filters-container" class="hidden ml-6 mt-2">
-            <button id="clear-filters-btn" hx:get="@{/fragments/chat-notes}" hx-target="#notes-grid"
-              hx-swap="innerHTML"
-              class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
-              <i class="fas fa-times-circle mr-1"></i>
-              Clear filters
-            </button>
-          </div>
+      <!-- Labels Section -->
+      <div class="px-4 py-2" hx-get="/fragments/labels/list" hx-trigger="load, labelCreated from:body, labelUpdated from:body, labelDeleted from:body" hx-swap="innerHTML">
+        <!-- Labels will be loaded here via HTMX -->
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Loading labels...
         </div>
       </div>
 

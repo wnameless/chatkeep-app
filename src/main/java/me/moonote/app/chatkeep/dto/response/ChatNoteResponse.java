@@ -30,6 +30,8 @@ public class ChatNoteResponse {
   Boolean isArchived;
   Boolean isTrashed;
   Boolean isFavorite;
+  List<String> labelIds; // Label IDs assigned to this note
+  List<LabelResponse> labels; // Full label objects for display (optional, populated by fragments)
   String contentPreview; // First ~200 characters of content for card display
   Instant createdAt;
   Instant updatedAt;

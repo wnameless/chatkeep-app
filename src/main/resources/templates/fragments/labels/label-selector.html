@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+  <!-- Label Selector Fragment -->
+  <div th:fragment="selector" class="relative" id="label-selector">
+    <!-- Selected Labels Display -->
+    <div class="flex flex-wrap gap-2 mb-2" th:attr="data-note-id=${noteId}">
+      <span th:each="label : ${labels}" th:if="${#lists.contains(selectedLabelIds, label.id)}"
+        th:style="'background-color: ' + ${label.color}"
+        class="inline-flex items-center px-2 py-1 rounded-full text-xs text-white">
+        <span th:text="${label.name}">Label</span>
+        <button type="button"
+          hx:delete="@{/api/v1/chat-notes/{noteId}/labels/{labelId}(noteId=${noteId},labelId=${label.id})}"
+          hx-ext="json-enc" hx-swap="none"
+          hx-on::after-request="htmx.ajax('GET', '/fragments/labels/selector?noteId=' + this.closest('#label-selector').querySelector('[data-note-id]')?.getAttribute('data-note-id') || window.location.search.split('noteId=')[1]?.split('&')[0], {target:'#label-selector', swap:'outerHTML'})"
+          class="ml-1 hover:text-red-200">
+          ×
+        </button>
+      </span>
+      <span th:if="${#lists.isEmpty(selectedLabelIds)}" class="text-sm text-gray-500 dark:text-gray-400 italic">
+        No labels assigned
+      </span>
+    </div>
+
+    <!-- Add Label Dropdown -->
+    <details class="relative">
+      <summary class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+        + Add Label
+      </summary>
+
+      <div
+        class="absolute z-10 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <!-- No Labels Message -->
+        <div th:if="${#lists.isEmpty(labels)}" class="p-4 text-sm text-gray-500 dark:text-gray-400">
+          No labels created yet.
+          <a href="/labels" class="text-blue-600 dark:text-blue-400 hover:underline">Create labels</a>
+        </div>
+
+        <!-- Available Labels -->
+        <div th:if="${!#lists.isEmpty(labels)}" class="p-2">
+          <div th:each="label : ${labels}" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <form enctype='application/json'>
+                <input type="checkbox" name="labelIds"
+                  th:attr="data-note-id=${noteId},hx-post=${#lists.contains(selectedLabelIds, label.id) ? null : '/api/v1/chat-notes/' + noteId + '/labels'},hx-delete=${#lists.contains(selectedLabelIds, label.id) ? '/api/v1/chat-notes/' + noteId + '/labels/' + label.id : null}"
+                  th:checked="${#lists.contains(selectedLabelIds, label.id)}" th:value="${label.id}"
+                  class="rounded text-blue-600 focus:ring-blue-500" hx-ext="json-enc" hx-swap="none"
+                  hx-on::after-request="htmx.ajax('GET', '/fragments/labels/selector?noteId=' + this.getAttribute('data-note-id'), {target:'#label-selector', swap:'outerHTML'})">
+              </form>
+              <span th:style="'background-color: ' + ${label.color}"
+                class="inline-block w-3 h-3 rounded-full"></span>
+              <span class="text-sm text-gray-700 dark:text-gray-300" th:text="${label.name}">Label Name</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+</body>
+
+</html>

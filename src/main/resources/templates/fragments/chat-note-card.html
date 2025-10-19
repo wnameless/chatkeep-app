@@ -31,12 +31,14 @@
           This is a preview of the chat note content that shows the first few lines...
         </p>
 
-        <!-- Tags -->
+        <!-- Labels (User-managed) -->
         <div class="flex flex-wrap gap-1.5 mb-3"
-          th:if="${note.tags != null && !note.tags.isEmpty()}">
-          <span th:each="tag : ${note.tags}" th:text="${tag}"
-            class="inline-block px-2 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
-            tag
+          th:if="${note.labels != null && !note.labels.isEmpty()}">
+          <span th:each="label : ${note.labels}"
+            th:style="'background-color: ' + ${label.color}"
+            class="inline-block px-2 py-1 text-xs font-medium text-white rounded">
+            <i class="fas fa-tag text-xs mr-1"></i>
+            [[${label.name}]]
           </span>
         </div>
 
@@ -210,11 +212,13 @@
           Content preview...
         </p>
 
-        <!-- Tags -->
-        <div class="flex flex-wrap gap-1.5" th:if="${note.tags != null && !note.tags.isEmpty()}">
-          <span th:each="tag : ${note.tags}" th:text="${tag}"
-            class="inline-block px-2 py-0.5 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded">
-            tag
+        <!-- Labels -->
+        <div class="flex flex-wrap gap-1.5" th:if="${note.labels != null && !note.labels.isEmpty()}">
+          <span th:each="label : ${note.labels}"
+            th:style="'background-color: ' + ${label.color}"
+            class="inline-block px-2 py-0.5 text-xs font-medium text-white rounded">
+            <i class="fas fa-tag text-xs mr-1"></i>
+            [[${label.name}]]
           </span>
         </div>
       </div>

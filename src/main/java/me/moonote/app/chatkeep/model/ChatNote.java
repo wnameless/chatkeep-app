@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,9 @@ public class ChatNote {
   String title;
   LocalDate conversationDate;
   List<String> tags;
+
+  @Indexed
+  List<String> labelIds; // References to Label IDs (user-managed labels)
 
   // Embedded documents
   ConversationSummary summary;

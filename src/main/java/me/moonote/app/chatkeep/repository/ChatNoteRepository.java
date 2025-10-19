@@ -61,6 +61,40 @@ public interface ChatNoteRepository extends MongoRepository<ChatNote, String> {
   @Query("{ 'tags': { $in: ?0 }, 'userId': ?1, 'isArchived': false, 'isTrashed': false }")
   Page<ChatNote> findActiveByTagsInAndUserId(List<String> tags, String userId, Pageable pageable);
 
+  // Find by label IDs - Multiple labels (AND operation - contains ALL label IDs)
+  @Query("{ 'labelIds': { $all: ?0 } }")
+  Page<ChatNote> findByLabelIdsContainingAll(List<String> labelIds, Pageable pageable);
+
+  @Query("{ 'labelIds': { $all: ?0 }, 'userId': ?1 }")
+  Page<ChatNote> findByLabelIdsContainingAllAndUserId(List<String> labelIds, String userId,
+      Pageable pageable);
+
+  // Find by label IDs - Multiple labels (OR operation - contains ANY label ID)
+  @Query("{ 'labelIds': { $in: ?0 } }")
+  Page<ChatNote> findByLabelIdsIn(List<String> labelIds, Pageable pageable);
+
+  @Query("{ 'labelIds': { $in: ?0 }, 'userId': ?1 }")
+  Page<ChatNote> findByLabelIdsInAndUserId(List<String> labelIds, String userId, Pageable pageable);
+
+  // Find by label IDs with lifecycle filters - Active notes only (AND operation)
+  @Query("{ 'labelIds': { $all: ?0 }, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByLabelIdsContainingAll(List<String> labelIds, Pageable pageable);
+
+  @Query("{ 'labelIds': { $all: ?0 }, 'userId': ?1, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByLabelIdsContainingAllAndUserId(List<String> labelIds, String userId,
+      Pageable pageable);
+
+  // Find by label IDs with lifecycle filters - Active notes only (OR operation)
+  @Query("{ 'labelIds': { $in: ?0 }, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByLabelIdsIn(List<String> labelIds, Pageable pageable);
+
+  @Query("{ 'labelIds': { $in: ?0 }, 'userId': ?1, 'isArchived': false, 'isTrashed': false }")
+  Page<ChatNote> findActiveByLabelIdsInAndUserId(List<String> labelIds, String userId,
+      Pageable pageable);
+
+  // Find ChatNotes containing a specific label ID (for cascade deletion)
+  List<ChatNote> findByLabelIdsContaining(String labelId);
+
   // Search by title
   List<ChatNote> findByTitleContainingIgnoreCase(String keyword);
 
