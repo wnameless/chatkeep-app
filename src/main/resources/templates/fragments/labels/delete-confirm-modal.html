@@ -35,14 +35,8 @@
               <span class="font-semibold" th:text="'&quot;' + ${label.name} + '&quot;'">Label
                 Name</span>?
             </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400" th:if="${label.usageCount > 0}">
-              This label is currently assigned to
-              <span class="font-semibold" th:text="${label.usageCount}">0</span>
-              ChatNote<span th:if="${label.usageCount > 1}">s</span>.
-              It will be removed from all of them.
-            </p>
-            <p class="text-sm text-gray-600 dark:text-gray-400" th:if="${label.usageCount == 0}">
-              This label is not currently assigned to any ChatNotes.
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              If this label is assigned to any ChatNotes, it will be removed from all of them.
             </p>
             <p class="text-sm font-semibold text-red-600 dark:text-red-400 mt-2">
               This action cannot be undone.

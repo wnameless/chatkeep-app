@@ -26,7 +26,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.response.ChatNoteDetailLightResponse;
 import me.moonote.app.chatkeep.dto.response.ChatNoteResponse;
+import me.moonote.app.chatkeep.dto.response.LabelResponse;
 import me.moonote.app.chatkeep.mapper.ChatNoteMapper;
+import me.moonote.app.chatkeep.mapper.LabelMapper;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
@@ -34,10 +36,6 @@ import me.moonote.app.chatkeep.repository.ChatNoteRepository;
 import me.moonote.app.chatkeep.repository.LabelRepository;
 import me.moonote.app.chatkeep.security.SecurityUtils;
 import me.moonote.app.chatkeep.service.ChatNoteService;
-import me.moonote.app.chatkeep.service.LabelService;
-import me.moonote.app.chatkeep.dto.response.LabelResponse;
-import me.moonote.app.chatkeep.mapper.LabelMapper;
-import me.moonote.app.chatkeep.model.Label;
 
 /**
  * Fragment controller for HTMX-based interactions Returns fully-rendered HTML fragments via
@@ -54,7 +52,6 @@ public class ChatNoteFragmentController {
   private final ChatNoteRepository chatNoteRepository;
   private final ChatNoteMapper chatNoteMapper;
   private final ObjectMapper objectMapper;
-  private final LabelService labelService;
   private final LabelRepository labelRepository;
   private final LabelMapper labelMapper;
 
@@ -101,10 +98,10 @@ public class ChatNoteFragmentController {
         // Populate labels
         if (note.getLabelIds() != null && !note.getLabelIds().isEmpty()) {
           List<LabelResponse> labels = note.getLabelIds().stream()
-            .map(labelId -> labelRepository.findById(labelId).orElse(null))
-            .filter(java.util.Objects::nonNull)
-            .map(label -> labelMapper.toResponse(label, 0)) // Usage count not needed for card display
-            .collect(Collectors.toList());
+              .map(labelId -> labelRepository.findById(labelId).orElse(null))
+              .filter(java.util.Objects::nonNull)
+              .map(labelMapper::toResponse)
+              .collect(Collectors.toList());
           note.setLabels(labels);
         }
       }
@@ -664,10 +661,10 @@ public class ChatNoteFragmentController {
     // Populate labels with full details
     if (entity.getLabelIds() != null && !entity.getLabelIds().isEmpty()) {
       List<LabelResponse> labels = entity.getLabelIds().stream()
-        .map(labelId -> labelRepository.findById(labelId).orElse(null))
-        .filter(java.util.Objects::nonNull)
-        .map(label -> labelMapper.toResponse(label, 0))
-        .collect(Collectors.toList());
+          .map(labelId -> labelRepository.findById(labelId).orElse(null))
+          .filter(java.util.Objects::nonNull)
+          .map(labelMapper::toResponse)
+          .collect(Collectors.toList());
       noteData.put("labels", labels);
     } else {
       noteData.put("labels", List.of());

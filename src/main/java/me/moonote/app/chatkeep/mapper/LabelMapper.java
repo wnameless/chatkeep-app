@@ -1,7 +1,6 @@
 package me.moonote.app.chatkeep.mapper;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import me.moonote.app.chatkeep.dto.request.CreateLabelRequest;
@@ -31,31 +30,28 @@ public class LabelMapper {
    * Convert Label entity to LabelResponse DTO.
    *
    * @param label Label entity
-   * @param usageCount Number of ChatNotes using this label
    * @return LabelResponse DTO
    */
-  public LabelResponse toResponse(Label label, int usageCount) {
+  public LabelResponse toResponse(Label label) {
     return LabelResponse.builder()
         .id(label.getId())
         .userId(label.getUserId())
         .name(label.getName()) // Display name (original casing)
         .color(label.getColor())
-        .usageCount(usageCount)
         .createdAt(label.getCreatedAt())
         .updatedAt(label.getUpdatedAt())
         .build();
   }
 
   /**
-   * Convert list of Labels to LabelResponse DTOs with usage counts.
+   * Convert list of Labels to LabelResponse DTOs.
    *
    * @param labels List of labels
-   * @param usageCounts Map of label ID to usage count
    * @return List of LabelResponse DTOs
    */
-  public List<LabelResponse> toResponseList(List<Label> labels, Map<String, Integer> usageCounts) {
+  public List<LabelResponse> toResponseList(List<Label> labels) {
     return labels.stream()
-        .map(label -> toResponse(label, usageCounts.getOrDefault(label.getId(), 0)))
+        .map(this::toResponse)
         .collect(Collectors.toList());
   }
 

@@ -1,8 +1,6 @@
 package me.moonote.app.chatkeep.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,11 +50,11 @@ public class LabelService {
 
     log.info("Label '{}' created successfully with id: {}", saved.getName(), saved.getId());
 
-    return labelMapper.toResponse(saved, 0); // Usage count is 0 for new label
+    return labelMapper.toResponse(saved);
   }
 
   /**
-   * Get all labels for the current user with usage counts.
+   * Get all labels for the current user.
    *
    * @return List of LabelResponse
    */
@@ -67,14 +65,7 @@ public class LabelService {
 
     List<Label> labels = labelRepository.findByUserId(userId);
 
-    // Calculate usage counts for all labels
-    Map<String, Integer> usageCounts = new HashMap<>();
-    for (Label label : labels) {
-      int count = calculateUsageCount(label.getId());
-      usageCounts.put(label.getId(), count);
-    }
-
-    return labelMapper.toResponseList(labels, usageCounts);
+    return labelMapper.toResponseList(labels);
   }
 
   /**
@@ -98,8 +89,7 @@ public class LabelService {
       throw new IllegalArgumentException("You do not have permission to access this label");
     }
 
-    int usageCount = calculateUsageCount(id);
-    return labelMapper.toResponse(label, usageCount);
+    return labelMapper.toResponse(label);
   }
 
   /**
@@ -143,8 +133,7 @@ public class LabelService {
 
     log.info("Label '{}' updated successfully", updated.getName());
 
-    int usageCount = calculateUsageCount(id);
-    return labelMapper.toResponse(updated, usageCount);
+    return labelMapper.toResponse(updated);
   }
 
   /**
@@ -181,16 +170,6 @@ public class LabelService {
     labelRepository.deleteById(id);
 
     log.info("Label '{}' deleted successfully", label.getName());
-  }
-
-  /**
-   * Calculate the number of ChatNotes using a specific label.
-   *
-   * @param labelId Label ID
-   * @return Usage count
-   */
-  public int calculateUsageCount(String labelId) {
-    return chatNoteRepository.findByLabelIdsContaining(labelId).size();
   }
 
 }

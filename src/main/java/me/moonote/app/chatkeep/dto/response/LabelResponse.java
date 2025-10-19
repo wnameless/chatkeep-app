@@ -22,7 +22,6 @@ public class LabelResponse {
   String userId; // Owner of this label
   String name; // Display name (original casing)
   String color; // Hex color code
-  Integer usageCount; // Number of ChatNotes using this label
   Instant createdAt;
   Instant updatedAt;
 
