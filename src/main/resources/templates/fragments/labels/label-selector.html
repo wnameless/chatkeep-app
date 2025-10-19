@@ -19,14 +19,16 @@
           ×
         </button>
       </span>
-      <span th:if="${#lists.isEmpty(selectedLabelIds)}" class="text-sm text-gray-500 dark:text-gray-400 italic">
+      <span th:if="${#lists.isEmpty(selectedLabelIds)}"
+        class="text-sm text-gray-500 dark:text-gray-400 italic">
         No labels assigned
       </span>
     </div>
 
     <!-- Add Label Dropdown -->
     <details class="relative">
-      <summary class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+      <summary
+        class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
         + Add Label
       </summary>
 
@@ -35,12 +37,12 @@
         <!-- No Labels Message -->
         <div th:if="${#lists.isEmpty(labels)}" class="p-4 text-sm text-gray-500 dark:text-gray-400">
           No labels created yet.
-          <a href="/labels" class="text-blue-600 dark:text-blue-400 hover:underline">Create labels</a>
         </div>
 
         <!-- Available Labels -->
         <div th:if="${!#lists.isEmpty(labels)}" class="p-2">
-          <div th:each="label : ${labels}" class="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
+          <div th:each="label : ${labels}"
+            class="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
             <label class="flex items-center space-x-2 cursor-pointer">
               <form enctype='application/json'>
                 <input type="checkbox" name="labelIds"
@@ -51,7 +53,8 @@
               </form>
               <span th:style="'background-color: ' + ${label.color}"
                 class="inline-block w-3 h-3 rounded-full"></span>
-              <span class="text-sm text-gray-700 dark:text-gray-300" th:text="${label.name}">Label Name</span>
+              <span class="text-sm text-gray-700 dark:text-gray-300" th:text="${label.name}">Label
+                Name</span>
             </label>
           </div>
         </div>
