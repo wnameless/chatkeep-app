@@ -37,8 +37,8 @@ class MongoDbNewsqlMarkdownTest {
     preprocessor = new MarkdownChatNotePreprocessor(objectMapper, schemaValidator);
 
     // Load the test markdown file
-    mongodbNewsqlMarkdown = Files
-        .readString(Paths.get("src/test/resources/archive-markdowns/mongodb_newsql.md"));
+    mongodbNewsqlMarkdown =
+        Files.readString(Paths.get("src/test/resources/archive-markdowns/mongodb_newsql.md"));
   }
 
   @Test
@@ -113,13 +113,14 @@ class MongoDbNewsqlMarkdownTest {
     assertNotNull(dto.getMetadata().getTags(), "Tags should not be null");
 
     // BUG: This assertion will FAIL because tags are not being parsed
-    // The line in the markdown is: **Tags:** databases, mongodb, newsql, acid, architecture, scalability
-    // But the parser expects: **Tags:** [databases, mongodb, newsql, acid, architecture, scalability]
+    // The line in the markdown is: **Tags:** databases, mongodb, newsql, acid, architecture,
+    // scalability
+    // But the parser expects: **Tags:** [databases, mongodb, newsql, acid, architecture,
+    // scalability]
     assertEquals(6, dto.getMetadata().getTags().size(),
         "Should have 6 tags (BUG: currently returns 0)");
 
-    assertTrue(dto.getMetadata().getTags().contains("databases"),
-        "Should contain 'databases' tag");
+    assertTrue(dto.getMetadata().getTags().contains("databases"), "Should contain 'databases' tag");
     assertTrue(dto.getMetadata().getTags().contains("mongodb"), "Should contain 'mongodb' tag");
     assertTrue(dto.getMetadata().getTags().contains("newsql"), "Should contain 'newsql' tag");
     assertTrue(dto.getMetadata().getTags().contains("acid"), "Should contain 'acid' tag");

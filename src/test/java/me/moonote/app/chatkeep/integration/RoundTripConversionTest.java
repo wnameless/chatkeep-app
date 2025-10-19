@@ -91,14 +91,12 @@ class RoundTripConversionTest {
     // Verify generated markdown has all required sections
     assertTrue(generatedMarkdown.contains("---\nARCHIVE_FORMAT_VERSION:"),
         "Should have YAML frontmatter");
-    assertTrue(generatedMarkdown.contains("INSTRUCTIONS_FOR_AI:"),
-        "Should have AI instructions");
+    assertTrue(generatedMarkdown.contains("INSTRUCTIONS_FOR_AI:"), "Should have AI instructions");
     assertTrue(generatedMarkdown.contains("## Initial Query"), "Should have Initial Query section");
     assertTrue(generatedMarkdown.contains("## Key Insights"), "Should have Key Insights section");
     assertTrue(generatedMarkdown.contains("## Follow-up Explorations"),
         "Should have Follow-up section");
-    assertTrue(generatedMarkdown.contains("## References/Links"),
-        "Should have References section");
+    assertTrue(generatedMarkdown.contains("## References/Links"), "Should have References section");
     assertTrue(generatedMarkdown.contains("## Conversation Artifacts"),
         "Should have Artifacts section");
     assertTrue(generatedMarkdown.contains("## Workarounds Used"),
@@ -162,8 +160,7 @@ class RoundTripConversionTest {
 
     // Verify tags
     assertNotNull(chatNote2.getTags(), "Tags should not be null");
-    assertEquals(chatNote1.getTags().size(), chatNote2.getTags().size(),
-        "Tag count should match");
+    assertEquals(chatNote1.getTags().size(), chatNote2.getTags().size(), "Tag count should match");
     assertTrue(chatNote2.getTags().containsAll(chatNote1.getTags()),
         "All tags should be preserved");
   }
@@ -183,8 +180,7 @@ class RoundTripConversionTest {
     assertNotNull(chatNote2.getSummary(), "Summary should not be null");
     assertNotNull(chatNote2.getSummary().getInitialQuery(), "Initial query should not be null");
     assertNotNull(chatNote2.getSummary().getKeyInsights(), "Key insights should not be null");
-    assertNotNull(chatNote2.getSummary().getFollowUpExplorations(),
-        "Follow-up should not be null");
+    assertNotNull(chatNote2.getSummary().getFollowUpExplorations(), "Follow-up should not be null");
     assertNotNull(chatNote2.getSummary().getReferences(), "References should not be null");
 
     // Verify initial query has content
@@ -299,8 +295,7 @@ class RoundTripConversionTest {
       Reference ref1 = chatNote1.getSummary().getReferences().get(i);
       Reference ref2 = chatNote2.getSummary().getReferences().get(i);
 
-      assertEquals(ref1.getUrl(), ref2.getUrl(),
-          "Reference " + i + " URL should match");
+      assertEquals(ref1.getUrl(), ref2.getUrl(), "Reference " + i + " URL should match");
       assertEquals(ref1.getDescription(), ref2.getDescription(),
           "Reference " + i + " description should match");
     }

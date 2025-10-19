@@ -279,9 +279,6 @@ class MarkdownToChatNoteConversionTest {
 
   @Test
   void testFullPipeline_ValidationSuccess() {
-    // Arrange
-    String userId = "validation-test-user";
-
     // Act
     ChatNoteValidationResult validationResult = preprocessor.preprocess(dragonwellMarkdown);
 
