@@ -59,14 +59,18 @@ public class ChatNoteFragmentController {
 
   /**
    * Load ChatNotes grid GET /fragments/chat-notes?view=masonry&filter=chatnotes
+   * Supports infinite scroll via append parameter
    */
   @GetMapping("/chat-notes")
   public String getChatNotes(@RequestParam(required = false) String view,
       @RequestParam(defaultValue = "chatnotes") String filter,
       @RequestParam(required = false) String labelIds,
+      @RequestParam(required = false) String search,
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size,
+      @RequestParam(defaultValue = "false") boolean append,
       Model model, HttpSession session) {
-    log.info("Loading chat notes: view={}, filter={}, labelIds={}", view, filter, labelIds);
+    log.info("Loading chat notes: view={}, filter={}, labelIds={}, search={}, page={}, append={}",
+        view, filter, labelIds, search, page, append);
 
     // Store view preference in session
     if (view != null) {
@@ -132,12 +136,28 @@ public class ChatNoteFragmentController {
     // Normalize filter name for template
     String normalizedFilter = normalizeFilter(filter);
 
+    // Detect if there are more results for infinite scroll
+    boolean hasMore = notes.size() == size;
+
     model.addAttribute("notes", notes);
     model.addAttribute("viewMode", currentView);
     model.addAttribute("filter", normalizedFilter);
+    model.addAttribute("hasMore", hasMore);
+    model.addAttribute("currentPage", page);
 
-    return currentView.equals("list") ? "fragments/chat-note-cards-list"
-        : "fragments/chat-note-cards";
+    // Preserve current filter state for infinite scroll sentinel
+    model.addAttribute("currentFilter", filter);
+    model.addAttribute("currentLabelIds", labelIds != null ? labelIds : "");
+    model.addAttribute("currentSearch", search != null ? search : "");
+
+    // Return cards-only fragment when appending, full grid otherwise
+    if (append) {
+      return currentView.equals("list") ? "fragments/chat-note-cards-list :: cards-only"
+          : "fragments/chat-note-cards :: cards-only";
+    }
+
+    return currentView.equals("list") ? "fragments/chat-note-cards-list :: list-cards"
+        : "fragments/chat-note-cards :: cards";
   }
 
   /**

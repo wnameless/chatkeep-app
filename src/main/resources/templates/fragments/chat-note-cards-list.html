@@ -3,15 +3,44 @@
 
 <body>
 
-  <!-- List View - ChatNote Cards Fragment -->
+  <!-- List View - ChatNote Cards Fragment (Full Wrapper) -->
   <th:block th:fragment="list-cards">
-    <!-- Check if notes list is not empty -->
+    <!-- Cards container -->
     <th:block th:if="${notes != null && !notes.isEmpty()}">
+      <!-- Note cards -->
       <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}">
+      </div>
+
+      <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
+      <div th:if="${hasMore}"
+           th:id="'scroll-sentinel-' + ${currentPage}"
+           hx:get="@{/fragments/chat-notes(
+             filter=${currentFilter},
+             labelIds=${currentLabelIds},
+             search=${currentSearch},
+             page=${currentPage + 1},
+             append=true)}"
+           hx-trigger="intersect once"
+           hx-target="#notes-grid"
+           hx-swap="beforeend"
+           class="col-span-full flex items-center justify-center py-8">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-spinner fa-spin mr-2"></i>
+          <span>Loading more notes...</span>
+        </div>
+      </div>
+
+      <!-- End state (no more results) -->
+      <div th:unless="${hasMore}"
+           class="col-span-full flex items-center justify-center py-8">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-check-circle mr-2"></i>
+          <span>All notes loaded</span>
+        </div>
       </div>
     </th:block>
 
-    <!-- Empty state -->
+    <!-- Empty state (no notes at all) -->
     <th:block th:unless="${notes != null && !notes.isEmpty()}">
       <div class="col-span-full flex items-center justify-center min-h-[400px]">
         <div
@@ -63,6 +92,41 @@
         </div>
       </div>
     </th:block>
+  </th:block>
+
+  <!-- Cards-only fragment (for infinite scroll appending) -->
+  <th:block th:fragment="cards-only">
+    <!-- Just the note cards, no empty states or sentinels -->
+    <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}">
+    </div>
+
+    <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
+    <div th:if="${hasMore}"
+         th:id="'scroll-sentinel-' + ${currentPage}"
+         hx:get="@{/fragments/chat-notes(
+           filter=${currentFilter},
+           labelIds=${currentLabelIds},
+           search=${currentSearch},
+           page=${currentPage + 1},
+           append=true)}"
+         hx-trigger="intersect once"
+         hx-target="#notes-grid"
+         hx-swap="beforeend"
+         class="col-span-full flex items-center justify-center py-8">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        <i class="fas fa-spinner fa-spin mr-2"></i>
+        <span>Loading more notes...</span>
+      </div>
+    </div>
+
+    <!-- End state (no more results) -->
+    <div th:unless="${hasMore}"
+         class="col-span-full flex items-center justify-center py-8">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>All notes loaded</span>
+      </div>
+    </div>
   </th:block>
 
 </body>
