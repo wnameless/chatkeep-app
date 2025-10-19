@@ -215,6 +215,19 @@ function initializeHeader() {
         if (archivingPromptDropdown && !archivingPromptDropdown.contains(e.target) && e.target !== copyTemplateBtn) {
             archivingPromptDropdown.classList.add('hidden');
         }
+
+        // Close import dropdowns
+        const importDropdown = document.getElementById('import-dropdown');
+        const importBtn = document.getElementById('import-archive-btn');
+        if (importDropdown && !importDropdown.contains(e.target) && e.target !== importBtn) {
+            importDropdown.classList.add('hidden');
+        }
+
+        const mobileImportDropdown = document.getElementById('mobile-import-dropdown');
+        const mobileImportBtn = document.getElementById('mobile-import-archive-btn');
+        if (mobileImportDropdown && !mobileImportDropdown.contains(e.target) && e.target !== mobileImportBtn) {
+            mobileImportDropdown.classList.add('hidden');
+        }
     });
 
     // Refresh button - add spin animation
@@ -227,10 +240,60 @@ function initializeHeader() {
         });
     }
 
-    // Import archive button
+    // Import archive dropdown toggle (desktop)
     const importBtn = document.getElementById('import-archive-btn');
-    if (importBtn) {
-        importBtn.addEventListener('click', openImportDialog);
+    const importDropdown = document.getElementById('import-dropdown');
+    if (importBtn && importDropdown) {
+        importBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            importDropdown.classList.toggle('hidden');
+        });
+    }
+
+    // Import archive dropdown toggle (mobile)
+    const mobileImportBtn = document.getElementById('mobile-import-archive-btn');
+    const mobileImportDropdown = document.getElementById('mobile-import-dropdown');
+    if (mobileImportBtn && mobileImportDropdown) {
+        mobileImportBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileImportDropdown.classList.toggle('hidden');
+        });
+    }
+
+    // Upload file option (desktop)
+    const uploadFileBtn = document.getElementById('upload-file-btn');
+    if (uploadFileBtn) {
+        uploadFileBtn.addEventListener('click', function() {
+            importDropdown?.classList.add('hidden');
+            openImportDialog();
+        });
+    }
+
+    // Upload file option (mobile)
+    const mobileUploadFileBtn = document.querySelector('.mobile-upload-file-btn');
+    if (mobileUploadFileBtn) {
+        mobileUploadFileBtn.addEventListener('click', function() {
+            mobileImportDropdown?.classList.add('hidden');
+            openImportDialog();
+        });
+    }
+
+    // Paste content option (desktop)
+    const pasteContentBtn = document.getElementById('paste-content-btn');
+    if (pasteContentBtn) {
+        pasteContentBtn.addEventListener('click', function() {
+            importDropdown?.classList.add('hidden');
+            openPasteModal();
+        });
+    }
+
+    // Paste content option (mobile)
+    const mobilePasteContentBtn = document.querySelector('.mobile-paste-content-btn');
+    if (mobilePasteContentBtn) {
+        mobilePasteContentBtn.addEventListener('click', function() {
+            mobileImportDropdown?.classList.add('hidden');
+            openPasteModal();
+        });
     }
 
     // Copy prompt action button (inside dropdown)
@@ -457,4 +520,79 @@ function copyArchiveTemplate(dropdown) {
 
 function logout() {
     window.location.href = '/logout';
+}
+
+// ==================== Paste Archive Modal ====================
+
+function openPasteModal() {
+    // Fetch the modal template and insert into modal-container
+    fetch('/fragments/paste-archive-modal')
+        .then(response => response.text())
+        .then(html => {
+            const modalContainer = document.getElementById('modal-container');
+            if (modalContainer) {
+                modalContainer.innerHTML = html;
+            }
+        })
+        .catch(err => {
+            console.error('Error loading paste modal:', err);
+            showToast('Failed to open paste modal', 'error');
+        });
+}
+
+function closePasteModal() {
+    const modal = document.getElementById('paste-archive-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function handlePasteSubmit(event) {
+    event.preventDefault();
+
+    const content = document.getElementById('archive-content').value.trim();
+    if (!content) {
+        showToast('Please paste archive content', 'warning');
+        return;
+    }
+
+    // Show loading state
+    const submitBtn = document.getElementById('paste-submit-btn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Importing...';
+
+    // Submit to backend
+    fetch('/api/v1/chat-notes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            markdownContent: content
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Archive imported successfully', 'success');
+            closePasteModal();
+
+            // Reload current view
+            htmx.ajax('GET', '/fragments/chat-notes', {
+                target: '#notes-grid',
+                swap: 'innerHTML'
+            });
+        } else {
+            showToast(data.message || 'Import failed', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    })
+    .catch(err => {
+        console.error('Import error:', err);
+        showToast('Import failed. Please check the archive format.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
 }

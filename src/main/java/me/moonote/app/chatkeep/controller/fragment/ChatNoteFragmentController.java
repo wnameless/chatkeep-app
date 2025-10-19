@@ -568,4 +568,12 @@ public class ChatNoteFragmentController {
     return noteData;
   }
 
+  /**
+   * Serve the paste archive modal fragment
+   */
+  @GetMapping("/paste-archive-modal")
+  public String getPasteArchiveModal() {
+    return "fragments/paste-archive-modal :: modal";
+  }
+
 }

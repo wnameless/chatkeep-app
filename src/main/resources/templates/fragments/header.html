@@ -34,10 +34,35 @@
 
           <!-- Import Archive Button (Plus Icon) inside search box -->
           <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
-            <button id="import-archive-btn" title="Import Archive Markdown"
-              class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
-              <i class="fas fa-plus text-lg"></i>
-            </button>
+            <div class="relative">
+              <button id="import-archive-btn" title="Import Archive"
+                class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+                <i class="fas fa-plus text-lg"></i>
+              </button>
+
+              <!-- Import Options Dropdown -->
+              <div id="import-dropdown"
+                class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div class="py-2">
+                  <button id="upload-file-btn"
+                    class="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                    <i class="fas fa-file-upload w-5 text-primary-500"></i>
+                    <div>
+                      <div class="font-medium">Upload File</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file</div>
+                    </div>
+                  </button>
+                  <button id="paste-content-btn"
+                    class="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                    <i class="fas fa-clipboard w-5 text-primary-500"></i>
+                    <div>
+                      <div class="font-medium">Paste Content</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -227,10 +252,33 @@
 
         <div
           class="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
-          <button
-            class="import-archive-btn p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
-            <i class="fas fa-plus text-lg"></i>
-          </button>
+          <div class="relative">
+            <button id="mobile-import-archive-btn"
+              class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
+              <i class="fas fa-plus text-lg"></i>
+            </button>
+
+            <!-- Mobile Import Options Dropdown -->
+            <div id="mobile-import-dropdown"
+              class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+              <div class="py-2">
+                <button class="mobile-upload-file-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                  <i class="fas fa-file-upload w-5 text-primary-500"></i>
+                  <div>
+                    <div class="font-medium">Upload File</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file</div>
+                  </div>
+                </button>
+                <button class="mobile-paste-content-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                  <i class="fas fa-clipboard w-5 text-primary-500"></i>
+                  <div>
+                    <div class="font-medium">Paste Content</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="h-6 w-px bg-gray-300 dark:bg-gray-600"></div>
           <button
             class="copy-template-btn p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">

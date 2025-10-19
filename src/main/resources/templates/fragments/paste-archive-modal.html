@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+  <!-- Paste Archive Modal Fragment -->
+  <div th:fragment="modal"
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-75 flex items-center justify-center z-50"
+    id="paste-archive-modal">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full mx-4 p-6 max-h-[90vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Paste Archive Content
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Paste your conversation archive
+            markdown below</p>
+        </div>
+        <button onclick="closePasteModal()"
+          class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form id="paste-archive-form" class="flex-1 flex flex-col"
+        onsubmit="handlePasteSubmit(event)">
+
+        <!-- Textarea -->
+        <div class="mb-6">
+          <label for="archive-content"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Archive Content
+          </label>
+          <textarea id="archive-content" name="content" required
+            placeholder="Paste your conversation archive markdown here...&#10;&#10;Example:&#10;---&#10;version: '1.0'&#10;platform: claude&#10;title: My Chat&#10;..."
+            class="w-full h-[350px] px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 font-mono text-sm resize-y"
+            autocomplete="off"></textarea>
+        </div>
+
+        <!-- Validation Indicator -->
+        <div id="paste-validation-indicator" class="mb-4 hidden">
+          <div class="flex items-center gap-2 text-sm">
+            <i class="fas fa-circle-notch fa-spin text-primary-500"></i>
+            <span class="text-gray-600 dark:text-gray-400">Validating format...</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-between items-center">
+          <div class="text-xs text-gray-500 dark:text-gray-400">
+            <i class="fas fa-info-circle mr-1"></i>
+            Markdown will be validated after submission
+          </div>
+          <div class="flex space-x-3">
+            <button type="button" onclick="closePasteModal()"
+              class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md">
+              Cancel
+            </button>
+            <button type="submit" id="paste-submit-btn"
+              class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-md flex items-center gap-2">
+              <i class="fas fa-check"></i>
+              <span>Import Archive</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</body>
+
+</html>
