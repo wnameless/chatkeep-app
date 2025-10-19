@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSidebar();
     initializeHeader();
     initializeViewToggle();
-    initializeTags();
     initializeTheme();
     setupHTMXListeners();
 });
@@ -46,107 +45,6 @@ function initializeSidebar() {
             this.classList.add('active', 'bg-primary-50', 'dark:bg-primary-900', 'text-primary-600', 'dark:text-primary-400');
         });
     });
-}
-
-// ==================== Tags Management ====================
-
-function initializeTags() {
-    // Tags toggle
-    const tagsToggle = document.getElementById('tags-toggle');
-    const tagsList = document.getElementById('tags-list');
-    const tagsChevron = document.getElementById('tags-chevron');
-
-    if (tagsToggle && tagsList) {
-        tagsToggle.addEventListener('click', function() {
-            const isHidden = tagsList.classList.contains('hidden');
-            tagsList.classList.toggle('hidden');
-            tagsChevron.classList.toggle('rotate-180');
-
-            // Load tags on first expand
-            if (isHidden && tagsList.querySelector('#tags-container').children.length === 0) {
-                loadTagsViaHTMX();
-            }
-        });
-    }
-
-    // Clear filters button handler
-    const clearFiltersBtn = document.getElementById('clear-filters-btn');
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', function() {
-            // Uncheck all tag checkboxes
-            document.querySelectorAll('.tag-checkbox:checked').forEach(cb => cb.checked = false);
-            // Hide clear button
-            document.getElementById('clear-filters-container')?.classList.add('hidden');
-        });
-    }
-}
-
-function loadTagsViaHTMX() {
-    // Fetch tags via HTMX fragment (uses SecurityUtils.getCurrentUserId())
-    htmx.ajax('GET', '/fragments/tags', {
-        target: '#tags-container',
-        swap: 'innerHTML'
-    }).then(() => {
-        // Hide loading message after tags are loaded
-        const tagsLoading = document.getElementById('tags-loading');
-        if (tagsLoading) tagsLoading.classList.add('hidden');
-
-        // Attach event listeners to newly loaded checkboxes
-        document.querySelectorAll('.tag-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', handleTagFilterChange);
-        });
-    });
-}
-
-function renderTagsInSidebar(tagsMap) {
-    const tagsContainer = document.getElementById('tags-container');
-    const tagsLoading = document.getElementById('tags-loading');
-
-    if (tagsLoading) tagsLoading.classList.add('hidden');
-    if (!tagsContainer) return;
-
-    tagsContainer.innerHTML = '';
-
-    // Sort tags by count (descending) then alphabetically
-    const sortedTags = Array.from(tagsMap.entries())
-        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-
-    sortedTags.forEach(([tag, count]) => {
-        const label = document.createElement('label');
-        label.className = 'flex items-center py-1.5 px-2 ml-6 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer';
-        label.innerHTML = `
-            <input type="checkbox" value="${tag}" class="tag-checkbox rounded text-primary-500 focus:ring-primary-400 mr-2">
-            <span class="text-sm text-gray-700 dark:text-gray-300">${tag}</span>
-            <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">${count}</span>
-        `;
-
-        const checkbox = label.querySelector('.tag-checkbox');
-        checkbox.addEventListener('change', handleTagFilterChange);
-
-        tagsContainer.appendChild(label);
-    });
-}
-
-function handleTagFilterChange() {
-    const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
-    const clearFiltersContainer = document.getElementById('clear-filters-container');
-
-    if (selectedTags.length > 0) {
-        clearFiltersContainer?.classList.remove('hidden');
-        // Trigger HTMX request with selected tags (OR operation for multiple tags)
-        const tagsParam = selectedTags.join(',');
-        htmx.ajax('GET', `/fragments/filter/tags?tags=${tagsParam}&operator=OR`, {
-            target: '#notes-grid',
-            swap: 'innerHTML'
-        });
-    } else {
-        clearFiltersContainer?.classList.add('hidden');
-        // Reload default view
-        htmx.ajax('GET', '/fragments/chat-notes', {
-            target: '#notes-grid',
-            swap: 'innerHTML'
-        });
-    }
 }
 
 // ==================== Header Management ====================

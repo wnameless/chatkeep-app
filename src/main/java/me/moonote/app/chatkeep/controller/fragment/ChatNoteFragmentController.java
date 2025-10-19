@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -407,101 +406,6 @@ public class ChatNoteFragmentController {
       log.error("Error searching", e);
       model.addAttribute("notes", List.of());
       model.addAttribute("filter", "search");
-      return "fragments/chat-note-cards";
-    }
-  }
-
-  /**
-   * Get tags list for sidebar GET /fragments/tags Returns tag checkboxes with counts
-   */
-  @GetMapping("/tags")
-  public String getTags(Model model) {
-
-    log.info("Loading tags for sidebar");
-
-    String userId = SecurityUtils.getCurrentUserId();
-
-    if (userId == null) {
-      model.addAttribute("tags", List.of());
-      return "fragments/tags-list";
-    }
-
-    try {
-      // Get all active chat notes for the user
-      Pageable pageable = PageRequest.of(0, 1000, Sort.by(Sort.Direction.DESC, "createdAt"));
-      List<ChatNoteResponse> notes =
-          chatNoteService.getActiveChatNotes(userId, pageable).getContent();
-
-      // Count tag occurrences
-      Map<String, Long> tagsMap = new HashMap<>();
-      notes.forEach(note -> {
-        if (note.getTags() != null) {
-          note.getTags().forEach(tag -> {
-            tagsMap.put(tag, tagsMap.getOrDefault(tag, 0L) + 1);
-          });
-        }
-      });
-
-      // Sort by count descending, then alphabetically
-      List<Map.Entry<String, Long>> sortedTags = tagsMap.entrySet().stream().sorted((a, b) -> {
-        int countCompare = b.getValue().compareTo(a.getValue());
-        return countCompare != 0 ? countCompare : a.getKey().compareTo(b.getKey());
-      }).collect(Collectors.toList());
-
-      model.addAttribute("tags", sortedTags);
-      return "fragments/tags-list";
-
-    } catch (Exception e) {
-      log.error("Error loading tags", e);
-      model.addAttribute("tags", List.of());
-      return "fragments/tags-list";
-    }
-  }
-
-  /**
-   * Filter by tags GET /fragments/filter/tags?tags=java,spring
-   */
-  @GetMapping("/filter/tags")
-  public String filterByTags(@RequestParam List<String> tags, Model model, HttpSession session) {
-
-    log.info("Filter by tags: {}", tags);
-
-    String userId = SecurityUtils.getCurrentUserId();
-
-    if (userId == null) {
-      model.addAttribute("notes", List.of());
-      model.addAttribute("viewMode", "masonry");
-      return "fragments/chat-note-cards";
-    }
-
-    try {
-      Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<ChatNoteResponse> resultsPage =
-          chatNoteService.filterActiveByTagsForUser(userId, tags, "OR", pageable);
-
-      List<ChatNoteResponse> results = resultsPage.getContent();
-
-      // Add content previews
-      results = results.stream().map(note -> {
-        ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
-        if (entity != null) {
-          note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
-        }
-        return note;
-      }).collect(Collectors.toList());
-
-      String viewMode = (String) session.getAttribute("viewMode");
-      model.addAttribute("notes", results);
-      model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
-      model.addAttribute("filter", "tags");
-
-      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
-          : "fragments/chat-note-cards";
-
-    } catch (Exception e) {
-      log.error("Error filtering by tags", e);
-      model.addAttribute("notes", List.of());
-      model.addAttribute("filter", "tags");
       return "fragments/chat-note-cards";
     }
   }
