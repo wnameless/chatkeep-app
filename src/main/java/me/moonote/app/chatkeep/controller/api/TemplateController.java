@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/templates")
 public class TemplateController {
 
-  private static final String TEMPLATE_PATH = "ai-specs/conversation_archive_template.md";
+  private static final String TEMPLATE_PATH = "ai-specs/AIConversationArchivingSystem.md";
 
   /**
    * Get conversation archive template GET /api/v1/templates/archive

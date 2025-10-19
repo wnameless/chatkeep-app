@@ -174,6 +174,22 @@ function initializeHeader() {
         });
     }
 
+    // Archiving prompt dropdown
+    const copyTemplateBtn = document.getElementById('copy-template-btn');
+    const archivingPromptDropdown = document.getElementById('archiving-prompt-dropdown');
+
+    if (copyTemplateBtn && archivingPromptDropdown) {
+        copyTemplateBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            archivingPromptDropdown.classList.toggle('hidden');
+            // Reset success message when opening
+            const successMessage = document.getElementById('copy-success-message');
+            if (successMessage) {
+                successMessage.classList.add('hidden');
+            }
+        });
+    }
+
     // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (settingsDropdown && !settingsDropdown.contains(e.target) && e.target !== settingsBtn) {
@@ -181,6 +197,9 @@ function initializeHeader() {
         }
         if (userDropdown && !userDropdown.contains(e.target) && e.target !== userMenuBtn) {
             userDropdown.classList.add('hidden');
+        }
+        if (archivingPromptDropdown && !archivingPromptDropdown.contains(e.target) && e.target !== copyTemplateBtn) {
+            archivingPromptDropdown.classList.add('hidden');
         }
     });
 
@@ -200,11 +219,24 @@ function initializeHeader() {
         importBtn.addEventListener('click', openImportDialog);
     }
 
-    // Copy template button
-    const copyTemplateBtn = document.getElementById('copy-template-btn');
-    if (copyTemplateBtn) {
-        copyTemplateBtn.addEventListener('click', copyArchiveTemplate);
+    // Copy prompt action button (inside dropdown)
+    const copyPromptActionBtn = document.getElementById('copy-prompt-action-btn');
+    if (copyPromptActionBtn) {
+        copyPromptActionBtn.addEventListener('click', function() {
+            copyArchiveTemplate(archivingPromptDropdown);
+        });
     }
+
+    // Mobile copy template buttons (class-based selector for mobile icon buttons)
+    const mobileCopyBtns = document.querySelectorAll('.copy-template-btn');
+    mobileCopyBtns.forEach(btn => {
+        // Skip the main desktop button (handled above)
+        if (btn.id !== 'copy-template-btn') {
+            btn.addEventListener('click', function() {
+                copyArchiveTemplate(null); // No dropdown on mobile, just show toast
+            });
+        }
+    });
 
     // Logout button
     const logoutBtn = document.getElementById('logout-btn');
@@ -380,18 +412,34 @@ function handleFileImport(event) {
     });
 }
 
-function copyArchiveTemplate() {
+function copyArchiveTemplate(dropdown) {
     // Fetch template and copy to clipboard
     fetch('/api/v1/templates/archive')
         .then(response => response.text())
         .then(template => {
             navigator.clipboard.writeText(template)
-                .then(() => showToast('Template copied to clipboard', 'success'))
-                .catch(() => showToast('Failed to copy template', 'error'));
+                .then(() => {
+                    if (dropdown) {
+                        // Desktop: Show success message in dropdown
+                        const successMessage = document.getElementById('copy-success-message');
+                        if (successMessage) {
+                            successMessage.classList.remove('hidden');
+                        }
+
+                        // Auto-close dropdown after 2 seconds
+                        setTimeout(() => {
+                            dropdown.classList.add('hidden');
+                        }, 2000);
+                    } else {
+                        // Mobile: Show toast notification
+                        showToast('Prompt copied to clipboard', 'success');
+                    }
+                })
+                .catch(() => showToast('Failed to copy prompt', 'error'));
         })
         .catch(err => {
             console.error('Error fetching template:', err);
-            showToast('Failed to fetch template', 'error');
+            showToast('Failed to fetch prompt', 'error');
         });
 }
 
