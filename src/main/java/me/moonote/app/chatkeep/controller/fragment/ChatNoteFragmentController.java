@@ -3,6 +3,7 @@ package me.moonote.app.chatkeep.controller.fragment;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ import me.moonote.app.chatkeep.mapper.LabelMapper;
 import me.moonote.app.chatkeep.model.Artifact;
 import me.moonote.app.chatkeep.model.Attachment;
 import me.moonote.app.chatkeep.model.ChatNote;
+import me.moonote.app.chatkeep.model.Label;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
 import me.moonote.app.chatkeep.repository.LabelRepository;
 import me.moonote.app.chatkeep.security.SecurityUtils;
@@ -90,15 +92,26 @@ public class ChatNoteFragmentController {
     // Load notes based on filter
     List<ChatNoteResponse> notes = loadNotesByFilter(filter, userId, page, size);
 
+    // Batch fetch all unique label IDs to avoid N+1 query
+    Set<String> allLabelIds = notes.stream()
+        .filter(note -> note.getLabelIds() != null)
+        .flatMap(note -> note.getLabelIds().stream())
+        .collect(Collectors.toSet());
+
+    // Single batch query to fetch all labels
+    Map<String, Label> labelMap = allLabelIds.isEmpty() ? Map.of()
+        : labelRepository.findAllById(allLabelIds).stream()
+            .collect(Collectors.toMap(Label::getId, label -> label));
+
     // Add content previews and labels
     notes = notes.stream().map(note -> {
       ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
       if (entity != null) {
         note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
-        // Populate labels
+        // Populate labels using pre-fetched label map
         if (note.getLabelIds() != null && !note.getLabelIds().isEmpty()) {
           List<LabelResponse> labels = note.getLabelIds().stream()
-              .map(labelId -> labelRepository.findById(labelId).orElse(null))
+              .map(labelMap::get)
               .filter(java.util.Objects::nonNull)
               .map(labelMapper::toResponse)
               .collect(Collectors.toList());
@@ -658,11 +671,9 @@ public class ChatNoteFragmentController {
     noteData.put("tags", entity.getTags() != null ? entity.getTags() : List.of());
     noteData.put("labelIds", entity.getLabelIds() != null ? entity.getLabelIds() : List.of());
 
-    // Populate labels with full details
+    // Populate labels with full details (batch fetch to avoid N+1 query)
     if (entity.getLabelIds() != null && !entity.getLabelIds().isEmpty()) {
-      List<LabelResponse> labels = entity.getLabelIds().stream()
-          .map(labelId -> labelRepository.findById(labelId).orElse(null))
-          .filter(java.util.Objects::nonNull)
+      List<LabelResponse> labels = labelRepository.findAllById(entity.getLabelIds()).stream()
           .map(labelMapper::toResponse)
           .collect(Collectors.toList());
       noteData.put("labels", labels);

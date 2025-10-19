@@ -20,6 +20,7 @@ import me.moonote.app.chatkeep.model.ChatNote;
 import me.moonote.app.chatkeep.model.ConversationSummary;
 import me.moonote.app.chatkeep.model.FollowUpSection;
 import me.moonote.app.chatkeep.model.InsightsSection;
+import me.moonote.app.chatkeep.model.Label;
 import me.moonote.app.chatkeep.model.QuerySection;
 import me.moonote.app.chatkeep.model.Reference;
 import me.moonote.app.chatkeep.repository.ChatNoteRepository;
@@ -328,16 +329,20 @@ public class ChatNoteService {
 
     String currentUserId = SecurityUtils.getCurrentUserId();
 
-    // Verify all labels exist and are owned by the current user
-    for (String labelId : labelIds) {
-      labelRepository.findById(labelId).ifPresentOrElse(label -> {
-        if (!label.getUserId().equals(currentUserId)) {
-          throw new IllegalArgumentException(
-              "Label " + labelId + " does not belong to current user");
-        }
-      }, () -> {
-        throw new IllegalArgumentException("Label not found: " + labelId);
-      });
+    // Verify all labels exist and are owned by the current user (batch fetch to avoid N+1 query)
+    List<Label> labels = labelRepository.findAllById(labelIds);
+
+    // Verify count matches (all labels exist)
+    if (labels.size() != labelIds.size()) {
+      throw new IllegalArgumentException("One or more labels not found");
+    }
+
+    // Verify ownership
+    boolean allOwnedByUser = labels.stream()
+        .allMatch(label -> label.getUserId().equals(currentUserId));
+
+    if (!allOwnedByUser) {
+      throw new IllegalArgumentException("One or more labels do not belong to current user");
     }
 
     // Initialize labelIds list if null

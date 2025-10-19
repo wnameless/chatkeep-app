@@ -161,10 +161,9 @@ public class LabelService {
 
     log.info("Removing label {} from {} ChatNotes", id, chatNotes.size());
 
-    for (ChatNote chatNote : chatNotes) {
-      chatNote.getLabelIds().remove(id);
-      chatNoteRepository.save(chatNote);
-    }
+    // Remove label from all notes and batch save (avoid N+1 updates)
+    chatNotes.forEach(chatNote -> chatNote.getLabelIds().remove(id));
+    chatNoteRepository.saveAll(chatNotes);
 
     // Delete the label
     labelRepository.deleteById(id);
