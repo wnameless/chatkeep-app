@@ -20,7 +20,7 @@ public class LocalMongoConfig extends AbstractMongoClientConfiguration {
 
   @Override
   protected String getDatabaseName() {
-    return "chatkeep-dev";
+    return "chatkeep-demo";
   }
 
   @Override
