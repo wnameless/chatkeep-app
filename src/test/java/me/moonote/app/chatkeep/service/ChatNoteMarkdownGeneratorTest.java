@@ -90,7 +90,7 @@ class ChatNoteMarkdownGeneratorTest {
 
     ChatNoteValidationResult result = preprocessor.preprocess(dragonwellMarkdown);
     dragonwellDto = result.getChatNoteDto();
-    dragonwellChatNote = mapper.toEntity(dragonwellDto, "test-user", dragonwellMarkdown);
+    dragonwellChatNote = mapper.toEntity(dragonwellDto, "test-user");
 
     // Populate test data from dragonwell DTO
     populateTestDataFromDto(dragonwellDto);

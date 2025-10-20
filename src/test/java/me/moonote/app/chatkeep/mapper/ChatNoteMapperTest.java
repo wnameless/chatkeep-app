@@ -55,7 +55,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Metadata from YAML frontmatter
     assertEquals("1.0", chatNote.getArchiveVersion(), "Archive version should match");
@@ -77,7 +77,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertEquals("Building Dragonwell JDK 21 on macOS with Compact Object Headers",
@@ -92,7 +92,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertNotNull(chatNote.getTags(), "Tags should not be null");
@@ -109,7 +109,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertNotNull(chatNote.getSummary(), "Summary should not be null");
@@ -128,7 +128,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     QuerySection initialQuery = chatNote.getSummary().getInitialQuery();
@@ -152,7 +152,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     InsightsSection keyInsights = chatNote.getSummary().getKeyInsights();
@@ -175,7 +175,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     FollowUpSection followUp = chatNote.getSummary().getFollowUpExplorations();
@@ -194,7 +194,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertNotNull(chatNote.getSummary().getReferences(), "References should not be null");
@@ -213,7 +213,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Artifacts are no longer embedded in entity, only count is stored
     assertEquals(1, chatNote.getArtifactCount(), "Should have artifact count of 1");
@@ -243,7 +243,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - dragonwell.md has no attachments
     // Attachments are no longer embedded in entity, only count is stored
@@ -260,35 +260,11 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - dragonwell.md has no workarounds
     assertNotNull(chatNote.getWorkarounds(), "Workarounds list should not be null");
     assertTrue(chatNote.getWorkarounds().isEmpty(), "Should have no workarounds");
-  }
-
-  @Test
-  void testToEntity_ShouldStoreOriginalMarkdownContent() {
-    // Arrange
-    String userId = "test-user-123";
-
-    // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
-
-    // Assert
-    assertNotNull(chatNote.getMarkdownContent(), "Markdown content should not be null");
-    assertEquals(dragonwellMarkdown, chatNote.getMarkdownContent(),
-        "Should store original markdown content");
-
-    // Verify markdown content is complete
-    assertTrue(chatNote.getMarkdownContent().contains("ARCHIVE_FORMAT_VERSION: 1.0"),
-        "Markdown should contain YAML frontmatter");
-    assertTrue(chatNote.getMarkdownContent().contains("# Building Dragonwell"),
-        "Markdown should contain title");
-    assertTrue(chatNote.getMarkdownContent().contains("## Initial Query"),
-        "Markdown should contain sections");
-    assertTrue(chatNote.getMarkdownContent().contains("<!-- ARTIFACT_START:"),
-        "Markdown should contain artifacts");
   }
 
   @Test
@@ -297,7 +273,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-456";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertEquals(userId, chatNote.getUserId(), "User ID should be set correctly");
@@ -309,7 +285,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Default lifecycle flags
     assertEquals(false, chatNote.getIsPublic(), "Should default to private (isPublic=false)");
@@ -325,7 +301,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert
     assertEquals(0L, chatNote.getViewCount(), "View count should default to 0");
@@ -337,7 +313,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Audit fields should be null (set by MongoDB @CreatedDate/@LastModifiedDate)
     assertNull(chatNote.getCreatedAt(), "CreatedAt should be null (set by MongoDB on insert)");
@@ -350,7 +326,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - ID should be null (set by MongoDB on insert)
     assertNull(chatNote.getId(), "ID should be null (set by MongoDB on insert)");
@@ -362,7 +338,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Comprehensive verification of all data preservation
 
@@ -391,11 +367,6 @@ class ChatNoteMapperTest {
     assertNotNull(artifact.getTitle(), "Artifact title should be set");
     assertNotNull(artifact.getContent(), "Artifact content should be set");
     assertTrue(artifact.getContent().length() > 100, "Artifact content should be substantial");
-
-    // Original content
-    assertNotNull(chatNote.getMarkdownContent(), "Markdown content should be preserved");
-    assertEquals(dragonwellMarkdown.length(), chatNote.getMarkdownContent().length(),
-        "Markdown content length should match original");
   }
 
   @Test
@@ -405,8 +376,8 @@ class ChatNoteMapperTest {
     String userId2 = "user-bob";
 
     // Act
-    ChatNote chatNote1 = mapper.toEntity(chatNoteDto, userId1, dragonwellMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(chatNoteDto, userId2, dragonwellMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(chatNoteDto, userId1);
+    ChatNote chatNote2 = mapper.toEntity(chatNoteDto, userId2);
 
     // Assert - Same DTO mapped to different users
     assertEquals(userId1, chatNote1.getUserId(), "First user ID should match");
@@ -424,7 +395,7 @@ class ChatNoteMapperTest {
     String userId = "test-user-123";
 
     // Act
-    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(chatNoteDto, userId);
 
     // Assert - Verify all section descriptions are non-empty and meaningful
     String queryDesc = chatNote.getSummary().getInitialQuery().getDescription();

@@ -60,7 +60,7 @@ class MarkdownToChatNoteConversionTest {
 
     // Step 2: Map DTO to entity
     ChatNoteDto dto = validationResult.getChatNoteDto();
-    ChatNote chatNote = mapper.toEntity(dto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(dto, userId);
 
     // Assert - Verify entire pipeline succeeded
     assertTrue(validationResult.isValid(), "Markdown preprocessing should succeed");
@@ -72,7 +72,6 @@ class MarkdownToChatNoteConversionTest {
     verifySummary(chatNote);
     verifyArtifacts(dto); // Verify artifacts from DTO (no longer embedded in entity)
     verifyLifecycleDefaults(chatNote, userId);
-    verifyMarkdownContentPreservation(chatNote);
   }
 
   private void verifyMetadata(ChatNote chatNote) {
@@ -215,30 +214,6 @@ class MarkdownToChatNoteConversionTest {
     assertNull(chatNote.getId(), "ID should be null before MongoDB insert");
   }
 
-  private void verifyMarkdownContentPreservation(ChatNote chatNote) {
-    assertNotNull(chatNote.getMarkdownContent(), "Original markdown should be preserved");
-    assertEquals(dragonwellMarkdown, chatNote.getMarkdownContent(),
-        "Markdown content should match original exactly");
-
-    // Verify markdown contains all key sections
-    String markdown = chatNote.getMarkdownContent();
-    assertTrue(markdown.contains("---\nARCHIVE_FORMAT_VERSION: 1.0"),
-        "Should contain YAML frontmatter");
-    assertTrue(markdown.contains("# Building Dragonwell JDK 21"), "Should contain title");
-    assertTrue(markdown.contains("**Date:** 2025-10-02"), "Should contain date");
-    assertTrue(markdown.contains("**Tags:**"), "Should contain tags");
-    assertTrue(markdown.contains("## Initial Query"), "Should contain Initial Query section");
-    assertTrue(markdown.contains("## Key Insights"), "Should contain Key Insights section");
-    assertTrue(markdown.contains("## Follow-up Explorations"), "Should contain Follow-up section");
-    assertTrue(markdown.contains("## References/Links"), "Should contain References section");
-    assertTrue(markdown.contains("## Artifacts"), "Should contain Artifacts section");
-    assertTrue(markdown.contains("<!-- ARTIFACT_START: type=\"script\""),
-        "Should contain artifact markers");
-    assertTrue(markdown.contains("<!-- ARTIFACT_END -->"), "Should contain artifact end markers");
-    assertTrue(markdown.contains("## Workarounds Used"), "Should contain Workarounds section");
-    assertTrue(markdown.contains("## Archive Metadata"), "Should contain Archive Metadata section");
-    assertTrue(markdown.contains("_End of archived conversation_"), "Should contain end marker");
-  }
 
   @Test
   void testFullPipeline_DataIntegrity_NoDataLoss() {
@@ -248,7 +223,7 @@ class MarkdownToChatNoteConversionTest {
     // Act - Full pipeline
     ChatNoteValidationResult validationResult = preprocessor.preprocess(dragonwellMarkdown);
     ChatNoteDto dto = validationResult.getChatNoteDto();
-    ChatNote chatNote = mapper.toEntity(dto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(dto, userId);
 
     // Assert - Verify no data loss during conversion
     // Verify artifact count matches metadata
@@ -301,11 +276,11 @@ class MarkdownToChatNoteConversionTest {
     // Act - Run pipeline twice
     ChatNoteValidationResult result1 = preprocessor.preprocess(dragonwellMarkdown);
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, userId, dragonwellMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, userId);
 
     ChatNoteValidationResult result2 = preprocessor.preprocess(dragonwellMarkdown);
     ChatNoteDto dto2 = result2.getChatNoteDto();
-    ChatNote chatNote2 = mapper.toEntity(dto2, userId, dragonwellMarkdown);
+    ChatNote chatNote2 = mapper.toEntity(dto2, userId);
 
     // Assert - Results should be identical
     assertEquals(chatNote1.getTitle(), chatNote2.getTitle(), "Titles should match");
@@ -314,10 +289,6 @@ class MarkdownToChatNoteConversionTest {
         "Artifact counts should match");
     assertEquals(chatNote1.getSummary().getReferences().size(),
         chatNote2.getSummary().getReferences().size(), "Reference counts should match");
-
-    // Content should be identical
-    assertEquals(chatNote1.getMarkdownContent(), chatNote2.getMarkdownContent(),
-        "Markdown content should be identical");
 
     // Verify artifact content from DTOs
     assertEquals(dto1.getArtifacts().get(0).getContent(), dto2.getArtifacts().get(0).getContent(),
@@ -332,7 +303,7 @@ class MarkdownToChatNoteConversionTest {
     // Act
     ChatNoteValidationResult validationResult = preprocessor.preprocess(dragonwellMarkdown);
     ChatNoteDto dto = validationResult.getChatNoteDto();
-    ChatNote chatNote = mapper.toEntity(dto, userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(dto, userId);
 
     // Assert - Verify enum conversion from String to Enum
     assertEquals("COMPLETE", dto.getMetadata().getChatNoteCompleteness(),
@@ -353,8 +324,7 @@ class MarkdownToChatNoteConversionTest {
 
     // Act
     ChatNoteValidationResult validationResult = preprocessor.preprocess(dragonwellMarkdown);
-    ChatNote chatNote =
-        mapper.toEntity(validationResult.getChatNoteDto(), userId, dragonwellMarkdown);
+    ChatNote chatNote = mapper.toEntity(validationResult.getChatNoteDto(), userId);
 
     // Assert - Verify entity is ready for MongoDB persistence
     assertNull(chatNote.getId(), "ID should be null (MongoDB will generate)");

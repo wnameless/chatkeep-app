@@ -97,7 +97,7 @@ class RoundTripConversionTest {
     assertTrue(result1.isValid(), "Original markdown should be valid");
 
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user");
 
     // Populate test artifacts/attachments for markdown generation
     populateTestData(dto1);
@@ -122,7 +122,7 @@ class RoundTripConversionTest {
     // Parse original markdown
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user");
 
     // Populate test data for markdown generation
     populateTestData(dto1);
@@ -158,12 +158,12 @@ class RoundTripConversionTest {
   void testRoundTrip_MetadataPreservation() {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
-    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user");
 
     // Generate and re-parse
     String generatedMarkdown = generator.generateMarkdown(chatNote1);
     ChatNoteValidationResult result2 = preprocessor.preprocess(generatedMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user", generatedMarkdown);
+    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user");
 
     // Verify metadata fields
     assertEquals(chatNote1.getArchiveVersion(), chatNote2.getArchiveVersion(),
@@ -193,12 +193,12 @@ class RoundTripConversionTest {
   void testRoundTrip_TagsPreservation() {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
-    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user");
 
     // Generate and re-parse
     String generatedMarkdown = generator.generateMarkdown(chatNote1);
     ChatNoteValidationResult result2 = preprocessor.preprocess(generatedMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user", generatedMarkdown);
+    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user");
 
     // Verify tags
     assertNotNull(chatNote2.getTags(), "Tags should not be null");
@@ -211,12 +211,12 @@ class RoundTripConversionTest {
   void testRoundTrip_SummaryPreservation() {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
-    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user");
 
     // Generate and re-parse
     String generatedMarkdown = generator.generateMarkdown(chatNote1);
     ChatNoteValidationResult result2 = preprocessor.preprocess(generatedMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user", generatedMarkdown);
+    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user");
 
     // Verify summary sections exist and have substantial content
     assertNotNull(chatNote2.getSummary(), "Summary should not be null");
@@ -246,7 +246,7 @@ class RoundTripConversionTest {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user");
 
     // Populate test data and generate markdown
     populateTestData(dto1);
@@ -282,7 +282,7 @@ class RoundTripConversionTest {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user");
 
     // Get original artifact content from DTO
     String originalArtifactContent = dto1.getArtifacts().get(0).getContent();
@@ -321,12 +321,12 @@ class RoundTripConversionTest {
   void testRoundTrip_ReferencesPreservation() {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
-    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(result1.getChatNoteDto(), "test-user");
 
     // Generate and re-parse
     String generatedMarkdown = generator.generateMarkdown(chatNote1);
     ChatNoteValidationResult result2 = preprocessor.preprocess(generatedMarkdown);
-    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user", generatedMarkdown);
+    ChatNote chatNote2 = mapper.toEntity(result2.getChatNoteDto(), "test-user");
 
     // Verify references count
     assertEquals(chatNote1.getSummary().getReferences().size(),
@@ -356,7 +356,7 @@ class RoundTripConversionTest {
     // Parse original
     ChatNoteValidationResult result1 = preprocessor.preprocess(originalMarkdown);
     ChatNoteDto dto1 = result1.getChatNoteDto();
-    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user", originalMarkdown);
+    ChatNote chatNote1 = mapper.toEntity(dto1, "test-user");
 
     // Generate markdown (populate test data first)
     populateTestData(dto1);
@@ -365,7 +365,7 @@ class RoundTripConversionTest {
     // Re-parse and generate again
     ChatNoteValidationResult result2 = preprocessor.preprocess(markdown1);
     ChatNoteDto dto2 = result2.getChatNoteDto();
-    ChatNote chatNote2 = mapper.toEntity(dto2, "test-user", markdown1);
+    ChatNote chatNote2 = mapper.toEntity(dto2, "test-user");
 
     populateTestData(dto2);
     String markdown2 = generator.generateMarkdown(chatNote2);

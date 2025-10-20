@@ -62,7 +62,7 @@ public class ChatNoteService {
 
     // Convert to entity and save ChatNote metadata
     ChatNoteDto chatNoteDto = validationResult.getChatNoteDto();
-    ChatNote entity = mapper.toEntity(chatNoteDto, userId, markdownContent);
+    ChatNote entity = mapper.toEntity(chatNoteDto, userId);
     ChatNote saved = repository.save(entity);
 
     log.info("Chat note metadata saved successfully with id: {}", saved.getId());
@@ -131,8 +131,7 @@ public class ChatNoteService {
         .summary(sourceNote.getSummary())
         .workarounds(
             sourceNote.getWorkarounds() != null ? List.copyOf(sourceNote.getWorkarounds()) : null)
-        .markdownContent(sourceNote.getMarkdownContent()).userId(userId) // Assign to the requesting
-                                                                         // user
+        .userId(userId) // Assign to the requesting user
         .isPublic(false) // Set as private by default
         .isArchived(false).isTrashed(false).isFavorite(false).trashedAt(null).viewCount(0L).build();
 
@@ -688,7 +687,6 @@ public class ChatNoteService {
         repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     chatNote.setTitle(title);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} title updated", id);
@@ -704,7 +702,6 @@ public class ChatNoteService {
         repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     chatNote.setTags(tags);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} tags updated", id);
@@ -720,7 +717,6 @@ public class ChatNoteService {
         repository.findById(id).orElseThrow(() -> new ChatNoteNotFoundException(id));
 
     chatNote.setConversationDate(date);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} conversation date updated", id);
@@ -746,7 +742,6 @@ public class ChatNoteService {
     }
 
     querySection.setDescription(description);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} initial query updated", id);
@@ -774,7 +769,6 @@ public class ChatNoteService {
 
     insightsSection.setDescription(description);
     insightsSection.setKeyPoints(keyPoints);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} key insights updated", id);
@@ -800,7 +794,6 @@ public class ChatNoteService {
     }
 
     followUpSection.setDescription(description);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} follow-up explorations updated", id);
@@ -827,7 +820,6 @@ public class ChatNoteService {
             .toList();
 
     chatNote.getSummary().setReferences(references);
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
 
     ChatNote updated = repository.save(chatNote);
     log.info("Chat note {} references updated", id);
@@ -857,7 +849,6 @@ public class ChatNoteService {
     artifactRepository.save(artifact);
 
     // Invalidate markdown cache
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
     ChatNote updated = repository.save(chatNote);
 
     log.info("Chat note {} artifact {} content updated", id, index);
@@ -887,7 +878,6 @@ public class ChatNoteService {
     attachmentRepository.save(attachment);
 
     // Invalidate markdown cache
-    chatNote.setMarkdownContent(null); // Trigger on-demand regeneration
     ChatNote updated = repository.save(chatNote);
 
     log.info("Chat note {} attachment {} content updated", id, index);

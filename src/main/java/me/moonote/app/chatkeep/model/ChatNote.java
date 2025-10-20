@@ -49,9 +49,6 @@ public class ChatNote {
   // Use ArtifactRepository and AttachmentRepository to fetch them by chatNoteId
   List<Workaround> workarounds;
 
-  // Original markdown content (for display and download)
-  String markdownContent;
-
   // Metadata for web app
   @CreatedDate
   Instant createdAt;
