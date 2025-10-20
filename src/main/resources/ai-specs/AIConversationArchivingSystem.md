@@ -5,9 +5,16 @@ This file contains everything needed to archive AI conversations into a standard
 ## How to Use This File
 
 **For creating an archive:**
+
+**Option 1: Explicit instruction**
 1. Upload this file to your AI chatbot
 2. Say: "Please archive our conversation following the instructions in this file"
 3. The AI will generate a complete archive that you can save
+
+**Option 2: Implicit execution** (Quick method)
+1. Upload or paste this file to your AI chatbot
+2. Press enter (no additional instruction needed)
+3. The AI will recognize this as an archiving request and begin the process automatically
 
 **For loading an archive:**
 - Simply upload the archived .md file to any AI chatbot
@@ -16,6 +23,37 @@ This file contains everything needed to archive AI conversations into a standard
 ---
 
 ## Part 1: Archiving Instructions for AI
+
+### CRITICAL: Language Handling
+
+**Communicate in the conversation's language, but keep template structure in English for backend parsing.**
+
+- **Detect conversation language FIRST**: Check what language the conversation being archived is in (English, Chinese, Spanish, etc.)
+- **User interaction language**: Communicate with the user in THE SAME LANGUAGE as the conversation
+  - If conversation is in Chinese → ask questions in Chinese
+  - If conversation is in Spanish → ask questions in Spanish
+  - If conversation is in English → ask questions in English
+- **Template structure (MUST be English)**: All section headings, YAML keys, wrapper syntax, and structural elements MUST remain exactly as shown in the template
+  - ✅ CORRECT: `## Initial Query`, `## Key Insights`, `## Attachments`, `ARCHIVE_FORMAT_VERSION`, `<!-- ARTIFACT_START:`, etc.
+  - ❌ WRONG: `## Consulta Inicial`, `## Informations Clés`, `## 初始查詢`, or any translated versions
+- **Content language (use original)**: Conversation summaries, artifact content, and attachment content should be in the original language used in the conversation
+- **Why this matters**: These archives are processed by backend parsers that expect specific English keywords and structure
+
+### IMPORTANT: Start Immediately, Don't Explain
+
+When a user uploads or pastes this file (with or without additional instructions):
+- **DO NOT** explain what this file contains
+- **DO NOT** walk through all the steps in this prompt
+- **DO NOT** describe the archiving process in detail before starting
+
+Instead:
+1. Briefly acknowledge in the conversation's language: "I'll begin archiving this conversation."
+2. Proceed directly to Step 0 (estimate size and present delivery options)
+3. Keep all interactions concise and focused on gathering necessary user choices
+
+The user already knows what this file does - they want action, not explanation.
+
+---
 
 When a user asks you to archive a conversation, follow these steps:
 
@@ -84,6 +122,7 @@ Handle the user's choice with appropriate fallbacks:
 **If user chooses "Simple Response":**
 → Proceed directly to Step 1 (no verification needed)
 → Generate the archive and output as a markdown code block
+→ **IMPORTANT**: Do NOT use any other method - respect the user's choice
 
 **If user chooses "Large Document Feature":**
 
@@ -92,6 +131,7 @@ Handle the user's choice with appropriate fallbacks:
    - Identify what it's called on your platform
    - Proceed to Step 1 and generate the archive there
    - Tell user: "I'll create this archive in [feature name]"
+   - **IMPORTANT**: Only use this method if user explicitly chose it
 3. **If NO:**
    - Tell user: "I don't have a large document feature on this platform. Would you like:
      a) Simple response instead (may be slower to render)
@@ -254,7 +294,8 @@ For each significant artifact created during the conversation:
    - Any file containing both "ARCHIVE_FORMAT_VERSION" AND "INSTRUCTIONS_FOR_AI"
    - Files named "AIConversationArchivingSystem.md" or similar variants
    - Files containing "Part 1: Archiving Instructions for AI"
-   - This is the instruction file for creating archives - it should not appear in the archive itself
+   - **CRITICAL**: This file should NOT appear in the archive AT ALL - no placeholder, no mention, completely omitted from the Attachments section
+   - Do NOT create a "This file was excluded" placeholder - simply do not include it
 
 2. **Other System Prompts:**
    - Files labeled as "pasted" that are never mentioned or discussed in the conversation
@@ -284,10 +325,11 @@ For each significant artifact created during the conversation:
 
 **Examples:**
 
-❌ **EXCLUDE:**
+❌ **EXCLUDE (no placeholder, completely omit):**
 ```
 Attachment: "AIConversationArchivingSystem.md" (pasted)
-→ This is the archiving instruction file itself - EXCLUDE
+→ This is the archiving instruction file itself - DO NOT include in Attachments section at all
+→ Do NOT create any placeholder or note for this file
 ```
 
 ❌ **EXCLUDE:**
@@ -312,6 +354,8 @@ Attachment: "data.csv" (uploaded file)
 - Update ATTACHMENT_COUNT to reflect only included attachments
 - Do NOT reference excluded attachments in summary sections
 - If an attachment was excluded, do not list it in "Attachments referenced" fields
+- **CRITICAL**: Excluded files should NOT appear in the Attachments section at all - not even as placeholders or notes
+- If ALL attachments were excluded, the Attachments section should only contain the section header with no content wrappers
 
 ### Step 7: Process Attachments (With Workarounds If Needed)
 
@@ -497,6 +541,7 @@ If your chosen delivery method fails:
 - **No silent failures:** Never skip attachments without documentation
 - **Technical accuracy:** Preserve all important technical details and specifics
 - **Final versions preferred:** For artifacts, include final or milestone versions, not every iteration
+
 
 ### Quality Checklist
 
@@ -767,7 +812,7 @@ Welcoming the day again.
 # Spreadsheet: spreadsheet1.xlsx
 
 | Column A | Column B | Column C |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
