@@ -19,105 +19,6 @@ This file contains everything needed to archive AI conversations into a standard
 
 When a user asks you to archive a conversation, follow these steps:
 
-### Step 0: Estimate Archive Size & Present Delivery Options
-
-Before generating the archive, estimate its size and help the user choose the best delivery method.
-
-**A. Calculate Estimated Size:**
-
-1. **Metadata & Summary:** ~5-10 KB (YAML frontmatter, summaries, references)
-2. **Artifacts:** Count each artifact and estimate:
-   - Code/text artifacts: Character count ÷ 1024 = KB
-   - Total all artifacts
-3. **Attachments:** This is usually the largest component:
-   - Text files (markdown, code, logs): Character count ÷ 1024 = KB
-   - Binary files (images, PDFs): Original file size × 1.37 (base64 encoding overhead)
-   - Spreadsheets/documents: Estimate based on complexity
-   - Total all attachments
-4. **Total Estimated Size:** Sum of all components
-
-**Example Calculation:**
-```
-Metadata & summary: ~8 KB
-Artifacts: 2 code files (~15 KB)
-Attachments:
-  - document.pdf (120 KB) → 164 KB after base64
-  - image.png (80 KB) → 110 KB after base64
-  - code.py (5 KB) → 5 KB (text, no encoding)
-Total: ~302 KB
-```
-
-**B. Present Delivery Options Based on Size:**
-
-Tell the user:
-
-**"This archive will be approximately [X] KB (~[Y] MB). Here are your delivery options:**
-
-**1. Simple Response** (code block in chat)
-- ✅ Recommended for: <100 KB archives
-- ⚠️ Acceptable for: 100-500 KB (may be slow to render)
-- ❌ Not recommended for: >500 KB (may truncate)
-- No special features needed, works everywhere
-
-**2. Large Document Feature** (Artifact/Canvas/Code View)
-- ✅ Recommended for: 100 KB - 1 MB archives
-- Better rendering for large documents
-- Separate viewing area outside chat
-- Note: Called "Artifacts" on Claude, "Canvas" on ChatGPT/Gemini, or similar names on other platforms
-
-**3. MCP Storage** (direct file save)
-- ✅ Recommended for: >500 KB archives
-- Saves directly to your computer or cloud storage
-- Most reliable for very large archives
-- Note: Requires MCP (Model Context Protocol) tools to be connected
-
-**Based on the estimated size (~[X] KB), I recommend: [Option]**
-
-**Which delivery method would you prefer?**"
-
-Wait for the user's choice before proceeding.
-
-### Step 0.5: Verify & Execute Chosen Delivery Method
-
-Handle the user's choice with appropriate fallbacks:
-
-**If user chooses "Simple Response":**
-→ Proceed directly to Step 1 (no verification needed)
-→ Generate the archive and output as a markdown code block
-
-**If user chooses "Large Document Feature":**
-
-1. Check your capabilities: "Can I create documents in a separate viewing area (Artifacts/Canvas/Code View)?"
-2. **If YES:**
-   - Identify what it's called on your platform
-   - Proceed to Step 1 and generate the archive there
-   - Tell user: "I'll create this archive in [feature name]"
-3. **If NO:**
-   - Tell user: "I don't have a large document feature on this platform. Would you like:
-     a) Simple response instead (may be slower to render)
-     b) MCP storage (I'll check what's available)"
-   - Wait for user's choice and handle accordingly
-
-**If user chooses "MCP Storage":**
-
-1. **Check for MCP tools** (NOW, not before):
-   - Query: "What MCP servers and tools are currently connected?"
-   - Look for: File system tools, cloud storage connectors
-2. **If MCP tools found:**
-   - List the options: "I found these storage locations:
-     1. [MCP Server 1]: Local file system - ~/Documents/
-     2. [MCP Server 2]: Google Drive (requires authentication)
-     Which would you like to use?"
-   - Wait for user to select specific destination
-   - Proceed to Step 1 and generate archive, then save to chosen location
-3. **If NO MCP tools found:**
-   - Tell user: "No MCP storage is currently available. Would you like:
-     a) Large document feature (if I have it)
-     b) Simple response instead"
-   - Wait for user's choice and handle accordingly
-
-**After confirming the delivery method, proceed to Step 1.**
-
 ### Step 1: Understand the Template
 Review Part 2 of this document which contains the complete template structure. Understand the YAML front matter, the attachment wrapper format, and the artifact wrapper format.
 
@@ -125,8 +26,6 @@ Review Part 2 of this document which contains the complete template structure. U
 In the YAML front matter at the top of the archive:
 - Set CREATED_DATE to today's date (YYYY-MM-DD)
 - Set ORIGINAL_PLATFORM to your platform name (Claude, ChatGPT, Gemini, etc.)
-- Set DELIVERY_METHOD (optional) to the method used: simple_response, large_document, or mcp_storage
-- Set ESTIMATED_SIZE_KB (optional) to the size calculated in Step 0
 - Count all attachments and update ATTACHMENT_COUNT
 - Count all artifacts and update ARTIFACT_COUNT
 - Calculate TOTAL_FILE_SIZE if possible (estimated KB/MB)
@@ -424,67 +323,7 @@ At the bottom of the file, fill in:
 
 ### Output Format
 
-**Depends on the delivery method chosen in Step 0:**
-
-**Simple Response:**
-- Provide the complete archived markdown file as a single code block
-- User can copy and paste to save
-- Do not truncate or summarize the archive itself - give the full, complete archive
-
-**Large Document Feature (Artifact/Canvas):**
-- Create the archive in your platform's large document feature
-- Title it appropriately (e.g., "Conversation Archive - [Topic]")
-- User can download directly from the artifact/canvas interface
-- Provide the complete archive, no truncation
-
-**MCP Storage:**
-- Save the archive file to the user's chosen storage location
-- Use a descriptive filename: `conversation_archive_[topic]_[date].md`
-- Confirm the save location and filename to the user
-- Example: "Archive saved to ~/Documents/conversation_archive_mongodb_setup_2025-01-15.md"
-
-### Delivery Method Details
-
-**Understanding Each Delivery Method:**
-
-**1. Simple Response (Traditional Method)**
-- Archive is generated as a markdown code block in the chat
-- Works on all platforms, no special features required
-- Best for small archives (<100 KB)
-- User must manually copy and save to a file
-- May be slow to render for large archives
-- Risk of truncation if archive exceeds chat response limits
-
-**2. Large Document Feature (Platform-Specific)**
-- Creates archive in a separate viewing area
-- Different names on different platforms:
-  - **Claude:** Artifacts
-  - **ChatGPT:** Canvas
-  - **Gemini:** Canvas
-  - **Other platforms:** May have similar features with different names
-- Better for medium-sized archives (100 KB - 1 MB)
-- Easier to download and view
-- No manual copy-paste required
-- Check if your platform supports this before using
-
-**3. MCP Storage (Most Reliable for Large Archives)**
-- Requires MCP (Model Context Protocol) tools to be connected
-- Saves directly to file system or cloud storage
-- Best for large archives (>500 KB)
-- No size limitations
-- No copy-paste needed
-- File is immediately available on user's system
-
-**Fallback Strategy:**
-If your chosen delivery method fails:
-1. Try the next most appropriate method based on size
-2. Inform the user of the change
-3. Never fail silently - always provide the archive somehow
-
-**Examples of Fallback:**
-- "Large document feature unavailable, using simple response instead"
-- "MCP storage not found, creating artifact instead"
-- "Archive too large for chat response, attempting to save via MCP"
+Provide the complete archived markdown file as a single code block so the user can easily copy it. Do not truncate or summarize the archive itself - give the full, complete archive.
 
 ### Important Guidelines
 
@@ -501,15 +340,7 @@ If your chosen delivery method fails:
 ### Quality Checklist
 
 Before outputting, verify:
-- [ ] Archive size was estimated in Step 0
-- [ ] Delivery method was selected based on size and capabilities
-- [ ] User confirmed their preferred delivery method
-- [ ] If MCP storage was chosen, storage location was verified
-- [ ] If large document feature was chosen, capability was confirmed
-- [ ] Fallback was offered if preferred method was unavailable
 - [ ] All YAML metadata fields are filled correctly
-- [ ] DELIVERY_METHOD field reflects the actual delivery method used (optional but recommended)
-- [ ] ESTIMATED_SIZE_KB field reflects the size calculated in Step 0 (optional but recommended)
 - [ ] All conversation phases are summarized
 - [ ] All significant artifacts created during the conversation are preserved
 - [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
@@ -521,7 +352,7 @@ Before outputting, verify:
 - [ ] All attachment and artifact references in the summary match actual items
 - [ ] No excluded attachments are referenced in summary sections
 - [ ] Artifacts include only final/important versions with evolution notes if significant
-- [ ] The output is complete and ready to save as a .md file (or saved via chosen delivery method)
+- [ ] The output is complete and ready to save as a .md file
 
 ---
 
@@ -535,8 +366,6 @@ ARCHIVE_FORMAT_VERSION: 1.0
 ARCHIVE_TYPE: conversation_summary
 CREATED_DATE: YYYY-MM-DD
 ORIGINAL_PLATFORM: [Claude/ChatGPT/Gemini/etc.]
-DELIVERY_METHOD: simple_response  # Optional: simple_response | large_document | mcp_storage
-ESTIMATED_SIZE_KB: 0  # Optional: estimated size before generation
 
 INSTRUCTIONS_FOR_AI: |
   ## Purpose
@@ -550,12 +379,6 @@ INSTRUCTIONS_FOR_AI: |
   4. Attachments section (inputs provided to the conversation)
   5. Workarounds Used section (if applicable)
   6. Archive Metadata section
-
-  ## Metadata Fields
-  Some fields in the YAML header are optional:
-  - DELIVERY_METHOD (optional): How the archive was delivered (simple_response, large_document, mcp_storage)
-  - ESTIMATED_SIZE_KB (optional): Estimated size before generation
-  Archives without these fields are still valid (backward compatible with v1.0).
 
   ## Artifact vs Attachment
   - **Artifacts**: Outputs CREATED during the conversation (code, poems, documents, analyses, etc.)
@@ -767,7 +590,7 @@ Welcoming the day again.
 # Spreadsheet: spreadsheet1.xlsx
 
 | Column A | Column B | Column C |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
