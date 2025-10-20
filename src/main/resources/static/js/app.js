@@ -492,7 +492,8 @@ function copyArchiveTemplate(dropdown) {
     fetch('/api/v1/templates/archive')
         .then(response => response.text())
         .then(template => {
-            navigator.clipboard.writeText(template)
+            // Try modern Clipboard API first, fallback to legacy method
+            copyToClipboard(template)
                 .then(() => {
                     if (dropdown) {
                         // Desktop: Show success message in dropdown
@@ -510,12 +511,70 @@ function copyArchiveTemplate(dropdown) {
                         showToast('Prompt copied to clipboard', 'success');
                     }
                 })
-                .catch(() => showToast('Failed to copy prompt', 'error'));
+                .catch((err) => {
+                    console.error('Copy failed:', err);
+                    showToast('Failed to copy prompt. Please check browser permissions.', 'error');
+                });
         })
         .catch(err => {
             console.error('Error fetching template:', err);
             showToast('Failed to fetch prompt', 'error');
         });
+}
+
+/**
+ * Copy text to clipboard with fallback support
+ * Tries modern Clipboard API first, falls back to legacy execCommand
+ * Works with self-signed SSL certificates
+ */
+function copyToClipboard(text) {
+    // Try modern Clipboard API (requires secure context)
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text)
+            .catch(err => {
+                console.warn('Clipboard API failed, trying fallback:', err);
+                return copyToClipboardFallback(text);
+            });
+    }
+
+    // Fallback to legacy method
+    return copyToClipboardFallback(text);
+}
+
+/**
+ * Legacy clipboard copy using execCommand
+ * Works in more environments including self-signed SSL
+ */
+function copyToClipboardFallback(text) {
+    return new Promise((resolve, reject) => {
+        // Create temporary textarea
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        textarea.setAttribute('readonly', '');
+
+        document.body.appendChild(textarea);
+
+        try {
+            // Select and copy
+            textarea.select();
+            textarea.setSelectionRange(0, text.length); // For mobile
+
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            if (successful) {
+                resolve();
+            } else {
+                reject(new Error('execCommand copy failed'));
+            }
+        } catch (err) {
+            document.body.removeChild(textarea);
+            reject(err);
+        }
+    });
 }
 
 function logout() {
