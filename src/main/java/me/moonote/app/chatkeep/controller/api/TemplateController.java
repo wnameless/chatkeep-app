@@ -3,6 +3,7 @@ package me.moonote.app.chatkeep.controller.api;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,49 @@ public class TemplateController {
 
       log.info("Successfully loaded archive template ({} bytes)", templateContent.length());
       return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(templateContent);
+
+    } catch (IOException e) {
+      log.error("Error reading template file", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to read template file: " + e.getMessage());
+    } catch (Exception e) {
+      log.error("Unexpected error fetching template", e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch template: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Download conversation archive template GET /api/v1/templates/archive/download
+   *
+   * Returns the markdown template file as a downloadable attachment.
+   */
+  @GetMapping(value = "/archive/download", produces = MediaType.TEXT_PLAIN_VALUE)
+  public ResponseEntity<String> downloadArchiveTemplate() {
+    try {
+      log.info("Downloading archive template from: {}", TEMPLATE_PATH);
+
+      // Load template from classpath
+      ClassPathResource resource = new ClassPathResource(TEMPLATE_PATH);
+
+      if (!resource.exists()) {
+        log.error("Template file not found at: {}", TEMPLATE_PATH);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Template file not found");
+      }
+
+      // Read template content
+      String templateContent =
+          new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+      log.info("Successfully loaded archive template for download ({} bytes)",
+          templateContent.length());
+
+      // Set headers for file download
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.TEXT_PLAIN);
+      headers.setContentDispositionFormData("attachment", "chatkeep-archiving-spec.md");
+
+      return ResponseEntity.ok().headers(headers).body(templateContent);
 
     } catch (IOException e) {
       log.error("Error reading template file", e);
