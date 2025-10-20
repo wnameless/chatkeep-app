@@ -304,6 +304,14 @@ function initializeHeader() {
         });
     }
 
+    // Download spec button (desktop)
+    const downloadSpecBtn = document.getElementById('download-spec-btn');
+    if (downloadSpecBtn) {
+        downloadSpecBtn.addEventListener('click', function() {
+            window.location.href = '/api/v1/templates/archive/download';
+        });
+    }
+
     // Mobile archiving prompt bottom sheet
     const mobileArchivingBtn = document.getElementById('mobile-archiving-prompt-btn');
     const mobileBottomSheet = document.getElementById('mobile-archiving-bottom-sheet');
@@ -333,6 +341,14 @@ function initializeHeader() {
         if (mobileCopyActionBtn) {
             mobileCopyActionBtn.addEventListener('click', function() {
                 copyArchiveTemplate(mobileBottomSheet);
+            });
+        }
+
+        // Download spec button (mobile)
+        const mobileDownloadSpecBtn = document.getElementById('mobile-download-spec-btn');
+        if (mobileDownloadSpecBtn) {
+            mobileDownloadSpecBtn.addEventListener('click', function() {
+                window.location.href = '/api/v1/templates/archive/download';
             });
         }
     }
