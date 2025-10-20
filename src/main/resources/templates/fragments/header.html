@@ -49,7 +49,8 @@
                     <i class="fas fa-file-upload w-5 text-primary-500"></i>
                     <div>
                       <div class="font-medium">Upload File</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file
+                      </div>
                     </div>
                   </button>
                   <button id="paste-content-btn"
@@ -57,7 +58,8 @@
                     <i class="fas fa-clipboard w-5 text-primary-500"></i>
                     <div>
                       <div class="font-medium">Paste Content</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown
+                      </div>
                     </div>
                   </button>
                 </div>
@@ -81,30 +83,36 @@
               <!-- Header -->
               <div class="flex items-center gap-2 mb-3">
                 <i class="fas fa-robot text-primary-500 text-lg"></i>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">AI Archiving Prompt</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">AI Archiving
+                  Prompt</h3>
               </div>
 
               <!-- Description -->
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations in ChatKeep format.
+                Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations
+                in ChatKeep format.
               </p>
 
               <!-- Instructions -->
               <div class="space-y-2 mb-4 text-xs text-gray-600 dark:text-gray-400">
                 <div class="flex items-start gap-2">
-                  <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">1</span>
+                  <span
+                    class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">1</span>
                   <span>Copy the archiving prompt</span>
                 </div>
                 <div class="flex items-start gap-2">
-                  <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">2</span>
+                  <span
+                    class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">2</span>
                   <span>Paste it into your AI conversation</span>
                 </div>
                 <div class="flex items-start gap-2">
-                  <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">3</span>
+                  <span
+                    class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">3</span>
                   <span>AI generates markdown archive</span>
                 </div>
                 <div class="flex items-start gap-2">
-                  <span class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">4</span>
+                  <span
+                    class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">4</span>
                   <span>Import using the <i class="fas fa-plus text-xs"></i> button</span>
                 </div>
               </div>
@@ -114,7 +122,7 @@
                 <button id="copy-prompt-action-btn"
                   class="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                   <i class="fas fa-clipboard"></i>
-                  <span>Copy Prompt to Clipboard</span>
+                  <span>Copy to Clipboard</span>
                 </button>
                 <button id="download-spec-btn" title="Download full specification"
                   class="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors flex items-center justify-center">
@@ -268,18 +276,22 @@
             <div id="mobile-import-dropdown"
               class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
               <div class="py-2">
-                <button class="mobile-upload-file-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                <button
+                  class="mobile-upload-file-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                   <i class="fas fa-file-upload w-5 text-primary-500"></i>
                   <div>
                     <div class="font-medium">Upload File</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file
+                    </div>
                   </div>
                 </button>
-                <button class="mobile-paste-content-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
+                <button
+                  class="mobile-paste-content-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                   <i class="fas fa-clipboard w-5 text-primary-500"></i>
                   <div>
                     <div class="font-medium">Paste Content</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown
+                    </div>
                   </div>
                 </button>
               </div>
@@ -311,30 +323,36 @@
         <!-- Header -->
         <div class="flex items-center gap-2 mb-4">
           <i class="fas fa-robot text-primary-500 text-xl"></i>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Archiving Prompt</h3>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Archiving Prompt
+          </h3>
         </div>
 
         <!-- Description -->
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">
-          Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations in ChatKeep format.
+          Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations in
+          ChatKeep format.
         </p>
 
         <!-- Instructions -->
         <div class="space-y-3 mb-6 text-sm text-gray-600 dark:text-gray-400">
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">1</span>
+            <span
+              class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">1</span>
             <span>Copy the archiving prompt</span>
           </div>
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">2</span>
+            <span
+              class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">2</span>
             <span>Paste it into your AI conversation</span>
           </div>
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">3</span>
+            <span
+              class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">3</span>
             <span>AI generates markdown archive</span>
           </div>
           <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">4</span>
+            <span
+              class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">4</span>
             <span>Import using the <i class="fas fa-plus text-sm"></i> button</span>
           </div>
         </div>
@@ -344,7 +362,7 @@
           <button id="mobile-copy-prompt-action-btn"
             class="flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
             <i class="fas fa-clipboard"></i>
-            <span>Copy Prompt to Clipboard</span>
+            <span>Copy to Clipboard</span>
           </button>
           <button id="mobile-download-spec-btn" title="Download full specification"
             class="px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors flex items-center justify-center">
