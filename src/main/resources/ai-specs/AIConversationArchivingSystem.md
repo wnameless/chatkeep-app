@@ -143,13 +143,84 @@ For each significant artifact created during the conversation:
 <!-- ARTIFACT_END -->
 ```
 
+### Step 6.5: Filter System Prompts and Instructions
+
+**IMPORTANT:** Before processing attachments, identify and exclude system prompts, instruction files, and non-conversational content.
+
+**What to EXCLUDE (do not include in Attachments section):**
+
+1. **The Archiving System Itself:**
+   - Any file containing both "ARCHIVE_FORMAT_VERSION" AND "INSTRUCTIONS_FOR_AI"
+   - Files named "AIConversationArchivingSystem.md" or similar variants
+   - Files containing "Part 1: Archiving Instructions for AI"
+   - This is the instruction file for creating archives - it should not appear in the archive itself
+
+2. **Other System Prompts:**
+   - Files labeled as "pasted" that are never mentioned or discussed in the conversation
+   - Instruction sets, prompt templates, or system configuration files
+   - Content that was used to guide your behavior but not analyzed as part of the conversation
+
+3. **Detection Criteria - Exclude if ALL of these are true:**
+   - Attachment has "pasted" label (not uploaded as a file)
+   - Content is never referenced in conversation summary sections
+   - Content was not discussed, analyzed, or used as a topic of conversation
+   - Content appears to be instructions/prompts rather than data/information
+
+**What to INCLUDE (process normally as attachments):**
+
+✅ **Pasted content that WAS discussed:**
+- Even if pasted, include if the user asked you to analyze it
+- Include if specific content from it was referenced in the conversation
+- Include if it contains data/information that was the subject of discussion
+
+✅ **Uploaded files:**
+- All actually uploaded files should be included (not just pasted text)
+- These are intentional conversation inputs
+
+✅ **Reference materials:**
+- Documentation, articles, code that was actively used in the conversation
+- Any content that was analyzed, debugged, or improved
+
+**Examples:**
+
+❌ **EXCLUDE:**
+```
+Attachment: "AIConversationArchivingSystem.md" (pasted)
+→ This is the archiving instruction file itself - EXCLUDE
+```
+
+❌ **EXCLUDE:**
+```
+Attachment: "prompt_template.md" (pasted, never mentioned)
+→ System prompt not discussed in conversation - EXCLUDE
+```
+
+✅ **INCLUDE:**
+```
+Attachment: "bug_report.md" (pasted, discussed extensively)
+→ User asked for help analyzing this bug report - INCLUDE
+```
+
+✅ **INCLUDE:**
+```
+Attachment: "data.csv" (uploaded file)
+→ User uploaded this file for analysis - INCLUDE
+```
+
+**After filtering:**
+- Update ATTACHMENT_COUNT to reflect only included attachments
+- Do NOT reference excluded attachments in summary sections
+- If an attachment was excluded, do not list it in "Attachments referenced" fields
+
 ### Step 7: Process Attachments (With Workarounds If Needed)
+
+**Note:** After filtering out system prompts in Step 6.5, process only the remaining conversation-relevant attachments.
 
 **Preferred approach:** Convert all attachments to full markdown format using the wrapper syntax.
 
 **Standard Conversion Process:**
 
-For each attachment in the conversation:
+For each attachment in the conversation (after filtering):
 
 1. Convert it to markdown format
 2. Wrap it using this exact syntax:
@@ -272,10 +343,14 @@ Before outputting, verify:
 - [ ] All YAML metadata fields are filled correctly
 - [ ] All conversation phases are summarized
 - [ ] All significant artifacts created during the conversation are preserved
-- [ ] All attachments are either converted or documented with workarounds
+- [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
+- [ ] Only conversation-relevant attachments are included (files actually discussed or analyzed)
+- [ ] ATTACHMENT_COUNT reflects only included attachments (after filtering)
+- [ ] All included attachments are either converted or documented with workarounds
 - [ ] All workarounds are explained in the "Workarounds Used" section
 - [ ] ARCHIVE_COMPLETENESS accurately reflects the archive state
 - [ ] All attachment and artifact references in the summary match actual items
+- [ ] No excluded attachments are referenced in summary sections
 - [ ] Artifacts include only final/important versions with evolution notes if significant
 - [ ] The output is complete and ready to save as a .md file
 
@@ -333,11 +408,22 @@ INSTRUCTIONS_FOR_AI: |
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
+  - System prompts and instruction files are automatically excluded (e.g., the archiving system itself)
+  - Only conversation-relevant attachments are included (files actually discussed or used in the conversation)
+  - Pasted content that was never referenced in the conversation is filtered out
   - Images are embedded as base64-encoded data URIs in markdown image syntax: ![alt](data:image/png;base64,...)
   - PDFs, Word docs, spreadsheets, etc. are converted to markdown tables or text
   - The filename in the wrapper preserves the original filename for reference
   - Some attachments may be summarized if they were too large - check for ⚠️ WARNING markers
   - Check the "Workarounds Used" section to see if any attachments were modified during archiving
+
+  ## Attachment Filtering
+  Not all attachments from the original conversation appear in this archive:
+  - System prompts and instruction files are automatically excluded
+  - The archiving system file itself (AIConversationArchivingSystem.md) is never included
+  - Pasted content that was never discussed or referenced is filtered out
+  - Only conversation-relevant attachments are preserved
+  - ATTACHMENT_COUNT reflects the number of included attachments after filtering
 
   ## Archive Completeness
   Check the ARCHIVE_COMPLETENESS field:

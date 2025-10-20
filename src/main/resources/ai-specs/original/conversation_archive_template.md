@@ -45,11 +45,22 @@ INSTRUCTIONS_FOR_AI: |
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
+  - System prompts and instruction files are automatically excluded (e.g., the archiving system itself)
+  - Only conversation-relevant attachments are included (files actually discussed or used in the conversation)
+  - Pasted content that was never referenced in the conversation is filtered out
   - Images are embedded as base64-encoded data URIs in markdown image syntax: ![alt](data:image/png;base64,...)
   - PDFs, Word docs, spreadsheets, etc. are converted to markdown tables or text
   - The filename in the wrapper preserves the original filename for reference
   - Some attachments may be summarized if they were too large - check for ⚠️ WARNING markers
   - Check the "Workarounds Used" section to see if any attachments were modified during archiving
+
+  ## Attachment Filtering
+  Not all attachments from the original conversation appear in this archive:
+  - System prompts and instruction files are automatically excluded
+  - The archiving system file itself (AIConversationArchivingSystem.md) is never included
+  - Pasted content that was never discussed or referenced is filtered out
+  - Only conversation-relevant attachments are preserved
+  - ATTACHMENT_COUNT reflects the number of included attachments after filtering
 
   ## Archive Completeness
   Check the ARCHIVE_COMPLETENESS field:
@@ -216,7 +227,7 @@ Welcoming the day again.
 # Spreadsheet: spreadsheet1.xlsx
 
 | Column A | Column B | Column C |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
