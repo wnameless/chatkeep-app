@@ -381,7 +381,7 @@ public class ChatNoteFragmentController {
       model.addAttribute("notes", List.of());
       model.addAttribute("viewMode", "masonry");
       model.addAttribute("filter", "search");
-      return "fragments/chat-note-cards";
+      return "fragments/chat-note-cards :: cards";
     }
 
     // If query is empty, return active notes (same as default view)
@@ -390,11 +390,31 @@ public class ChatNoteFragmentController {
       List<ChatNoteResponse> notes =
           chatNoteService.getActiveChatNotes(userId, pageable).getContent();
 
-      // Add content previews
+      // Batch fetch all unique label IDs to avoid N+1 query
+      Set<String> allLabelIds = notes.stream()
+          .filter(note -> note.getLabelIds() != null)
+          .flatMap(note -> note.getLabelIds().stream())
+          .collect(Collectors.toSet());
+
+      // Single batch query to fetch all labels
+      Map<String, Label> labelMap = allLabelIds.isEmpty() ? Map.of()
+          : labelRepository.findAllById(allLabelIds).stream()
+              .collect(Collectors.toMap(Label::getId, label -> label));
+
+      // Add content previews and labels
       notes = notes.stream().map(note -> {
         ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
         if (entity != null) {
           note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
+          // Populate labels using pre-fetched label map
+          if (note.getLabelIds() != null && !note.getLabelIds().isEmpty()) {
+            List<LabelResponse> labels = note.getLabelIds().stream()
+                .map(labelMap::get)
+                .filter(java.util.Objects::nonNull)
+                .map(labelMapper::toResponse)
+                .collect(Collectors.toList());
+            note.setLabels(labels);
+          }
         }
         return note;
       }).collect(Collectors.toList());
@@ -404,19 +424,39 @@ public class ChatNoteFragmentController {
       model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
       model.addAttribute("filter", "active");
 
-      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
-          : "fragments/chat-note-cards";
+      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list :: cards"
+          : "fragments/chat-note-cards :: cards";
     }
 
     try {
       // Use comprehensive search: title, tags, and content
       List<ChatNoteResponse> results = chatNoteService.searchUserChatNotes(userId, query);
 
-      // Add content previews
+      // Batch fetch all unique label IDs to avoid N+1 query
+      Set<String> allLabelIds = results.stream()
+          .filter(note -> note.getLabelIds() != null)
+          .flatMap(note -> note.getLabelIds().stream())
+          .collect(Collectors.toSet());
+
+      // Single batch query to fetch all labels
+      Map<String, Label> labelMap = allLabelIds.isEmpty() ? Map.of()
+          : labelRepository.findAllById(allLabelIds).stream()
+              .collect(Collectors.toMap(Label::getId, label -> label));
+
+      // Add content previews and labels
       results = results.stream().map(note -> {
         ChatNote entity = chatNoteRepository.findById(note.getId()).orElse(null);
         if (entity != null) {
           note.setContentPreview(chatNoteMapper.generateContentPreview(entity));
+          // Populate labels using pre-fetched label map
+          if (note.getLabelIds() != null && !note.getLabelIds().isEmpty()) {
+            List<LabelResponse> labels = note.getLabelIds().stream()
+                .map(labelMap::get)
+                .filter(java.util.Objects::nonNull)
+                .map(labelMapper::toResponse)
+                .collect(Collectors.toList());
+            note.setLabels(labels);
+          }
         }
         return note;
       }).collect(Collectors.toList());
@@ -426,14 +466,14 @@ public class ChatNoteFragmentController {
       model.addAttribute("viewMode", viewMode != null ? viewMode : "masonry");
       model.addAttribute("filter", "search");
 
-      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list"
-          : "fragments/chat-note-cards";
+      return viewMode != null && viewMode.equals("list") ? "fragments/chat-note-cards-list :: cards"
+          : "fragments/chat-note-cards :: cards";
 
     } catch (Exception e) {
       log.error("Error searching", e);
       model.addAttribute("notes", List.of());
       model.addAttribute("filter", "search");
-      return "fragments/chat-note-cards";
+      return "fragments/chat-note-cards :: cards";
     }
   }
 
