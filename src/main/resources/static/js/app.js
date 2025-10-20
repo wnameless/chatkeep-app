@@ -304,16 +304,38 @@ function initializeHeader() {
         });
     }
 
-    // Mobile copy template buttons (class-based selector for mobile icon buttons)
-    const mobileCopyBtns = document.querySelectorAll('.copy-template-btn');
-    mobileCopyBtns.forEach(btn => {
-        // Skip the main desktop button (handled above)
-        if (btn.id !== 'copy-template-btn') {
-            btn.addEventListener('click', function() {
-                copyArchiveTemplate(null); // No dropdown on mobile, just show toast
+    // Mobile archiving prompt bottom sheet
+    const mobileArchivingBtn = document.getElementById('mobile-archiving-prompt-btn');
+    const mobileBottomSheet = document.getElementById('mobile-archiving-bottom-sheet');
+    const mobileBackdrop = document.getElementById('mobile-archiving-backdrop');
+    const mobileCopyActionBtn = document.getElementById('mobile-copy-prompt-action-btn');
+
+    if (mobileArchivingBtn && mobileBottomSheet && mobileBackdrop) {
+        // Open bottom sheet
+        mobileArchivingBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            mobileBottomSheet.classList.remove('hidden');
+            mobileBackdrop.classList.remove('hidden');
+            // Reset success message when opening
+            const mobileSuccessMessage = document.getElementById('mobile-copy-success-message');
+            if (mobileSuccessMessage) {
+                mobileSuccessMessage.classList.add('hidden');
+            }
+        });
+
+        // Close bottom sheet when clicking backdrop
+        mobileBackdrop.addEventListener('click', function() {
+            mobileBottomSheet.classList.add('hidden');
+            mobileBackdrop.classList.add('hidden');
+        });
+
+        // Copy action button inside mobile bottom sheet
+        if (mobileCopyActionBtn) {
+            mobileCopyActionBtn.addEventListener('click', function() {
+                copyArchiveTemplate(mobileBottomSheet);
             });
         }
-    });
+    }
 
     // Logout button
     const logoutBtn = document.getElementById('logout-btn');
@@ -521,9 +543,21 @@ function copyArchiveTemplate(dropdown) {
 
                     if (successful) {
                         if (dropdown) {
-                            const successMessage = document.getElementById('copy-success-message');
+                            // Check if it's mobile bottom sheet or desktop dropdown
+                            const isMobile = dropdown.id === 'mobile-archiving-bottom-sheet';
+                            const successMessageId = isMobile ? 'mobile-copy-success-message' : 'copy-success-message';
+                            const successMessage = document.getElementById(successMessageId);
+
                             if (successMessage) successMessage.classList.remove('hidden');
-                            setTimeout(() => dropdown.classList.add('hidden'), 2000);
+
+                            setTimeout(() => {
+                                dropdown.classList.add('hidden');
+                                // Also hide backdrop for mobile
+                                if (isMobile) {
+                                    const backdrop = document.getElementById('mobile-archiving-backdrop');
+                                    if (backdrop) backdrop.classList.add('hidden');
+                                }
+                            }, 2000);
                         } else {
                             showToast('Prompt copied to clipboard', 'success');
                         }
@@ -542,18 +576,26 @@ function copyArchiveTemplate(dropdown) {
             copyToClipboard(template)
                 .then(() => {
                     if (dropdown) {
-                        // Desktop: Show success message in dropdown
-                        const successMessage = document.getElementById('copy-success-message');
+                        // Check if it's mobile bottom sheet or desktop dropdown
+                        const isMobile = dropdown.id === 'mobile-archiving-bottom-sheet';
+                        const successMessageId = isMobile ? 'mobile-copy-success-message' : 'copy-success-message';
+                        const successMessage = document.getElementById(successMessageId);
+
                         if (successMessage) {
                             successMessage.classList.remove('hidden');
                         }
 
-                        // Auto-close dropdown after 2 seconds
+                        // Auto-close dropdown/bottom sheet after 2 seconds
                         setTimeout(() => {
                             dropdown.classList.add('hidden');
+                            // Also hide backdrop for mobile
+                            if (isMobile) {
+                                const backdrop = document.getElementById('mobile-archiving-backdrop');
+                                if (backdrop) backdrop.classList.add('hidden');
+                            }
                         }, 2000);
                     } else {
-                        // Mobile: Show toast notification
+                        // Fallback: Show toast notification
                         showToast('Prompt copied to clipboard', 'success');
                     }
                 })
