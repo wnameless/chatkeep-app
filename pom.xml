@@ -11,7 +11,7 @@
   </parent>
   <groupId>me.moonote.app</groupId>
   <artifactId>chatkeep</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>chatkeep</name>
   <description>ChatKeep is an app to capture and share all your conversations between AI chatbots</description>
   <url>https://github.com/wnameless/chatkeep-app</url>
