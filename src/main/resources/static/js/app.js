@@ -488,11 +488,57 @@ function handleFileImport(event) {
 }
 
 function copyArchiveTemplate(dropdown) {
+    // iOS Safari workaround: Create textarea immediately (within user gesture)
+    // This maintains the security context even after async fetch
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    let textarea = null;
+
+    if (isIOS) {
+        // Create textarea NOW while we still have user gesture context
+        textarea = document.createElement('textarea');
+        textarea.value = 'Loading...'; // Placeholder
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        textarea.setAttribute('readonly', '');
+        document.body.appendChild(textarea);
+        textarea.select(); // Select immediately to maintain focus
+    }
+
     // Fetch template and copy to clipboard
     fetch('/api/v1/templates/archive')
         .then(response => response.text())
         .then(template => {
-            // Try modern Clipboard API first, fallback to legacy method
+            // iOS: Use the pre-created textarea
+            if (isIOS && textarea) {
+                textarea.value = template;
+                textarea.select();
+                textarea.setSelectionRange(0, template.length);
+
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+
+                    if (successful) {
+                        if (dropdown) {
+                            const successMessage = document.getElementById('copy-success-message');
+                            if (successMessage) successMessage.classList.remove('hidden');
+                            setTimeout(() => dropdown.classList.add('hidden'), 2000);
+                        } else {
+                            showToast('Prompt copied to clipboard', 'success');
+                        }
+                    } else {
+                        throw new Error('execCommand failed');
+                    }
+                } catch (err) {
+                    if (textarea.parentNode) document.body.removeChild(textarea);
+                    console.error('iOS copy failed:', err);
+                    showToast('Copy failed. Please try again.', 'error');
+                }
+                return;
+            }
+
+            // Non-iOS: Try modern Clipboard API first, fallback to legacy method
             copyToClipboard(template)
                 .then(() => {
                     if (dropdown) {
@@ -513,10 +559,14 @@ function copyArchiveTemplate(dropdown) {
                 })
                 .catch((err) => {
                     console.error('Copy failed:', err);
-                    showToast('Failed to copy prompt. Please check browser permissions.', 'error');
+                    showToast('Copy failed. Please try again.', 'error');
                 });
         })
         .catch(err => {
+            // Clean up iOS textarea on fetch error
+            if (isIOS && textarea && textarea.parentNode) {
+                document.body.removeChild(textarea);
+            }
             console.error('Error fetching template:', err);
             showToast('Failed to fetch prompt', 'error');
         });
