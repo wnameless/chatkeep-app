@@ -193,7 +193,7 @@
       </div>
 
       <!-- Tab Content Area -->
-      <div class="flex-1 overflow-y-auto px-4 py-3 md:px-6 md:py-4" id="tab-content-area">
+      <div class="flex-1 overflow-y-auto px-2 py-2 md:px-6 md:py-4" id="tab-content-area">
 
         <!-- Content Tab (Default) -->
         <div id="content-tab" class="tab-content">
@@ -304,7 +304,7 @@
 
         <!-- Artifacts Tab -->
         <div id="artifacts-tab" class="tab-content hidden">
-          <div class="space-y-3">
+          <div class="space-y-2 md:space-y-3">
             <!-- Artifact list will be dynamically loaded -->
             <div th:if="${artifacts != null && !artifacts.isEmpty()}">
               <div th:each="artifact, iterStat : ${artifacts}"
@@ -315,7 +315,7 @@
                   hx:get="@{/fragments/artifact/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
                   hx-trigger="click once" hx:target="${'#artifact-content-' + iterStat.index}"
                   hx-swap="innerHTML"
-                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  class="w-full flex items-center justify-between px-3 py-2 md:px-4 md:py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
                     <i class="fas fa-file-code text-primary-500"></i>
                     <div class="text-left">
@@ -335,7 +335,7 @@
 
                 <!-- Artifact Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'artifact-content-' + ${iterStat.index}"
-                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>
@@ -345,7 +345,7 @@
 
         <!-- Attachments Tab -->
         <div id="attachments-tab" class="tab-content hidden">
-          <div class="space-y-3">
+          <div class="space-y-2 md:space-y-3">
             <!-- Attachment list will be dynamically loaded -->
             <div th:if="${attachments != null && !attachments.isEmpty()}">
               <div th:each="attachment, iterStat : ${attachments}"
@@ -356,7 +356,7 @@
                   hx:get="@{/fragments/attachment/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
                   hx-trigger="click once" hx:target="${'#attachment-content-' + iterStat.index}"
                   hx-swap="innerHTML"
-                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  class="w-full flex items-center justify-between px-3 py-2 md:px-4 md:py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
                     <i class="fas fa-paperclip text-primary-500"></i>
                     <div class="text-left">
@@ -376,7 +376,7 @@
 
                 <!-- Attachment Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'attachment-content-' + ${iterStat.index}"
-                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>
