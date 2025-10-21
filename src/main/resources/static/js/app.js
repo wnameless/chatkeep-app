@@ -18,9 +18,10 @@ function initializeSidebar() {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
 
     // Mobile sidebar toggle
-    if (sidebarToggle) {
+    if (sidebarToggle && sidebar && sidebarOverlay) {
         sidebarToggle.addEventListener('click', function() {
             sidebar.classList.toggle('-translate-x-full');
             sidebarOverlay.classList.toggle('hidden');
@@ -28,8 +29,16 @@ function initializeSidebar() {
     }
 
     // Close sidebar when overlay is clicked
-    if (sidebarOverlay) {
+    if (sidebar && sidebarOverlay) {
         sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.add('-translate-x-full');
+            sidebarOverlay.classList.add('hidden');
+        });
+    }
+
+    // Close sidebar when close button is clicked (mobile)
+    if (sidebarCloseBtn && sidebar && sidebarOverlay) {
+        sidebarCloseBtn.addEventListener('click', function() {
             sidebar.classList.add('-translate-x-full');
             sidebarOverlay.classList.add('hidden');
         });
@@ -43,6 +52,12 @@ function initializeSidebar() {
                 nav.classList.remove('active', 'bg-primary-50', 'dark:bg-primary-900', 'text-primary-600', 'dark:text-primary-400');
             });
             this.classList.add('active', 'bg-primary-50', 'dark:bg-primary-900', 'text-primary-600', 'dark:text-primary-400');
+
+            // Close sidebar on mobile after clicking filter options
+            if (sidebar && sidebarOverlay) {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
         });
     });
 }

@@ -5,20 +5,20 @@
 
   <!-- ChatNote Modal Fragment -->
   <div th:fragment="modal(note)" id="chat-note-modal"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    class="fixed inset-0 bg-black bg-opacity-50 flex md:items-center md:justify-center z-50 md:p-4"
     onclick="if(event.target === this) closeChatNoteModal()">
 
     <!-- Modal Container -->
     <div
-      class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col"
+      class="bg-white dark:bg-gray-800 md:rounded-lg md:shadow-2xl w-full md:max-w-5xl h-full md:max-h-[90vh] flex flex-col"
       onclick="event.stopPropagation()">
 
       <!-- Modal Header -->
       <div
-        class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <!-- Title -->
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4"
-          th:text="${note.title}">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4 line-clamp-2 md:line-clamp-none"
+          th:text="${note.title}" th:title="${note.title}">
           ChatNote Title
         </h2>
 
@@ -26,35 +26,48 @@
         <div class="flex items-center space-x-2">
           <!-- Edit Button -->
           <button th:attr="onclick=${'enterEditMode(''' + note.id + ''')' }" id="edit-mode-btn"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
-            <i class="fas fa-edit mr-1"></i>
-            Edit
+            class="px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
+            <i class="fas fa-edit md:mr-1"></i>
+            <span class="hidden md:inline">Edit</span>
           </button>
 
           <!-- Save Button (Hidden initially) -->
           <button th:attr="onclick=${'saveChatNote(''' + note.id + ''')' }" id="save-mode-btn"
-            class="hidden px-4 py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
-            <i class="fas fa-save mr-1"></i>
-            Save
+            class="hidden px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
+            <i class="fas fa-save md:mr-1"></i>
+            <span class="hidden md:inline">Save</span>
           </button>
 
           <!-- Cancel Button (Hidden initially) -->
           <button onclick="exitEditMode()" id="cancel-mode-btn"
-            class="hidden px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
-            Cancel
+            class="hidden px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
+            <span class="hidden md:inline">Cancel</span>
+            <i class="fas fa-times md:hidden"></i>
           </button>
 
           <!-- Close Button -->
           <button onclick="closeChatNoteModal()"
             class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-            <i class="fas fa-times text-xl"></i>
+            <i class="fas fa-times text-2xl md:text-xl"></i>
           </button>
         </div>
       </div>
 
-      <!-- Metadata Section -->
-      <div
-        class="px-6 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <!-- Metadata Section Container -->
+      <div class="border-b border-gray-200 dark:border-gray-700">
+
+        <!-- Details Toggle Button (Mobile Only) -->
+        <button id="metadata-toggle" onclick="toggleMetadata()"
+          class="w-full px-6 py-3 flex items-center justify-between md:hidden bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <i class="fas fa-info-circle mr-2 text-primary-500"></i>Details
+          </span>
+          <i id="metadata-chevron" class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
+        </button>
+
+        <!-- Metadata Section (Collapsible on Mobile, Always Visible on Desktop) -->
+        <div id="metadata-section"
+          class="hidden md:block px-6 py-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <!-- Platform -->
           <div>
@@ -152,7 +165,11 @@
             <i class="fas fa-share mr-1"></i>Share Link
           </button>
         </div>
+        </div>
+        <!-- End of Metadata Section -->
+
       </div>
+      <!-- End of Metadata Container -->
 
       <!-- Tab Navigation -->
       <div class="flex border-b border-gray-200 dark:border-gray-700 px-6">
@@ -176,7 +193,7 @@
       </div>
 
       <!-- Tab Content Area -->
-      <div class="flex-1 overflow-y-auto px-6 py-4" id="tab-content-area">
+      <div class="flex-1 overflow-y-auto px-2 py-2 md:px-6 md:py-4" id="tab-content-area">
 
         <!-- Content Tab (Default) -->
         <div id="content-tab" class="tab-content">
@@ -287,7 +304,7 @@
 
         <!-- Artifacts Tab -->
         <div id="artifacts-tab" class="tab-content hidden">
-          <div class="space-y-3">
+          <div class="space-y-2 md:space-y-3">
             <!-- Artifact list will be dynamically loaded -->
             <div th:if="${artifacts != null && !artifacts.isEmpty()}">
               <div th:each="artifact, iterStat : ${artifacts}"
@@ -298,7 +315,7 @@
                   hx:get="@{/fragments/artifact/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
                   hx-trigger="click once" hx:target="${'#artifact-content-' + iterStat.index}"
                   hx-swap="innerHTML"
-                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  class="w-full flex items-center justify-between px-3 py-2 md:px-4 md:py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
                     <i class="fas fa-file-code text-primary-500"></i>
                     <div class="text-left">
@@ -318,7 +335,7 @@
 
                 <!-- Artifact Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'artifact-content-' + ${iterStat.index}"
-                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>
@@ -328,7 +345,7 @@
 
         <!-- Attachments Tab -->
         <div id="attachments-tab" class="tab-content hidden">
-          <div class="space-y-3">
+          <div class="space-y-2 md:space-y-3">
             <!-- Attachment list will be dynamically loaded -->
             <div th:if="${attachments != null && !attachments.isEmpty()}">
               <div th:each="attachment, iterStat : ${attachments}"
@@ -339,7 +356,7 @@
                   hx:get="@{/fragments/attachment/{noteId}/{index}(noteId=${note.id},index=${iterStat.index})}"
                   hx-trigger="click once" hx:target="${'#attachment-content-' + iterStat.index}"
                   hx-swap="innerHTML"
-                  class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  class="w-full flex items-center justify-between px-3 py-2 md:px-4 md:py-3 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                   <div class="flex items-center space-x-3">
                     <i class="fas fa-paperclip text-primary-500"></i>
                     <div class="text-left">
@@ -359,7 +376,7 @@
 
                 <!-- Attachment Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'attachment-content-' + ${iterStat.index}"
-                  class="hidden px-4 py-3 bg-white dark:bg-gray-800">
+                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>

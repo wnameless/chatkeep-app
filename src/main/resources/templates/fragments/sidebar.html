@@ -3,68 +3,77 @@
 
 <body>
 
-  <aside th:fragment="sidebar" id="sidebar"
-    class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto no-scrollbar transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:static inset-y-0 left-0 z-40">
+  <div th:fragment="sidebar">
+    <aside id="sidebar"
+      class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto no-scrollbar transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:static inset-y-0 left-0 z-40">
 
-    <nav class="py-4">
-
-      <!-- ChatNotes (Default View) -->
-      <a href="#" hx:get="@{/fragments/chat-notes(filter='chatnotes')}" hx-target="#notes-grid"
-        hx-push-url="false"
-        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active">
-        <i class="fas fa-notes-medical w-6 text-lg"></i>
-        <span class="ml-3 font-medium">ChatNotes</span>
-      </a>
-
-      <!-- Favorite -->
-      <a href="#" hx:get="@{/fragments/chat-notes(filter='favorites')}" hx-target="#notes-grid"
-        hx-push-url="false"
-        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <i class="fas fa-star w-6 text-lg"></i>
-        <span class="ml-3 font-medium">Favorites</span>
-      </a>
-
-      <!-- Shared (Public ChatNotes) -->
-      <a href="#" hx:get="@{/fragments/chat-notes(filter='shared')}" hx-target="#notes-grid"
-        hx-push-url="false"
-        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <i class="fas fa-share-nodes w-6 text-lg"></i>
-        <span class="ml-3 font-medium">Shared</span>
-      </a>
-
-      <!-- Archive -->
-      <a href="#" hx:get="@{/fragments/chat-notes(filter='archive')}" hx-target="#notes-grid"
-        hx-push-url="false"
-        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <i class="fas fa-archive w-6 text-lg"></i>
-        <span class="ml-3 font-medium">Archive</span>
-      </a>
-
-      <!-- Trash -->
-      <a href="#" hx:get="@{/fragments/chat-notes(filter='trash')}" hx-target="#notes-grid"
-        hx-push-url="false"
-        class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <i class="fas fa-trash w-6 text-lg"></i>
-        <span class="ml-3 font-medium">Trash</span>
-      </a>
-
-      <!-- Separator -->
-      <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-
-      <!-- Labels Section -->
-      <div class="px-4 py-2" hx-get="/fragments/labels/list" hx-trigger="load, labelCreated from:body, labelUpdated from:body, labelDeleted from:body" hx-swap="innerHTML">
-        <!-- Labels will be loaded here via HTMX -->
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Loading labels...
-        </div>
+      <!-- Mobile Close Button -->
+      <div class="lg:hidden flex justify-end px-4 pt-4 pb-2">
+        <button id="sidebar-close-btn" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" title="Close sidebar">
+          <i class="fas fa-times text-xl"></i>
+        </button>
       </div>
 
-    </nav>
+      <nav class="py-4">
 
-  </aside>
+        <!-- ChatNotes (Default View) -->
+        <a href="#" hx:get="@{/fragments/chat-notes(filter='chatnotes')}" hx-target="#notes-grid"
+          hx-push-url="false"
+          class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active">
+          <i class="fas fa-notes-medical w-6 text-lg"></i>
+          <span class="ml-3 font-medium">ChatNotes</span>
+        </a>
 
-  <!-- Sidebar Overlay (Mobile) -->
-  <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden">
+        <!-- Favorite -->
+        <a href="#" hx:get="@{/fragments/chat-notes(filter='favorites')}" hx-target="#notes-grid"
+          hx-push-url="false"
+          class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="fas fa-star w-6 text-lg"></i>
+          <span class="ml-3 font-medium">Favorites</span>
+        </a>
+
+        <!-- Shared (Public ChatNotes) -->
+        <a href="#" hx:get="@{/fragments/chat-notes(filter='shared')}" hx-target="#notes-grid"
+          hx-push-url="false"
+          class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="fas fa-share-nodes w-6 text-lg"></i>
+          <span class="ml-3 font-medium">Shared</span>
+        </a>
+
+        <!-- Archive -->
+        <a href="#" hx:get="@{/fragments/chat-notes(filter='archive')}" hx-target="#notes-grid"
+          hx-push-url="false"
+          class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="fas fa-archive w-6 text-lg"></i>
+          <span class="ml-3 font-medium">Archive</span>
+        </a>
+
+        <!-- Trash -->
+        <a href="#" hx:get="@{/fragments/chat-notes(filter='trash')}" hx-target="#notes-grid"
+          hx-push-url="false"
+          class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <i class="fas fa-trash w-6 text-lg"></i>
+          <span class="ml-3 font-medium">Trash</span>
+        </a>
+
+        <!-- Separator -->
+        <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+        <!-- Labels Section -->
+        <div class="px-4 py-2" hx-get="/fragments/labels/list" hx-trigger="load, labelCreated from:body, labelUpdated from:body, labelDeleted from:body" hx-swap="innerHTML">
+          <!-- Labels will be loaded here via HTMX -->
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            Loading labels...
+          </div>
+        </div>
+
+      </nav>
+
+    </aside>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden">
+    </div>
   </div>
 
 </body>
