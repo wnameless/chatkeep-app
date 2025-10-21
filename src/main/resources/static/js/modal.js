@@ -56,6 +56,18 @@ function initializeModalTabs() {
     });
 }
 
+// ==================== Metadata Toggle (Mobile) ====================
+
+function toggleMetadata() {
+    const section = document.getElementById('metadata-section');
+    const chevron = document.getElementById('metadata-chevron');
+
+    if (section && chevron) {
+        section.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+    }
+}
+
 // ==================== Artifacts & Attachments Toggle ====================
 
 function toggleArtifact(index) {
@@ -361,6 +373,7 @@ function escapeHtml(text) {
 // Export to window for inline onclick handlers
 window.closeChatNoteModal = closeChatNoteModal;
 window.initializeModal = initializeModal;
+window.toggleMetadata = toggleMetadata;
 window.toggleArtifact = toggleArtifact;
 window.toggleAttachment = toggleAttachment;
 window.enterEditMode = enterEditMode;
