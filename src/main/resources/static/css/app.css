@@ -168,3 +168,30 @@
 .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* Card fade-out animation for smooth removal */
+@keyframes cardFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+.card-fade-out {
+    animation: cardFadeOut 0.3s ease-out forwards;
+}
+
+/* HTMX swap animations */
+.htmx-swapping {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+.htmx-settling {
+    opacity: 1;
+    transition: opacity 0.3s ease-in;
+}

@@ -7,7 +7,9 @@
   <th:block th:fragment="card(note)">
     <div
       class="chat-note-card group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer masonry-item"
-      th:id="'card-' + ${note.id}" hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
+      th:id="'card-' + ${note.id}"
+      th:attr="data-note-id=${note.id},data-is-favorite=${note.isFavorite},data-is-archived=${note.isArchived},data-is-trashed=${note.isTrashed},data-is-public=${note.isPublic}"
+      hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
       hx-target="#modal-container" hx-swap="innerHTML">
 
       <!-- Card Content -->
@@ -204,7 +206,9 @@
   <!-- List View Card (Alternative Layout) -->
   <div th:fragment="list-card(note)"
     class="chat-note-card group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer list-view-item mb-3"
-    th:id="'card-' + ${note.id}" hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
+    th:id="'card-' + ${note.id}"
+    th:attr="data-note-id=${note.id},data-is-favorite=${note.isFavorite},data-is-archived=${note.isArchived},data-is-trashed=${note.isTrashed},data-is-public=${note.isPublic}"
+    hx:get="@{/fragments/chat-note-modal(id=${note.id})}"
     hx-target="#modal-container" hx-swap="innerHTML">
 
     <div class="flex p-4">
