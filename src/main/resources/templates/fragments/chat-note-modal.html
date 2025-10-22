@@ -67,9 +67,9 @@
             class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
         </button>
 
-        <!-- Metadata Section (Collapsible on All Screen Sizes) -->
+        <!-- Metadata Section (Hidden on mobile, visible on desktop by default) -->
         <div id="metadata-section"
-          class="px-6 py-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300">
+          class="hidden md:block px-6 py-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
             <!-- Platform -->
             <div>
@@ -408,6 +408,28 @@
         } else {
           document.getElementById('markdown-content').innerHTML =
             '<p class="text-gray-500 dark:text-gray-400">Content not available</p>';
+        }
+      })();
+    </script>
+
+    <!-- Initialize metadata section chevron based on screen size -->
+    <script>
+      (function() {
+        const metadataSection = document.getElementById('metadata-section');
+        const chevron = document.getElementById('metadata-chevron');
+
+        if (metadataSection && chevron) {
+          // Check if metadata section is visible on page load
+          const isVisible = window.getComputedStyle(metadataSection).display !== 'none';
+
+          // Update chevron to match visibility state
+          if (isVisible) {
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-up');
+          } else {
+            chevron.classList.remove('fa-chevron-up');
+            chevron.classList.add('fa-chevron-down');
+          }
         }
       })();
     </script>
