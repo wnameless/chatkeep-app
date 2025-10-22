@@ -217,8 +217,7 @@
             "string",
             "null"
           ],
-          "format": "uri",
-          "description": "URL (optional for concept/contextual references)"
+          "description": "URL (optional for concept/contextual references, supports international characters)"
         },
         "type": {
           "type": "string",
