@@ -63,8 +63,20 @@ function toggleMetadata() {
     const chevron = document.getElementById('metadata-chevron');
 
     if (section && chevron) {
-        section.classList.toggle('hidden');
-        chevron.classList.toggle('rotate-180');
+        // Check current visibility using computed style (handles responsive classes)
+        const isVisible = window.getComputedStyle(section).display !== 'none';
+
+        if (isVisible) {
+            // Hide it
+            section.classList.add('!hidden');
+            chevron.classList.remove('fa-chevron-up');
+            chevron.classList.add('fa-chevron-down');
+        } else {
+            // Show it
+            section.classList.remove('!hidden');
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-up');
+        }
     }
 }
 
