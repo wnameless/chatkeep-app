@@ -24,20 +24,89 @@ This file contains everything needed to archive AI conversations into a standard
 
 ## Part 1: Archiving Instructions for AI
 
-### CRITICAL: Language Handling
+### CRITICAL: Language Handling - Three Contexts
 
-**Communicate in the conversation's language, but keep template structure in English for backend parsing.**
+**1. Template Structure (MUST be English):**
+- Section headings: `## Initial Query`, `## Key Insights`, `## Attachments`, etc.
+- YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ATTACHMENT_COUNT`, etc.
+- Wrapper syntax: `<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`, `<!-- MARKDOWN_END:`
+- Structure keywords and formatting
 
-- **Detect conversation language FIRST**: Check what language the conversation being archived is in (English, Chinese, Spanish, etc.)
-- **User interaction language**: Communicate with the user in THE SAME LANGUAGE as the conversation
-  - If conversation is in Chinese → ask questions in Chinese
-  - If conversation is in Spanish → ask questions in Spanish
-  - If conversation is in English → ask questions in English
-- **Template structure (MUST be English)**: All section headings, YAML keys, wrapper syntax, and structural elements MUST remain exactly as shown in the template
-  - ✅ CORRECT: `## Initial Query`, `## Key Insights`, `## Attachments`, `ARCHIVE_FORMAT_VERSION`, `<!-- ARTIFACT_START:`, etc.
-  - ❌ WRONG: `## Consulta Inicial`, `## Informations Clés`, `## 初始查詢`, or any translated versions
-- **Content language (use original)**: Conversation summaries, artifact content, and attachment content should be in the original language used in the conversation
-- **Why this matters**: These archives are processed by backend parsers that expect specific English keywords and structure
+**Why:** Backend parsers expect specific English keywords for processing.
+
+**2. Archive Infrastructure (MUST be conversation language):**
+- User interaction: Questions, confirmations, explanations to user
+- Summaries: Initial Query, Key Insights, Follow-up Explorations
+- Descriptions ABOUT artifacts and attachments
+- Notes and explanations (workarounds, context, purposes)
+- Metadata descriptions
+
+**Why:** This is the AI communicating about the conversation - use the conversation's language.
+
+**3. Artifact & Attachment Content (MUST be original language):**
+- Artifact content: Keep in whatever language the user created it (code, poems, documents, analyses)
+- Attachment content: Keep in whatever language the file was originally in
+- May be multilingual, mixed languages, or different from conversation language
+
+**Why:** Preserve content exactly as created or provided - don't translate or change.
+
+**Examples:**
+
+✅ **Spanish conversation creating German poem:**
+```markdown
+## Key Insights
+
+El usuario quería crear un poema alemán sobre la naturaleza...  ← Spanish (conversation language)
+
+**Artifacts created:** [Poema Alemán]
+
+<!-- ARTIFACT_START: type="poem" title="Poema Alemán" version="final" -->
+Ich liebe dich, mein Schatz,
+In deinen Augen finde ich Platz...  ← German (as created by user)
+<!-- ARTIFACT_END -->
+```
+
+✅ **Chinese conversation with French/Italian documents:**
+```markdown
+## Initial Query
+
+用户上传了法语和意大利语商业文档，需要提取关键财务信息。  ← Chinese (conversation language)
+
+**Attachments referenced:** [rapport_financier.pdf, bilancio.docx]
+
+<!-- MARKDOWN_START: filename="rapport_financier.pdf" -->
+# Rapport Financier 2024
+
+Bonjour, voici le document financier...  ← French (preserved as-is)
+<!-- MARKDOWN_END -->
+
+<!-- MARKDOWN_START: filename="bilancio.docx" -->
+# Bilancio Aziendale
+
+Ciao, questo è il rapporto finanziario...  ← Italian (preserved as-is)
+<!-- MARKDOWN_END -->
+```
+
+✅ **English conversation with multilingual code:**
+```markdown
+## Key Insights
+
+User needed help creating a Python script with Japanese comments for a client...  ← English (conversation language)
+
+<!-- ARTIFACT_START: type="code" language="python" title="Data Processor" -->
+# データ処理スクリプト (Data Processing Script)
+def process_data():
+    """Process customer data"""  ← Mixed English/Japanese (as created)
+    # 顧客データを読み込む
+    pass
+<!-- ARTIFACT_END -->
+```
+
+**Common Mistakes to Avoid:**
+- ❌ Writing summaries in English when conversation was in Chinese
+- ❌ Translating German poem content to Spanish because conversation was in Spanish
+- ❌ Translating French attachment to English because you're communicating in English
+- ❌ Mixing languages within summaries (use conversation language consistently)
 
 ### IMPORTANT: Start Immediately, Don't Explain
 
@@ -93,15 +162,20 @@ Tell the user:
 
 **1. Simple Response** (code block in chat)
 - ✅ Recommended for: <100 KB archives
+- ✅ Most reliable: No platform-specific formatting issues
+- ✅ Always produces clean markdown
 - ⚠️ Acceptable for: 100-500 KB (may be slow to render)
 - ❌ Not recommended for: >500 KB (may truncate)
-- No special features needed, works everywhere
+- **DEFAULT RECOMMENDATION** - Use unless file is truly large
 
 **2. Large Document Feature** (Artifact/Canvas/Code View)
 - ✅ Recommended for: 100 KB - 1 MB archives
+- ⚠️ WARNING: May add platform-specific formatting that breaks template
+- ⚠️ Requires careful verification of output format
 - Better rendering for large documents
 - Separate viewing area outside chat
-- Note: Called "Artifacts" on Claude, "Canvas" on ChatGPT/Gemini, or similar names on other platforms
+- Note: Called "Artifacts" on Claude, "Canvas" on ChatGPT/Gemini
+- **Use only if simple response is too slow or truncates**
 
 **3. MCP Storage** (direct file save)
 - ✅ Recommended for: >500 KB archives
@@ -137,6 +211,35 @@ Handle the user's choice with appropriate fallbacks:
      a) Simple response instead (may be slower to render)
      b) MCP storage (I'll check what's available)"
    - Wait for user's choice and handle accordingly
+
+**CRITICAL: Format Integrity for Canvas/Artifacts/Code Blocks**
+
+If using Canvas, Artifacts, or Code View features:
+
+⚠️ **WARNING: These features sometimes apply platform-specific formatting that breaks the template!**
+
+**Before generating the archive:**
+1. Understand that the output MUST be plain markdown - NO platform-specific enhancements
+2. DO NOT let the platform add metadata wrappers, special headers, or formatting
+3. The output should be IDENTICAL to what you would produce in a simple response
+4. After generation, verify the structure matches the template exactly
+
+**What to avoid:**
+- ❌ Platform-generated headers or metadata boxes
+- ❌ Special formatting blocks not in the template
+- ❌ Interactive elements or buttons
+- ❌ Platform-specific syntax extensions
+- ❌ Any wrapper that's not in the template (`<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`)
+
+**What the output should be:**
+- ✅ Pure markdown following the template exactly
+- ✅ Standard markdown syntax only
+- ✅ All wrapper syntax exactly as shown in template
+- ✅ No platform-specific additions
+
+**If you cannot produce clean markdown in Canvas/Artifacts:**
+- Warn the user: "This platform's [feature name] may add extra formatting. Would you prefer simple response instead?"
+- Wait for user confirmation
 
 **If user chooses "MCP Storage":**
 
@@ -180,6 +283,9 @@ In the YAML front matter at the top of the archive:
 Give this conversation a clear, descriptive title that summarizes the main topic. This will be the H1 heading of the archive.
 
 ### Step 4: Summarize Each Phase
+
+**⚠️ LANGUAGE REMINDER: Write all summaries in the conversation's language (not English, not content language)!**
+
 Write concise summaries for each phase:
 
 **Initial Query:**
@@ -209,6 +315,8 @@ List all external links, documentation, concepts, and contextual information men
 Both types are valuable and should be included. The description itself conveys the nature of the reference.
 
 ### Step 6: Preserve Conversation Artifacts
+
+**⚠️ LANGUAGE REMINDER: Keep artifact content in its original language (as created by user)! Only descriptions ABOUT artifacts should be in conversation language.**
 
 **What are Conversation Artifacts?**
 
@@ -358,6 +466,8 @@ Attachment: "data.csv" (uploaded file)
 - If ALL attachments were excluded, the Attachments section should only contain the section header with no content wrappers
 
 ### Step 7: Process Attachments (With Workarounds If Needed)
+
+**⚠️ LANGUAGE REMINDER: Preserve attachment content in its original language! Don't translate. Only notes ABOUT attachments should be in conversation language.**
 
 **Note:** After filtering out system prompts in Step 6.5, process only the remaining conversation-relevant attachments.
 
@@ -543,6 +653,32 @@ If your chosen delivery method fails:
 - **Final versions preferred:** For artifacts, include final or milestone versions, not every iteration
 
 
+### Final Format Verification (CRITICAL FOR CANVAS/ARTIFACTS)
+
+**If using Canvas/Artifacts/Code View, verify before delivery:**
+
+1. **Check template structure:**
+   - [ ] YAML frontmatter starts with `---` and ends with `---`
+   - [ ] All section headings are exactly as in template (English)
+   - [ ] All wrapper syntax uses exact format from template
+   - [ ] No extra platform-generated sections or formatting
+
+2. **Check content language:**
+   - [ ] All summaries/notes/descriptions are in conversation's language
+   - [ ] All artifact content is in original language (as created)
+   - [ ] All attachment content is in original language (as provided)
+   - [ ] Only structure/headings/YAML keys are in English
+
+3. **Check markdown purity:**
+   - [ ] No platform-specific syntax extensions
+   - [ ] No interactive elements or special blocks
+   - [ ] Output is copyable as plain text
+   - [ ] Would work identically in simple response
+
+**If verification fails:**
+- Regenerate using simple response instead
+- Warn user: "Platform formatting detected. Switching to simple response for template integrity."
+
 ### Quality Checklist
 
 Before outputting, verify:
@@ -566,6 +702,13 @@ Before outputting, verify:
 - [ ] All attachment and artifact references in the summary match actual items
 - [ ] No excluded attachments are referenced in summary sections
 - [ ] Artifacts include only final/important versions with evolution notes if significant
+- [ ] Archive infrastructure (summaries, notes) is in conversation's language
+- [ ] Artifact content is in original language (as created by user)
+- [ ] Attachment content is in original language (as provided in files)
+- [ ] Only template structure (headings, YAML keys, wrappers) is in English
+- [ ] If using Canvas/Artifacts: verified no platform-specific formatting
+- [ ] If using Canvas/Artifacts: verified output is pure markdown matching template
+- [ ] If format issues detected: switched to simple response or warned user
 - [ ] The output is complete and ready to save as a .md file (or saved via chosen delivery method)
 
 ---
@@ -601,6 +744,14 @@ INSTRUCTIONS_FOR_AI: |
   - DELIVERY_METHOD (optional): How the archive was delivered (simple_response, large_document, mcp_storage)
   - ESTIMATED_SIZE_KB (optional): Estimated size before generation
   Archives without these fields are still valid (backward compatible with v1.0).
+
+  ## Language in Archives
+  Archives use three language contexts:
+  1. **Template structure** (English): Section headings, YAML keys, wrapper syntax
+  2. **Archive infrastructure** (conversation language): Summaries, descriptions, notes
+  3. **Content itself** (original language): Artifacts and attachments preserved as created/provided
+
+  Example: A Chinese conversation creating a German poem will have Chinese summaries with German poem content.
 
   ## Artifact vs Attachment
   - **Artifacts**: Outputs CREATED during the conversation (code, poems, documents, analyses, etc.)
