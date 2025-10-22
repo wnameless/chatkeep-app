@@ -13,19 +13,14 @@
       </th:block>
 
       <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
-      <div th:if="${hasMore}"
-           th:id="'scroll-sentinel-' + ${currentPage}"
-           hx:get="@{/fragments/chat-notes(
+      <div th:if="${hasMore}" th:id="'scroll-sentinel-' + ${currentPage}" hx:get="@{/fragments/chat-notes(
              filter=${currentFilter},
              labelIds=${currentLabelIds},
              search=${currentSearch},
              page=${currentPage + 1},
-             append=true)}"
-           hx-trigger="intersect once"
-           hx-target="#notes-grid"
-           hx-swap="beforeend"
-           style="column-span: all; -webkit-column-span: all;"
-           class="flex items-center justify-center py-8">
+             append=true)}" hx-trigger="intersect once" hx-target="#notes-grid" hx-swap="beforeend"
+        style="column-span: all; -webkit-column-span: all;"
+        class="flex items-center justify-center py-8">
         <div class="text-sm text-gray-500 dark:text-gray-400">
           <i class="fas fa-spinner fa-spin mr-2"></i>
           <span>Loading more notes...</span>
@@ -33,9 +28,8 @@
       </div>
 
       <!-- End state (no more results) -->
-      <div th:unless="${hasMore}"
-           style="column-span: all; -webkit-column-span: all;"
-           class="flex items-center justify-center py-8">
+      <div th:unless="${hasMore}" style="column-span: all; -webkit-column-span: all;"
+        class="flex items-center justify-center py-8">
         <div class="text-sm text-gray-500 dark:text-gray-400">
           <i class="fas fa-check-circle mr-2"></i>
           <span>All notes loaded</span>
@@ -72,7 +66,7 @@
                 <span>Click the</span>
                 <span
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary-500 text-white">
-                  <i class="fas fa-plus text-xs"></i>
+                  <i class="fas fa-robot text-xs"></i>
                 </span>
                 <span>button to begin</span>
               </div>
@@ -106,19 +100,14 @@
     </th:block>
 
     <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
-    <div th:if="${hasMore}"
-         th:id="'scroll-sentinel-' + ${currentPage}"
-         hx:get="@{/fragments/chat-notes(
+    <div th:if="${hasMore}" th:id="'scroll-sentinel-' + ${currentPage}" hx:get="@{/fragments/chat-notes(
            filter=${currentFilter},
            labelIds=${currentLabelIds},
            search=${currentSearch},
            page=${currentPage + 1},
-           append=true)}"
-         hx-trigger="intersect once"
-         hx-target="#notes-grid"
-         hx-swap="beforeend"
-         style="column-span: all; -webkit-column-span: all;"
-         class="flex items-center justify-center py-8">
+           append=true)}" hx-trigger="intersect once" hx-target="#notes-grid" hx-swap="beforeend"
+      style="column-span: all; -webkit-column-span: all;"
+      class="flex items-center justify-center py-8">
       <div class="text-sm text-gray-500 dark:text-gray-400">
         <i class="fas fa-spinner fa-spin mr-2"></i>
         <span>Loading more notes...</span>
@@ -126,9 +115,8 @@
     </div>
 
     <!-- End state (no more results) -->
-    <div th:unless="${hasMore}"
-         style="column-span: all; -webkit-column-span: all;"
-         class="flex items-center justify-center py-8">
+    <div th:unless="${hasMore}" style="column-span: all; -webkit-column-span: all;"
+      class="flex items-center justify-center py-8">
       <div class="text-sm text-gray-500 dark:text-gray-400">
         <i class="fas fa-check-circle mr-2"></i>
         <span>All notes loaded</span>
