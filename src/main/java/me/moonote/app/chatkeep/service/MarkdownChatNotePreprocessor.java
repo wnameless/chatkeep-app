@@ -348,9 +348,12 @@ public class MarkdownChatNotePreprocessor {
           String[] tokens = remainder.split("[\\s()]");
           String url = tokens[0].trim();
 
-          references.add(ReferenceDto.builder().description(description).url(url)
-              .type(ReferenceType.EXTERNAL_LINK).build());
-          continue;
+          // Only add if URL is not empty - otherwise treat as descriptive reference
+          if (!url.isEmpty()) {
+            references.add(ReferenceDto.builder().description(description).url(url)
+                .type(ReferenceType.EXTERNAL_LINK).build());
+            continue;
+          }
         }
       }
 
