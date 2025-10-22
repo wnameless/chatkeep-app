@@ -17,7 +17,8 @@
       <div
         class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <!-- Title -->
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4 line-clamp-2 md:line-clamp-none"
+        <h2
+          class="text-xl font-semibold text-gray-900 dark:text-gray-100 flex-1 mr-4 line-clamp-2 md:line-clamp-none"
           th:text="${note.title}" th:title="${note.title}">
           ChatNote Title
         </h2>
@@ -62,109 +63,110 @@
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
             <i class="fas fa-info-circle mr-2 text-primary-500"></i>Details
           </span>
-          <i id="metadata-chevron" class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
+          <i id="metadata-chevron"
+            class="fas fa-chevron-down text-gray-500 dark:text-gray-400 transition-transform"></i>
         </button>
 
         <!-- Metadata Section (Collapsible on Mobile, Always Visible on Desktop) -->
         <div id="metadata-section"
           class="hidden md:block px-6 py-3 bg-gray-50 dark:bg-gray-900 transition-all duration-300">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <!-- Platform -->
-          <div>
-            <span class="text-gray-500 dark:text-gray-400">Platform:</span>
-            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-              th:text="${note.platform}">Claude</span>
-          </div>
-
-          <!-- Conversation Date -->
-          <div>
-            <span class="text-gray-500 dark:text-gray-400">Date:</span>
-            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-              th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15,
-              2025</span>
-          </div>
-
-          <!-- Message Count -->
-          <div>
-            <span class="text-gray-500 dark:text-gray-400">Messages:</span>
-            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-              th:text="${note.messageCount}">10</span>
-          </div>
-
-          <!-- Word Count -->
-          <div>
-            <span class="text-gray-500 dark:text-gray-400">Words:</span>
-            <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
-              th:text="${note.wordCount}">1500</span>
-          </div>
-        </div>
-
-        <!-- Tags (Auto-extracted) -->
-        <div class="mt-3" th:if="${note.tags != null && !note.tags.isEmpty()}">
-          <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium">Tags:</div>
-          <div class="flex flex-wrap gap-1.5">
-            <span th:each="tag : ${note.tags}"
-              class="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">
-              <i class="fas fa-hashtag text-xs mr-1"></i>
-              [[${tag}]]
-            </span>
-          </div>
-        </div>
-
-        <!-- Labels (User-managed) -->
-        <div class="mt-3">
-          <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium">Labels:</div>
-          <div hx:get="@{/fragments/labels/selector(noteId=${note.id})}"
-               hx-trigger="load, labelAssigned from:body, labelRemoved from:body"
-               hx-swap="outerHTML">
-            <!-- Label selector will be loaded here -->
-            <div class="text-xs text-gray-400">Loading labels...</div>
-          </div>
-        </div>
-
-        <!-- Status Flags -->
-        <div class="mt-2 flex items-center space-x-3 text-xs">
-          <!-- Public/Private Toggle -->
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" th:checked="${note.isPublic}"
-              hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
-              hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
-              class="sr-only peer">
-            <div
-              class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <!-- Platform -->
+            <div>
+              <span class="text-gray-500 dark:text-gray-400">Platform:</span>
+              <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+                th:text="${note.platform}">Claude</span>
             </div>
-            <span class="ml-2 text-gray-700 dark:text-gray-300">
-              <i class="fas fa-globe mr-1"></i>Public
-            </span>
-          </label>
 
-          <!-- Favorite Toggle -->
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" th:checked="${note.isFavorite}"
-              hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
-              hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
-              class="sr-only peer">
-            <div
-              class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500">
+            <!-- Conversation Date -->
+            <div>
+              <span class="text-gray-500 dark:text-gray-400">Date:</span>
+              <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+                th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15,
+                2025</span>
             </div>
-            <span class="ml-2 text-gray-700 dark:text-gray-300">
-              <i class="fas fa-star mr-1"></i>Favorite
-            </span>
-          </label>
 
-          <!-- Download Button -->
-          <button th:attr="onclick=${'downloadChatNote(''' + note.id + ''')' }"
-            class="text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
-            <i class="fas fa-download mr-1"></i>Download
-          </button>
+            <!-- Message Count -->
+            <div>
+              <span class="text-gray-500 dark:text-gray-400">Messages:</span>
+              <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+                th:text="${note.messageCount}">10</span>
+            </div>
 
-          <!-- Copy Share Link (if public) -->
-          <button th:if="${note.isPublic}"
-            th:attr="onclick=${'copyShareLink(''' + note.id + ''')' }"
-            class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors">
-            <i class="fas fa-share mr-1"></i>Share Link
-          </button>
-        </div>
+            <!-- Word Count -->
+            <div>
+              <span class="text-gray-500 dark:text-gray-400">Words:</span>
+              <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
+                th:text="${note.wordCount}">1500</span>
+            </div>
+          </div>
+
+          <!-- Tags (Auto-extracted) -->
+          <div class="mt-3" th:if="${note.tags != null && !note.tags.isEmpty()}">
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium">Tags:</div>
+            <div class="flex flex-wrap gap-1.5">
+              <span th:each="tag : ${note.tags}"
+                class="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded border border-gray-300 dark:border-gray-600">
+                <i class="fas fa-hashtag text-xs mr-1"></i>
+                [[${tag}]]
+              </span>
+            </div>
+          </div>
+
+          <!-- Labels (User-managed) -->
+          <div class="mt-3">
+            <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 font-medium">Labels:</div>
+            <div hx:get="@{/fragments/labels/selector(noteId=${note.id})}"
+              hx-trigger="load, labelAssigned from:body, labelRemoved from:body"
+              hx-swap="outerHTML">
+              <!-- Label selector will be loaded here -->
+              <div class="text-xs text-gray-400">Loading labels...</div>
+            </div>
+          </div>
+
+          <!-- Status Flags -->
+          <div class="mt-2 flex items-center space-x-3 text-xs">
+            <!-- Public/Private Toggle -->
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" th:checked="${note.isPublic}"
+                hx:post="@{/fragments/chat-notes/{id}/visibility(id=${note.id},isPublic=${!note.isPublic})}"
+                hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
+                class="sr-only peer">
+              <div
+                class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500">
+              </div>
+              <span class="ml-2 text-gray-700 dark:text-gray-300">
+                <i class="fas fa-globe mr-1"></i>Public
+              </span>
+            </label>
+
+            <!-- Favorite Toggle -->
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" th:checked="${note.isFavorite}"
+                hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
+                hx-trigger="change" hx-target="#chat-note-modal" hx-swap="outerHTML"
+                class="sr-only peer">
+              <div
+                class="relative w-9 h-5 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-yellow-500">
+              </div>
+              <span class="ml-2 text-gray-700 dark:text-gray-300">
+                <i class="fas fa-star mr-1"></i>Favorite
+              </span>
+            </label>
+
+            <!-- Download Button -->
+            <button th:attr="onclick=${'downloadChatNote(''' + note.id + ''')' }"
+              class="text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors">
+              <i class="fas fa-download mr-1"></i>Download
+            </button>
+
+            <!-- Copy Share Link (if public) -->
+            <button th:if="${note.isPublic}"
+              th:attr="onclick=${'copyShareLink(''' + note.id + ''')' }"
+              class="text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors">
+              <i class="fas fa-share mr-1"></i>Share Link
+            </button>
+          </div>
         </div>
         <!-- End of Metadata Section -->
 
@@ -193,10 +195,10 @@
       </div>
 
       <!-- Tab Content Area -->
-      <div class="flex-1 overflow-y-auto px-2 py-2 md:px-6 md:py-4" id="tab-content-area">
+      <div class="flex-1 overflow-y-auto md:px-6 md:py-4" id="tab-content-area">
 
         <!-- Content Tab (Default) -->
-        <div id="content-tab" class="tab-content">
+        <div id="content-tab" class="tab-content px-2">
           <!-- View Mode -->
           <div id="content-view-mode">
             <div class="prose dark:prose-invert max-w-none" id="markdown-content">
@@ -232,8 +234,7 @@
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Conversation Date
               </label>
-              <input type="date" id="edit-conversation-date"
-                th:value="${note.conversationDate}"
+              <input type="date" id="edit-conversation-date" th:value="${note.conversationDate}"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
             </div>
 
@@ -281,8 +282,7 @@
                 <i class="fas fa-link mr-1"></i>References
                 <span class="text-xs text-gray-500">(JSON format)</span>
               </label>
-              <textarea id="edit-references" rows="6"
-                th:text="${referencesJson}"
+              <textarea id="edit-references" rows="6" th:text="${referencesJson}"
                 placeholder='[{"description": "Reference 1", "url": "https://example.com"}, {"description": "Concept", "url": null}]'
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"></textarea>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -308,7 +308,7 @@
             <!-- Artifact list will be dynamically loaded -->
             <div th:if="${artifacts != null && !artifacts.isEmpty()}">
               <div th:each="artifact, iterStat : ${artifacts}"
-                class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                class="border border-gray-200 dark:border-gray-700 md:rounded-lg overflow-hidden">
                 <!-- Artifact Header (Collapsible) -->
                 <button th:attr="onclick=${'toggleArtifact(' + iterStat.index + ')' }"
                   th:data-note-id="${note.id}" th:data-artifact-index="${iterStat.index}"
@@ -335,7 +335,7 @@
 
                 <!-- Artifact Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'artifact-content-' + ${iterStat.index}"
-                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
+                  class="hidden px-0 py-0 md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>
@@ -349,7 +349,7 @@
             <!-- Attachment list will be dynamically loaded -->
             <div th:if="${attachments != null && !attachments.isEmpty()}">
               <div th:each="attachment, iterStat : ${attachments}"
-                class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                class="border border-gray-200 dark:border-gray-700 md:rounded-lg overflow-hidden">
                 <!-- Attachment Header (Collapsible) -->
                 <button th:attr="onclick=${'toggleAttachment(' + iterStat.index + ')' }"
                   th:data-note-id="${note.id}" th:data-attachment-index="${iterStat.index}"
@@ -376,7 +376,7 @@
 
                 <!-- Attachment Content (Collapsible - Lazy Loaded) -->
                 <div th:id="'attachment-content-' + ${iterStat.index}"
-                  class="hidden md:px-4 md:py-3 bg-white dark:bg-gray-800">
+                  class="hidden px-0 py-0 md:px-4 md:py-3 bg-white dark:bg-gray-800">
                   <div class="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
                 </div>
               </div>
