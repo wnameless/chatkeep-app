@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxTrigger;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -168,6 +169,27 @@ public class ChatNoteFragmentController {
   }
 
   /**
+   * Get single chat note card GET /fragments/chat-note-card-single?id={id}
+   */
+  @GetMapping("/chat-note-card-single")
+  public String getSingleCard(@RequestParam String id, Model model) {
+    log.info("Loading single card for note: {}", id);
+
+    try {
+      ChatNote entity = chatNoteRepository.findById(id).orElseThrow();
+      Map<String, Object> noteData = buildNoteModel(entity);
+
+      model.addAttribute("note", noteData);
+
+      return "fragments/chat-note-card :: card";
+
+    } catch (Exception e) {
+      log.error("Error loading single card for note {}", id, e);
+      return "fragments/empty";
+    }
+  }
+
+  /**
    * Helper: Load notes by filter type
    */
   private List<ChatNoteResponse> loadNotesByFilter(String filter, String userId, int page,
@@ -196,6 +218,7 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/favorite")
   @HxRequest
+  @HxTrigger("noteUpdated")
   public String toggleFavorite(@PathVariable String id, @RequestParam Boolean isFavorite,
       Model model, HttpServletResponse response) {
 
@@ -230,6 +253,7 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/archive")
   @HxRequest
+  @HxTrigger("noteUpdated")
   public String toggleArchive(@PathVariable String id, @RequestParam Boolean isArchived,
       Model model, HttpServletResponse response) {
 
@@ -260,17 +284,21 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/trash")
   @HxRequest
-  public String moveToTrash(@PathVariable String id, HttpServletResponse response) {
+  @HxTrigger("noteUpdated")
+  public String moveToTrash(@PathVariable String id, Model model, HttpServletResponse response) {
 
     log.info("Move to trash: id={}", id);
 
     try {
       chatNoteService.moveToTrash(id);
 
+      ChatNote entity = chatNoteRepository.findById(id).orElseThrow();
+      model.addAttribute("note", buildNoteModel(entity));
+
       response.setHeader("HX-Trigger-After-Settle",
           "{\"showToast\":{\"message\":\"Moved to trash\",\"type\":\"success\"}}");
 
-      return "fragments/empty";
+      return "fragments/chat-note-card :: card";
 
     } catch (Exception e) {
       log.error("Error moving to trash", e);
@@ -285,6 +313,7 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/restore")
   @HxRequest
+  @HxTrigger("noteUpdated")
   public String restoreFromTrash(@PathVariable String id, Model model,
       HttpServletResponse response) {
 
@@ -314,6 +343,7 @@ public class ChatNoteFragmentController {
    */
   @PostMapping("/chat-notes/{id}/visibility")
   @HxRequest
+  @HxTrigger("noteUpdated")
   public String toggleVisibility(@PathVariable String id, @RequestParam Boolean isPublic,
       Model model, HttpServletResponse response) {
 
@@ -344,6 +374,7 @@ public class ChatNoteFragmentController {
    */
   @DeleteMapping("/chat-notes/{id}/permanent")
   @HxRequest
+  @HxTrigger("noteUpdated")
   public String permanentlyDelete(@PathVariable String id, HttpServletResponse response) {
 
     log.info("Permanently delete: id={}", id);

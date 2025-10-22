@@ -15,8 +15,8 @@
       </div>
 
       <!-- ChatNotes Grid (Masonry Layout) -->
-      <div id="notes-grid" class="masonry-grid" hx-get="/fragments/chat-notes" hx-trigger="load"
-        hx-swap="innerHTML">
+      <div id="notes-grid" class="masonry-grid" hx-get="/fragments/chat-notes"
+        hx-trigger="load, labelDeleted from:body" hx-swap="innerHTML">
         <!-- Loading State -->
         <div class="col-span-full flex items-center justify-center py-20">
           <div class="text-center">

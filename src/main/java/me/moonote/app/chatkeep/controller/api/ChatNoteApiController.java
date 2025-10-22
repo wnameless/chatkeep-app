@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxTrigger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.dto.request.UploadChatNoteRequest;
@@ -842,6 +843,7 @@ public class ChatNoteApiController {
    * Assign labels to a chat note POST /api/v1/chat-notes/{id}/labels
    */
   @PostMapping("/{id}/labels")
+  @HxTrigger("labelAssigned")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> assignLabels(@PathVariable String id,
       @RequestBody @jakarta.validation.Valid me.moonote.app.chatkeep.dto.request.AssignLabelsRequest request) {
     try {
@@ -864,6 +866,7 @@ public class ChatNoteApiController {
    * Remove a label from a chat note DELETE /api/v1/chat-notes/{id}/labels/{labelId}
    */
   @DeleteMapping("/{id}/labels/{labelId}")
+  @HxTrigger("labelRemoved")
   public ResponseEntity<ApiResponse<ChatNoteDetailResponse>> removeLabel(@PathVariable String id,
       @PathVariable String labelId) {
     try {

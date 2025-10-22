@@ -4,7 +4,7 @@
 <body>
 
   <!-- ChatNote Modal Fragment -->
-  <div th:fragment="modal(note)" id="chat-note-modal"
+  <div th:fragment="modal(note)" id="chat-note-modal" th:attr="data-note-id=${note.id}"
     class="fixed inset-0 bg-black bg-opacity-50 flex md:items-center md:justify-center z-50 md:p-4"
     onclick="if(event.target === this) closeChatNoteModal()">
 
