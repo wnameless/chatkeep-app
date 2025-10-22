@@ -56,7 +56,7 @@ function initializeModalTabs() {
     });
 }
 
-// ==================== Metadata Toggle (Mobile) ====================
+// ==================== Metadata Toggle ====================
 
 function toggleMetadata() {
     const section = document.getElementById('metadata-section');
