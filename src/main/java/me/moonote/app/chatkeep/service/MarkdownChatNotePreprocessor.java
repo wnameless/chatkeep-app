@@ -47,6 +47,9 @@ public class MarkdownChatNotePreprocessor {
     try {
       log.info("Starting preprocessing of markdown archive");
 
+      // Step 0: Strip code block wrappers if present (users often copy from code blocks)
+      markdownContent = stripCodeBlockWrappers(markdownContent);
+
       // Step 1-5: Parse all sections (same as before)
       ChatNoteMetadataDto metadata = parseYamlFrontmatter(markdownContent);
       ConversationSummaryDto summary = parseSummary(markdownContent);
@@ -77,6 +80,58 @@ public class MarkdownChatNotePreprocessor {
       log.error("Error preprocessing archive", e);
       return ChatNoteValidationResult.failure(Collections.singletonList(e.getMessage()));
     }
+  }
+
+  /**
+   * Strips code block wrappers (```) from markdown content if present. Users often copy archives
+   * from code blocks, which adds ``` at the beginning and end.
+   *
+   * Handles: - Plain code blocks: ```content``` - Language-specific blocks: ```markdown content ```
+   * - Multiple backticks: ````content````
+   *
+   * @param content the markdown content
+   * @return content with code block wrappers removed if present, otherwise unchanged
+   */
+  private String stripCodeBlockWrappers(String content) {
+    if (content == null || content.trim().isEmpty()) {
+      return content;
+    }
+
+    String trimmed = content.trim();
+
+    // Pattern to match opening code fence: ``` or ```language or ````
+    // Allows optional language identifier after opening fence
+    Pattern openingPattern = Pattern.compile("^(`{3,})\\s*[\\w]*\\s*\\n");
+    Matcher openingMatcher = openingPattern.matcher(trimmed);
+
+    if (!openingMatcher.find()) {
+      // No opening code fence found
+      return content;
+    }
+
+    String fence = openingMatcher.group(1); // e.g., "```" or "````"
+    int fenceLength = fence.length();
+
+    // Check if content ends with matching closing fence
+    Pattern closingPattern = Pattern.compile("\\n`{" + fenceLength + ",}\\s*$");
+    Matcher closingMatcher = closingPattern.matcher(trimmed);
+
+    if (!closingMatcher.find()) {
+      // No matching closing fence found
+      log.debug("Opening code fence found but no matching closing fence, leaving content as-is");
+      return content;
+    }
+
+    // Remove opening fence (including optional language and newline)
+    int startIndex = openingMatcher.end();
+
+    // Remove closing fence (including newline before it)
+    int endIndex = closingMatcher.start();
+
+    String unwrapped = trimmed.substring(startIndex, endIndex);
+    log.debug("Stripped code block wrappers from markdown content");
+
+    return unwrapped;
   }
 
   private ChatNoteMetadataDto parseYamlFrontmatter(String content) {
