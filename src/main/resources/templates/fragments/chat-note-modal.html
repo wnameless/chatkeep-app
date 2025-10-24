@@ -415,22 +415,25 @@
     <!-- Initialize metadata section chevron based on screen size -->
     <script>
       (function() {
-        const metadataSection = document.getElementById('metadata-section');
-        const chevron = document.getElementById('metadata-chevron');
+        // Use requestAnimationFrame to ensure styles are computed
+        requestAnimationFrame(() => {
+          const metadataSection = document.getElementById('metadata-section');
+          const chevron = document.getElementById('metadata-chevron');
 
-        if (metadataSection && chevron) {
-          // Check if metadata section is visible on page load
-          const isVisible = window.getComputedStyle(metadataSection).display !== 'none';
+          if (metadataSection && chevron) {
+            // Check if metadata section is visible on page load
+            const isVisible = window.getComputedStyle(metadataSection).display !== 'none';
 
-          // Update chevron to match visibility state
-          if (isVisible) {
-            chevron.classList.remove('fa-chevron-down');
-            chevron.classList.add('fa-chevron-up');
-          } else {
-            chevron.classList.remove('fa-chevron-up');
-            chevron.classList.add('fa-chevron-down');
+            // Update chevron to match visibility state
+            if (isVisible) {
+              chevron.classList.remove('fa-chevron-down');
+              chevron.classList.add('fa-chevron-up');
+            } else {
+              chevron.classList.remove('fa-chevron-up');
+              chevron.classList.add('fa-chevron-down');
+            }
           }
-        }
+        });
       })();
     </script>
 
