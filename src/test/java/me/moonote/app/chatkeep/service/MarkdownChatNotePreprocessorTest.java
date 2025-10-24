@@ -48,6 +48,12 @@ class MarkdownChatNotePreprocessorTest {
     ChatNoteValidationResult result = preprocessor.preprocess(dragonwellMarkdown);
 
     // Assert
+    if (!result.isValid()) {
+      System.out.println("\n=== Dragonwell Validation Errors ===");
+      result.getErrors().forEach(error -> System.out.println("- " + error));
+      System.out.println("====================================\n");
+    }
+
     assertTrue(result.isValid(), "Validation should succeed");
     assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
     assertTrue(result.getErrors().isEmpty(), "Errors should be empty");

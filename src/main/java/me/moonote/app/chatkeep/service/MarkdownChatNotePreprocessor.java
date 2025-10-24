@@ -50,22 +50,37 @@ public class MarkdownChatNotePreprocessor {
       // Step 0: Strip code block wrappers if present (users often copy from code blocks)
       markdownContent = stripCodeBlockWrappers(markdownContent);
 
-      // Step 1-5: Parse all sections (same as before)
+      // Step 1: Validate basic structure
+      List<String> structuralErrors = validateBasicStructure(markdownContent);
+      if (!structuralErrors.isEmpty()) {
+        log.warn("Archive structural validation failed: {}", structuralErrors);
+        return ChatNoteValidationResult.failure(structuralErrors);
+      }
+
+      // Step 2-6: Parse all sections
       ChatNoteMetadataDto metadata = parseYamlFrontmatter(markdownContent);
       ConversationSummaryDto summary = parseSummary(markdownContent);
       List<ArtifactDto> artifacts = extractArtifacts(markdownContent);
       List<AttachmentDto> attachments = extractAttachments(markdownContent);
       List<WorkaroundDto> workarounds = extractWorkarounds(markdownContent);
 
-      // Step 6: Create JSON structure
+      // Step 7: Validate content matches metadata claims
+      List<String> contentErrors =
+          validateContentMatchesMetadata(metadata, artifacts, attachments, markdownContent);
+      if (!contentErrors.isEmpty()) {
+        log.warn("Archive content validation failed: {}", contentErrors);
+        return ChatNoteValidationResult.failure(contentErrors);
+      }
+
+      // Step 8: Create JSON structure
       ChatNoteDto chatNoteDto = ChatNoteDto.builder().metadata(metadata).summary(summary)
           .artifacts(artifacts).attachments(attachments).workarounds(workarounds).build();
 
-      // Step 7: Convert to JSON
+      // Step 9: Convert to JSON
       String json = objectMapper.writeValueAsString(chatNoteDto);
       log.debug("Converted archive to JSON, size: {} bytes", json.length());
 
-      // Step 8: Validate against schema
+      // Step 10: Validate against schema
       ValidationResult validationResult = schemaValidator.validate(json);
 
       if (validationResult.isValid()) {
@@ -622,6 +637,164 @@ public class MarkdownChatNotePreprocessor {
     }
 
     return Collections.emptyList();
+  }
+
+  /**
+   * Validates the basic structure of the archive markdown. Checks for required sections and proper
+   * formatting.
+   *
+   * @param content the markdown content
+   * @return list of validation error messages (empty if valid)
+   */
+  private List<String> validateBasicStructure(String content) {
+    List<String> errors = new ArrayList<>();
+
+    // Check for YAML frontmatter
+    if (!content.trim().startsWith("---")) {
+      errors.add(
+          "Missing YAML frontmatter at the beginning of the archive. Archives must start with '---' followed by metadata fields. "
+              + "This may indicate the AI did not follow the archiving specification correctly.");
+      return errors; // Can't continue without YAML
+    }
+
+    Pattern yamlPattern = Pattern.compile("^---\\s*\\n(.*?)\\n---", Pattern.DOTALL);
+    Matcher yamlMatcher = yamlPattern.matcher(content);
+    if (!yamlMatcher.find()) {
+      errors.add(
+          "Malformed YAML frontmatter. Expected format: '---' (opening), metadata fields, '---' (closing). "
+              + "Make sure the YAML section is properly closed with '---' on its own line.");
+      return errors;
+    }
+
+    // Check for required sections
+    if (!content.contains("## Initial Query")) {
+      errors.add(
+          "Missing required section: '## Initial Query'. This section should describe what the user was trying to accomplish. "
+              + "The AI may have skipped this section or used a different heading.");
+    }
+
+    if (!content.contains("## Key Insights")) {
+      errors.add(
+          "Missing required section: '## Key Insights'. This section should contain the main findings or solutions. "
+              + "The AI may have skipped this section or used a different heading.");
+    }
+
+    // Check for Conversation Artifacts section (if ARTIFACT_COUNT > 0)
+    // Accept both "## Conversation Artifacts" (current spec) and "## Artifacts" (legacy)
+    String yamlContent = yamlMatcher.group(1);
+    Pattern artifactCountPattern = Pattern.compile("ARTIFACT_COUNT:\\s*(\\d+)");
+    Matcher artifactCountMatcher = artifactCountPattern.matcher(yamlContent);
+    if (artifactCountMatcher.find()) {
+      int artifactCount = Integer.parseInt(artifactCountMatcher.group(1));
+      if (artifactCount > 0 && !content.contains("## Conversation Artifacts")
+          && !content.contains("## Artifacts")) {
+        errors.add(
+            "Missing '## Conversation Artifacts' (or '## Artifacts') section, but ARTIFACT_COUNT is "
+                + artifactCount + ". "
+                + "Either the section is missing or the count is incorrect. Artifacts should be outputs created during the conversation.");
+      }
+    }
+
+    // Check for Attachments section (if ATTACHMENT_COUNT > 0)
+    Pattern attachmentCountPattern = Pattern.compile("ATTACHMENT_COUNT:\\s*(\\d+)");
+    Matcher attachmentCountMatcher = attachmentCountPattern.matcher(yamlContent);
+    if (attachmentCountMatcher.find()) {
+      int attachmentCount = Integer.parseInt(attachmentCountMatcher.group(1));
+      if (attachmentCount > 0 && !content.contains("## Attachments")) {
+        errors.add("Missing '## Attachments' section, but ATTACHMENT_COUNT is " + attachmentCount
+            + ". "
+            + "Either the section is missing or the count is incorrect. Attachments should be inputs provided to the conversation.");
+      }
+    }
+
+    return errors;
+  }
+
+  /**
+   * Validates that the extracted content matches the metadata claims. Checks counts, wrapper
+   * syntax, and consistency.
+   *
+   * @param metadata the parsed metadata
+   * @param artifacts the extracted artifacts
+   * @param attachments the extracted attachments
+   * @param content the full markdown content
+   * @return list of validation error messages (empty if valid)
+   */
+  private List<String> validateContentMatchesMetadata(ChatNoteMetadataDto metadata,
+      List<ArtifactDto> artifacts, List<AttachmentDto> attachments, String content) {
+    List<String> errors = new ArrayList<>();
+
+    // Validate artifact count
+    if (metadata.getArtifactCount() != null && artifacts.size() != metadata.getArtifactCount()) {
+      if (metadata.getArtifactCount() > 0 && artifacts.isEmpty()) {
+        errors.add("ARTIFACT_COUNT is " + metadata.getArtifactCount()
+            + " but no artifacts were found. "
+            + "Missing artifact wrappers: Expected '<!-- ARTIFACT_START: type=\"...\" title=\"...\" -->' syntax. "
+            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required wrapper syntax. "
+            + "Artifacts should be wrapped between '<!-- ARTIFACT_START: ... -->' and '<!-- ARTIFACT_END -->' markers.");
+      } else {
+        errors.add("ARTIFACT_COUNT mismatch: Expected " + metadata.getArtifactCount() + " but found "
+            + artifacts.size() + ". "
+            + "Either some artifact wrappers are malformed, or the count in YAML frontmatter is incorrect.");
+      }
+    }
+
+    // Validate attachment count
+    if (metadata.getAttachmentCount() != null
+        && attachments.size() != metadata.getAttachmentCount()) {
+      if (metadata.getAttachmentCount() > 0 && attachments.isEmpty()) {
+        errors.add("ATTACHMENT_COUNT is " + metadata.getAttachmentCount()
+            + " but no attachments were found. "
+            + "Missing attachment wrappers: Expected '<!-- MARKDOWN_START: filename=\"...\" -->' syntax. "
+            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required wrapper syntax. "
+            + "Attachments should be wrapped between '<!-- MARKDOWN_START: filename=\"...\" -->' and '<!-- MARKDOWN_END: filename=\"...\" -->' markers.");
+      } else {
+        errors.add("ATTACHMENT_COUNT mismatch: Expected " + metadata.getAttachmentCount()
+            + " but found " + attachments.size() + ". "
+            + "Either some attachment wrappers are malformed, or the count in YAML frontmatter is incorrect.");
+      }
+    }
+
+    // Validate workarounds count (if specified)
+    if (metadata.getWorkaroundsCount() != null && metadata.getWorkaroundsCount() > 0) {
+      // Check if workarounds section exists
+      if (!content.contains("## Workarounds Used")) {
+        errors.add("WORKAROUNDS_COUNT is " + metadata.getWorkaroundsCount()
+            + " but '## Workarounds Used' section is missing. "
+            + "This section should document any limitations encountered during archiving.");
+      }
+    }
+
+    // Check for title
+    if (metadata.getTitle() == null || metadata.getTitle().trim().isEmpty()) {
+      errors.add(
+          "Archive title is missing or empty. Expected a markdown H1 heading (e.g., '# Conversation Title') after the YAML frontmatter. "
+              + "The AI should have generated a descriptive title for the conversation.");
+    }
+
+    // Check for required YAML fields
+    if (metadata.getArchiveVersion() == null || metadata.getArchiveVersion().trim().isEmpty()) {
+      errors.add(
+          "Required YAML field 'ARCHIVE_FORMAT_VERSION' is missing or empty. This should be '1.0' for the current version.");
+    }
+
+    if (metadata.getArchiveType() == null || metadata.getArchiveType().trim().isEmpty()) {
+      errors.add(
+          "Required YAML field 'ARCHIVE_TYPE' is missing or empty. This should typically be 'conversation_summary'.");
+    }
+
+    if (metadata.getCreatedDate() == null) {
+      errors.add(
+          "Required YAML field 'CREATED_DATE' is missing or could not be parsed. Expected format: YYYY-MM-DD (e.g., 2025-10-22).");
+    }
+
+    if (metadata.getOriginalPlatform() == null || metadata.getOriginalPlatform().trim().isEmpty()
+        || metadata.getOriginalPlatform().equals("null")) {
+      errors.add(
+          "Required YAML field 'ORIGINAL_PLATFORM' is missing or empty. This should indicate which AI created the archive (e.g., Claude, ChatGPT, Gemini).");
+    }
+
+    return errors;
   }
 
 }
