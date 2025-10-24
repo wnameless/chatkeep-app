@@ -51,9 +51,9 @@ public class ChatNoteMarkdownGenerator {
         ## Artifact Format
         Artifacts use this wrapper structure:
 
-        <!-- ARTIFACT_START: type="code" language="python" title="Script Name" version="final" -->
+        :::artifact type="code" language="python" title="Script Name" version="final"
         [artifact content]
-        <!-- ARTIFACT_END -->
+        :::
 
         Artifact attributes:
         - type: Category of artifact (code, poem, document, design, analysis, etc.)
@@ -65,9 +65,9 @@ public class ChatNoteMarkdownGenerator {
         ## Attachment Format
         Attachments are located near the bottom in wrapped format:
 
-        <!-- MARKDOWN_START: filename="example.md" -->
+        :::attachment filename="example.md"
         [content here]
-        <!-- MARKDOWN_END: filename="example.md" -->
+        :::
 
         Important notes about attachments:
         - ALL attachments have been converted to markdown format, regardless of original type
@@ -401,7 +401,7 @@ public class ChatNoteMarkdownGenerator {
 
     for (Artifact artifact : artifacts) {
       // Build artifact start marker with attributes
-      section.append("<!-- ARTIFACT_START:");
+      section.append(":::artifact");
 
       // Type (required)
       if (artifact.getType() != null && !artifact.getType().isEmpty()) {
@@ -423,7 +423,7 @@ public class ChatNoteMarkdownGenerator {
         section.append(" version=\"").append(artifact.getVersion()).append("\"");
       }
 
-      section.append(" -->\n");
+      section.append("\n");
 
       // Artifact content (preserve as-is, including evolution notes if present)
       if (artifact.getContent() != null && !artifact.getContent().isEmpty()) {
@@ -434,7 +434,7 @@ public class ChatNoteMarkdownGenerator {
         }
       }
 
-      section.append("<!-- ARTIFACT_END -->\n\n");
+      section.append(":::\n\n");
     }
 
     section.append("---\n\n");
@@ -454,8 +454,8 @@ public class ChatNoteMarkdownGenerator {
     section.append("## Attachments\n\n");
 
     for (Attachment attachment : attachments) {
-      section.append("<!-- MARKDOWN_START: filename=\"").append(attachment.getFilename())
-          .append("\" -->\n\n");
+      section.append(":::attachment filename=\"").append(attachment.getFilename())
+          .append("\"\n\n");
 
       // Add warning marker if summarized
       if (Boolean.TRUE.equals(attachment.getIsSummarized())) {
@@ -486,8 +486,7 @@ public class ChatNoteMarkdownGenerator {
         section.append(attachment.getContent()).append("\n\n");
       }
 
-      section.append("<!-- MARKDOWN_END: filename=\"").append(attachment.getFilename())
-          .append("\" -->\n\n");
+      section.append(":::\n\n");
     }
 
     section.append("---\n\n");

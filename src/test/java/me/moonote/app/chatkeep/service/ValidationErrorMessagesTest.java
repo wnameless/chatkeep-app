@@ -47,14 +47,14 @@ class ValidationErrorMessagesTest {
     result.getErrors().forEach(error -> System.out.println("- " + error));
     System.out.println("===========================================\n");
 
-    // Check for specific error messages about missing wrappers
+    // Check for specific error messages about missing fence markers
     boolean hasArtifactWrapperError = result.getErrors().stream()
         .anyMatch(error -> error.contains("ARTIFACT_COUNT") && error.contains("but no artifacts were found")
-            && error.contains("ARTIFACT_START"));
+            && error.contains(":::artifact"));
 
     boolean hasAttachmentWrapperError = result.getErrors().stream()
         .anyMatch(error -> error.contains("ATTACHMENT_COUNT") && error.contains("but no attachments were found")
-            && error.contains("MARKDOWN_START"));
+            && error.contains(":::attachment"));
 
     assertTrue(hasArtifactWrapperError,
         "Should have error message about missing artifact wrappers");

@@ -235,9 +235,9 @@ class ChatNoteMarkdownGeneratorTest {
 
     // Assert
     assertTrue(generatedMarkdown.contains("## Conversation Artifacts"));
-    assertTrue(generatedMarkdown.contains("<!-- ARTIFACT_START:"),
+    assertTrue(generatedMarkdown.contains(":::artifact"),
         "Should contain artifact start marker");
-    assertTrue(generatedMarkdown.contains("<!-- ARTIFACT_END -->"),
+    assertTrue(generatedMarkdown.contains(":::"),
         "Should contain artifact end marker");
     assertTrue(generatedMarkdown.contains("type=\"script\""), "Should contain artifact type");
     assertTrue(generatedMarkdown.contains("language=\"bash\""), "Should contain artifact language");
@@ -257,9 +257,9 @@ class ChatNoteMarkdownGeneratorTest {
     String generatedMarkdown = generator.generateMarkdown(dragonwellChatNote);
 
     // Assert - Verify artifact markers and key content are present
-    assertTrue(generatedMarkdown.contains("<!-- ARTIFACT_START:"),
+    assertTrue(generatedMarkdown.contains(":::artifact"),
         "Should contain artifact start marker");
-    assertTrue(generatedMarkdown.contains("<!-- ARTIFACT_END -->"),
+    assertTrue(generatedMarkdown.contains(":::"),
         "Should contain artifact end marker");
 
     // Verify key content from original artifact is preserved
@@ -373,12 +373,12 @@ class ChatNoteMarkdownGeneratorTest {
 
     // Assert
     assertTrue(generatedMarkdown.contains("## Attachments"));
-    assertTrue(generatedMarkdown.contains("<!-- MARKDOWN_START: filename=\"test.md\" -->"));
-    assertTrue(generatedMarkdown.contains("<!-- MARKDOWN_END: filename=\"test.md\" -->"));
+    assertTrue(generatedMarkdown.contains(":::attachment filename=\"test.md\""));
+    assertTrue(generatedMarkdown.contains(":::"));
     assertTrue(generatedMarkdown.contains("# Test Document"));
 
     // Summarized attachment should have warning
-    assertTrue(generatedMarkdown.contains("<!-- MARKDOWN_START: filename=\"large.pdf\" -->"));
+    assertTrue(generatedMarkdown.contains(":::attachment filename=\"large.pdf\""));
     assertTrue(generatedMarkdown.contains("⚠️ NOTE: This attachment was summarized"));
     assertTrue(generatedMarkdown.contains("Original size: 150 pages / 2.5 MB"));
     assertTrue(generatedMarkdown.contains("Summarization level: Partial"));
@@ -437,8 +437,8 @@ class ChatNoteMarkdownGeneratorTest {
     String artifactSection = generatedMarkdown.substring(artifactStart, artifactEnd);
 
     // The poem artifact should NOT have language or version attributes
-    int poemStart = artifactSection.indexOf("<!-- ARTIFACT_START:");
-    int poemEnd = artifactSection.indexOf("-->", poemStart);
+    int poemStart = artifactSection.indexOf(":::artifact");
+    int poemEnd = artifactSection.indexOf("\n", poemStart);
     String poemMarker = artifactSection.substring(poemStart, poemEnd);
 
     assertFalse(poemMarker.contains("language="), "Should not include language if null");
@@ -509,7 +509,7 @@ class ChatNoteMarkdownGeneratorTest {
         "Should NOT contain Archive Metadata section");
     assertFalse(conversationContent.contains("_End of archived conversation_"),
         "Should NOT contain end marker");
-    assertFalse(conversationContent.contains("<!-- ARTIFACT_START:"),
+    assertFalse(conversationContent.contains(":::artifact"),
         "Should NOT contain artifact markers");
   }
 

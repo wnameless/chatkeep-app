@@ -25,9 +25,9 @@ INSTRUCTIONS_FOR_AI: |
   All attachments are located at the bottom of this file in a wrapped format.
   Each attachment uses this exact structure:
 
-  <!-- MARKDOWN_START: filename="example.md" -->
+  :::attachment filename="example.md"
   [content here]
-  <!-- MARKDOWN_END: filename="example.md" -->
+  :::
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
@@ -201,7 +201,7 @@ Iteratively developed comprehensive build script with 10 automated steps:
 
 ## Artifacts
 
-<!-- ARTIFACT_START: type="script" language="bash" title="Dragonwell macOS Build Script" version="final" -->
+:::artifact type="script" language="bash" title="Dragonwell macOS Build Script" version="final"
 #!/bin/bash
 set -e
 
@@ -372,7 +372,7 @@ echo "Or extract and use the archive:"
 echo "  tar -xzf build/$ZIP_NAME -C /Library/Java/JavaVirtualMachines/"
 echo ""
 echo "✅ Build completed successfully!"
-<!-- ARTIFACT_END -->
+:::
 
 ---
 

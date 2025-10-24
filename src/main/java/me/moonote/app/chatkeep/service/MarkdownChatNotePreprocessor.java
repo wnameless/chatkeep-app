@@ -444,7 +444,7 @@ public class MarkdownChatNotePreprocessor {
     String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
 
     Pattern artifactPattern = Pattern.compile(
-        "<!-- ARTIFACT_START: (.*?) -->\\s*\\n(.*?)\\n<!-- ARTIFACT_END -->", Pattern.DOTALL);
+        ":::artifact (.*?)\\n(.*?)\\n:::", Pattern.DOTALL);
 
     Matcher matcher = artifactPattern.matcher(contentAfterYaml);
 
@@ -489,7 +489,7 @@ public class MarkdownChatNotePreprocessor {
     String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
 
     Pattern attachmentPattern = Pattern.compile(
-        "<!-- MARKDOWN_START: filename=\"(.*?)\" -->\\s*\\n(.*?)\\n<!-- MARKDOWN_END: filename=\".*?\" -->",
+        ":::attachment filename=\"(.*?)\"\\n(.*?)\\n:::",
         Pattern.DOTALL);
 
     Matcher matcher = attachmentPattern.matcher(contentAfterYaml);
@@ -729,9 +729,9 @@ public class MarkdownChatNotePreprocessor {
       if (metadata.getArtifactCount() > 0 && artifacts.isEmpty()) {
         errors.add("ARTIFACT_COUNT is " + metadata.getArtifactCount()
             + " but no artifacts were found. "
-            + "Missing artifact wrappers: Expected '<!-- ARTIFACT_START: type=\"...\" title=\"...\" -->' syntax. "
-            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required wrapper syntax. "
-            + "Artifacts should be wrapped between '<!-- ARTIFACT_START: ... -->' and '<!-- ARTIFACT_END -->' markers.");
+            + "Missing artifact fence markers: Expected ':::artifact type=\"...\" title=\"...\"' syntax. "
+            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required fence markers. "
+            + "Artifacts should be wrapped between ':::artifact ...' and ':::' markers.");
       } else {
         errors.add("ARTIFACT_COUNT mismatch: Expected " + metadata.getArtifactCount() + " but found "
             + artifacts.size() + ". "
@@ -745,9 +745,9 @@ public class MarkdownChatNotePreprocessor {
       if (metadata.getAttachmentCount() > 0 && attachments.isEmpty()) {
         errors.add("ATTACHMENT_COUNT is " + metadata.getAttachmentCount()
             + " but no attachments were found. "
-            + "Missing attachment wrappers: Expected '<!-- MARKDOWN_START: filename=\"...\" -->' syntax. "
-            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required wrapper syntax. "
-            + "Attachments should be wrapped between '<!-- MARKDOWN_START: filename=\"...\" -->' and '<!-- MARKDOWN_END: filename=\"...\" -->' markers.");
+            + "Missing attachment fence markers: Expected ':::attachment filename=\"...\"' syntax. "
+            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required fence markers. "
+            + "Attachments should be wrapped between ':::attachment filename=\"...\"' and ':::' markers.");
       } else {
         errors.add("ATTACHMENT_COUNT mismatch: Expected " + metadata.getAttachmentCount()
             + " but found " + attachments.size() + ". "
