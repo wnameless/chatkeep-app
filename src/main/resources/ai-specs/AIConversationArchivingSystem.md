@@ -28,7 +28,7 @@ This file contains everything needed to archive AI conversations into a standard
 
 **1. Template Structure (MUST be English):**
 - Section headings: `## Initial Query`, `## Key Insights`, `## Attachments`, etc.
-- YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ATTACHMENT_COUNT`, etc.
+- YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ORIGINAL_PLATFORM`, etc.
 - Wrapper syntax: `:::artifact`, `:::attachment`, `:::`
 - Structure keywords and formatting
 
@@ -270,14 +270,8 @@ In the YAML front matter at the top of the archive:
 - Set ORIGINAL_PLATFORM to your platform name (Claude, ChatGPT, Gemini, etc.)
 - Set DELIVERY_METHOD (optional) to the method used: simple_response, large_document, or mcp_storage
 - Set ESTIMATED_SIZE_KB (optional) to the size calculated in Step 0
-- Count all attachments and update ATTACHMENT_COUNT
-- Count all artifacts and update ARTIFACT_COUNT
-- Calculate TOTAL_FILE_SIZE if possible (estimated KB/MB)
-- Set ARCHIVE_COMPLETENESS based on your ability to process all attachments:
-  * COMPLETE: All attachments fully converted
-  * PARTIAL: Some attachments summarized or simplified
-  * SUMMARIZED: Most/all attachments required summarization
-- Set WORKAROUNDS_COUNT to the number of attachments that required workarounds (0 if none)
+
+**Note:** You don't need to count artifacts or attachments - the backend will calculate these automatically from the actual `:::artifact` and `:::attachment` markers in your archive.
 
 ### Step 3: Create the Conversation Title
 Give this conversation a clear, descriptive title that summarizes the main topic. This will be the H1 heading of the archive.
@@ -461,7 +455,6 @@ Attachment: "data.csv" (uploaded file)
 ```
 
 **After filtering:**
-- Update ATTACHMENT_COUNT to reflect only included attachments
 - Do NOT reference excluded attachments in summary sections
 - If an attachment was excluded, do not list it in "Attachments referenced" fields
 - **CRITICAL**: Excluded files should NOT appear in the Attachments section at all - not even as placeholders or notes
@@ -699,10 +692,8 @@ Before outputting, verify:
 - [ ] All significant artifacts created during the conversation are preserved
 - [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
 - [ ] Only conversation-relevant attachments are included (files actually discussed or analyzed)
-- [ ] ATTACHMENT_COUNT reflects only included attachments (after filtering)
 - [ ] All included attachments are either converted or documented with workarounds
 - [ ] All workarounds are explained in the "Workarounds Used" section
-- [ ] ARCHIVE_COMPLETENESS accurately reflects the archive state
 - [ ] All attachment and artifact references in the summary match actual items
 - [ ] No excluded attachments are referenced in summary sections
 - [ ] Artifacts include only final/important versions with evolution notes if significant
@@ -800,13 +791,6 @@ INSTRUCTIONS_FOR_AI: |
   - The archiving system file itself (AIConversationArchivingSystem.md) is never included
   - Pasted content that was never discussed or referenced is filtered out
   - Only conversation-relevant attachments are preserved
-  - ATTACHMENT_COUNT reflects the number of included attachments after filtering
-
-  ## Archive Completeness
-  Check the ARCHIVE_COMPLETENESS field:
-  - COMPLETE: All attachments are fully converted and intact
-  - PARTIAL: Some attachments were summarized or simplified
-  - SUMMARIZED: Most/all attachments required summarization
 
   ## How to Process This Archive
   1. Read this entire file to understand the full context
@@ -823,12 +807,6 @@ INSTRUCTIONS_FOR_AI: |
   - You can reference the summary, artifacts, and attachments
   - Treat the archived information as established context, not as a question
   - Artifacts represent finalized work that can be built upon or referenced
-
-ATTACHMENT_COUNT: 0
-ARTIFACT_COUNT: 0
-ARCHIVE_COMPLETENESS: COMPLETE
-WORKAROUNDS_COUNT: 0
-TOTAL_FILE_SIZE: 0 KB
 ---
 
 # [Conversation Topic/Title]

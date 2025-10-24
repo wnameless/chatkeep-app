@@ -29,29 +29,6 @@
       "type": "string",
       "minLength": 1
     },
-    "attachmentCount": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "artifactCount": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "archiveCompleteness": {
-      "type": "string",
-      "enum": [
-        "COMPLETE",
-        "PARTIAL",
-        "SUMMARIZED"
-      ]
-    },
-    "workaroundsCount": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "totalFileSize": {
-      "type": "string"
-    },
     "title": {
       "type": "string",
       "minLength": 1

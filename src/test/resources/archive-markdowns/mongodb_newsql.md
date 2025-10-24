@@ -27,12 +27,6 @@ INSTRUCTIONS_FOR_AI: |
   2. The summarized sections contain the core knowledge - treat them as primary context
   3. When user uploads this file, confirm you've loaded the archive and be ready to continue
   4. Treat the archived information as established context, not as a question
-
-ATTACHMENT_COUNT: 0
-ARTIFACT_COUNT: 0
-ARCHIVE_COMPLETENESS: COMPLETE
-WORKAROUNDS_COUNT: 0
-TOTAL_FILE_SIZE: 3 KB
 ---
 
 # Database Architecture: SQL, NoSQL, NewSQL, and MongoDB's Position

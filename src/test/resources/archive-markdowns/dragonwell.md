@@ -53,12 +53,6 @@ INSTRUCTIONS_FOR_AI: |
   - Be ready to continue from where it left off
   - Reference both summary and artifacts/attachments as needed
   - Treat archived information as established context
-
-ATTACHMENT_COUNT: 0
-ARTIFACT_COUNT: 1
-ARCHIVE_COMPLETENESS: COMPLETE
-WORKAROUNDS_COUNT: 0
-TOTAL_FILE_SIZE: 18 KB
 ---
 
 # Building Dragonwell JDK 21 on macOS with Compact Object Headers

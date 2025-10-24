@@ -64,13 +64,8 @@ public class MarkdownChatNotePreprocessor {
       List<AttachmentDto> attachments = extractAttachments(markdownContent);
       List<WorkaroundDto> workarounds = extractWorkarounds(markdownContent);
 
-      // Step 7: Validate content matches metadata claims
-      List<String> contentErrors =
-          validateContentMatchesMetadata(metadata, artifacts, attachments, markdownContent);
-      if (!contentErrors.isEmpty()) {
-        log.warn("Archive content validation failed: {}", contentErrors);
-        return ChatNoteValidationResult.failure(contentErrors);
-      }
+      // Step 7: Calculate and set counts from actual content (backend is authoritative)
+      calculateAndSetMetadataCounts(metadata, artifacts, attachments, workarounds, markdownContent);
 
       // Step 8: Create JSON structure
       ChatNoteDto chatNoteDto = ChatNoteDto.builder().metadata(metadata).summary(summary)
@@ -620,8 +615,9 @@ public class MarkdownChatNotePreprocessor {
    */
   private List<String> extractReferencedItems(String sectionContent, String fieldName) {
     // Pattern matches: **FieldName:** [items] or **FieldName:** items
+    // Use .*? instead of .+? to allow empty brackets []
     Pattern pattern = Pattern.compile(
-        "\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.+?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
+        "\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.*?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
     Matcher matcher = pattern.matcher(sectionContent);
 
     if (matcher.find()) {
@@ -711,90 +707,48 @@ public class MarkdownChatNotePreprocessor {
   }
 
   /**
-   * Validates that the extracted content matches the metadata claims. Checks counts, wrapper
-   * syntax, and consistency.
+   * Calculates and sets metadata counts from actual content. Backend is authoritative source for
+   * all counts - YAML values are ignored if present.
    *
-   * @param metadata the parsed metadata
-   * @param artifacts the extracted artifacts
-   * @param attachments the extracted attachments
-   * @param content the full markdown content
-   * @return list of validation error messages (empty if valid)
+   * @param metadata the metadata object to update
+   * @param artifacts the list of extracted artifacts
+   * @param attachments the list of extracted attachments
+   * @param workarounds the list of extracted workarounds
+   * @param markdownContent the full markdown content for size calculation
    */
-  private List<String> validateContentMatchesMetadata(ChatNoteMetadataDto metadata,
-      List<ArtifactDto> artifacts, List<AttachmentDto> attachments, String content) {
-    List<String> errors = new ArrayList<>();
+  private void calculateAndSetMetadataCounts(ChatNoteMetadataDto metadata,
+      List<ArtifactDto> artifacts, List<AttachmentDto> attachments,
+      List<WorkaroundDto> workarounds, String markdownContent) {
 
-    // Validate artifact count
-    if (metadata.getArtifactCount() != null && artifacts.size() != metadata.getArtifactCount()) {
-      if (metadata.getArtifactCount() > 0 && artifacts.isEmpty()) {
-        errors.add("ARTIFACT_COUNT is " + metadata.getArtifactCount()
-            + " but no artifacts were found. "
-            + "Missing artifact fence markers: Expected ':::artifact type=\"...\" title=\"...\"' syntax. "
-            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required fence markers. "
-            + "Artifacts should be wrapped between ':::artifact ...' and ':::' markers.");
+    // Calculate counts from actual content
+    metadata.setArtifactCount(artifacts.size());
+    metadata.setAttachmentCount(attachments.size());
+    metadata.setWorkaroundsCount(workarounds.size());
+
+    // Calculate total file size from markdown content
+    long sizeInBytes = markdownContent.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+    long sizeInKB = (sizeInBytes + 512) / 1024; // Round to nearest KB
+    metadata.setTotalFileSize(sizeInKB + " KB");
+
+    // Derive chatNoteCompleteness from workarounds
+    if (workarounds.isEmpty()) {
+      metadata.setChatNoteCompleteness("COMPLETE");
+    } else {
+      // If attachments exist and workarounds cover most/all of them, it's SUMMARIZED
+      // Otherwise it's PARTIAL
+      int attachmentCount = attachments.size();
+      int workaroundCount = workarounds.size();
+
+      if (attachmentCount > 0 && workaroundCount >= attachmentCount) {
+        metadata.setChatNoteCompleteness("SUMMARIZED");
       } else {
-        errors.add("ARTIFACT_COUNT mismatch: Expected " + metadata.getArtifactCount() + " but found "
-            + artifacts.size() + ". "
-            + "Either some artifact wrappers are malformed, or the count in YAML frontmatter is incorrect.");
+        metadata.setChatNoteCompleteness("PARTIAL");
       }
     }
 
-    // Validate attachment count
-    if (metadata.getAttachmentCount() != null
-        && attachments.size() != metadata.getAttachmentCount()) {
-      if (metadata.getAttachmentCount() > 0 && attachments.isEmpty()) {
-        errors.add("ATTACHMENT_COUNT is " + metadata.getAttachmentCount()
-            + " but no attachments were found. "
-            + "Missing attachment fence markers: Expected ':::attachment filename=\"...\"' syntax. "
-            + "This may indicate the AI (e.g., Gemini) did not follow the archiving specification and omitted the required fence markers. "
-            + "Attachments should be wrapped between ':::attachment filename=\"...\"' and ':::' markers.");
-      } else {
-        errors.add("ATTACHMENT_COUNT mismatch: Expected " + metadata.getAttachmentCount()
-            + " but found " + attachments.size() + ". "
-            + "Either some attachment wrappers are malformed, or the count in YAML frontmatter is incorrect.");
-      }
-    }
-
-    // Validate workarounds count (if specified)
-    if (metadata.getWorkaroundsCount() != null && metadata.getWorkaroundsCount() > 0) {
-      // Check if workarounds section exists
-      if (!content.contains("## Workarounds Used")) {
-        errors.add("WORKAROUNDS_COUNT is " + metadata.getWorkaroundsCount()
-            + " but '## Workarounds Used' section is missing. "
-            + "This section should document any limitations encountered during archiving.");
-      }
-    }
-
-    // Check for title
-    if (metadata.getTitle() == null || metadata.getTitle().trim().isEmpty()) {
-      errors.add(
-          "Archive title is missing or empty. Expected a markdown H1 heading (e.g., '# Conversation Title') after the YAML frontmatter. "
-              + "The AI should have generated a descriptive title for the conversation.");
-    }
-
-    // Check for required YAML fields
-    if (metadata.getArchiveVersion() == null || metadata.getArchiveVersion().trim().isEmpty()) {
-      errors.add(
-          "Required YAML field 'ARCHIVE_FORMAT_VERSION' is missing or empty. This should be '1.0' for the current version.");
-    }
-
-    if (metadata.getArchiveType() == null || metadata.getArchiveType().trim().isEmpty()) {
-      errors.add(
-          "Required YAML field 'ARCHIVE_TYPE' is missing or empty. This should typically be 'conversation_summary'.");
-    }
-
-    if (metadata.getCreatedDate() == null) {
-      errors.add(
-          "Required YAML field 'CREATED_DATE' is missing or could not be parsed. Expected format: YYYY-MM-DD (e.g., 2025-10-22).");
-    }
-
-    if (metadata.getOriginalPlatform() == null || metadata.getOriginalPlatform().trim().isEmpty()
-        || metadata.getOriginalPlatform().equals("null")) {
-      errors.add(
-          "Required YAML field 'ORIGINAL_PLATFORM' is missing or empty. This should indicate which AI created the archive (e.g., Claude, ChatGPT, Gemini).");
-    }
-
-    return errors;
+    log.debug("Calculated metadata: artifacts={}, attachments={}, workarounds={}, completeness={}, size={}",
+        metadata.getArtifactCount(), metadata.getAttachmentCount(), metadata.getWorkaroundsCount(),
+        metadata.getChatNoteCompleteness(), metadata.getTotalFileSize());
   }
 
 }

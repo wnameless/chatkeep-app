@@ -77,12 +77,6 @@ public class ChatNoteMarkdownGenerator {
         - Some attachments may be summarized if they were too large - check for ⚠️ WARNING markers
         - Check the "Workarounds Used" section to see if any attachments were modified during archiving
 
-        ## Archive Completeness
-        Check the ARCHIVE_COMPLETENESS field:
-        - COMPLETE: All attachments are fully converted and intact
-        - PARTIAL: Some attachments were summarized or simplified
-        - SUMMARIZED: Most/all attachments required summarization
-
         ## How to Process This Archive
         1. Read this entire file to understand the full context
         2. The summarized sections contain the core knowledge - treat them as primary context
@@ -209,14 +203,6 @@ public class ChatNoteMarkdownGenerator {
     for (String line : INSTRUCTIONS_FOR_AI.split("\n")) {
       yaml.append("  ").append(line).append("\n");
     }
-    yaml.append("\n");
-
-    // Counts and metadata
-    yaml.append("ATTACHMENT_COUNT: ").append(chatNote.getAttachmentCount()).append("\n");
-    yaml.append("ARTIFACT_COUNT: ").append(chatNote.getArtifactCount()).append("\n");
-    yaml.append("ARCHIVE_COMPLETENESS: ").append(chatNote.getChatNoteCompleteness()).append("\n");
-    yaml.append("WORKAROUNDS_COUNT: ").append(chatNote.getWorkaroundsCount()).append("\n");
-    yaml.append("TOTAL_FILE_SIZE: ").append(chatNote.getTotalFileSize()).append("\n");
     yaml.append("---\n\n");
 
     return yaml.toString();

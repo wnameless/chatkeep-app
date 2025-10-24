@@ -520,12 +520,9 @@ public class ChatNoteFragmentController {
 
     try {
       ChatNoteDetailLightResponse note = chatNoteService.getChatNoteById(id);
-      ChatNote entity = chatNoteRepository.findById(id).orElseThrow();
 
       // Set additional fields
       note.setPlatform(note.getOriginalPlatform());
-      note.setMessageCount(chatNoteMapper.estimateMessageCount(entity));
-      note.setWordCount(chatNoteMapper.estimateWordCount(entity));
 
       // Serialize references to JSON string for template
       String referencesJson = "[]";

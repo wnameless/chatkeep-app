@@ -146,14 +146,6 @@ class ChatNoteMarkdownGeneratorTest {
         "Should contain platform");
     assertTrue(generatedMarkdown.contains("INSTRUCTIONS_FOR_AI: |"),
         "Should contain AI instructions");
-    assertTrue(generatedMarkdown.contains("ATTACHMENT_COUNT: 0"),
-        "Should contain attachment count");
-    assertTrue(generatedMarkdown.contains("ARTIFACT_COUNT: 1"), "Should contain artifact count");
-    assertTrue(generatedMarkdown.contains("ARCHIVE_COMPLETENESS: COMPLETE"),
-        "Should contain completeness");
-    assertTrue(generatedMarkdown.contains("WORKAROUNDS_COUNT: 0"),
-        "Should contain workarounds count");
-    assertTrue(generatedMarkdown.contains("TOTAL_FILE_SIZE: 18 KB"), "Should contain file size");
   }
 
   @Test
@@ -307,7 +299,7 @@ class ChatNoteMarkdownGeneratorTest {
     assertTrue(generatedMarkdown.contains("**Total attachments:** 0"));
     assertTrue(generatedMarkdown.contains("**Total artifacts:** 1"));
     assertTrue(generatedMarkdown.contains("**Attachments with workarounds:** 0"));
-    assertTrue(generatedMarkdown.contains("**Total file size:** 18 KB"));
+    assertTrue(generatedMarkdown.contains("**Total file size:** 14 KB"));
   }
 
   @Test

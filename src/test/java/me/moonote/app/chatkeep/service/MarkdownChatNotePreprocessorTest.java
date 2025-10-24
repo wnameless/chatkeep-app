@@ -79,7 +79,7 @@ class MarkdownChatNotePreprocessorTest {
     assertEquals("COMPLETE", metadata.getChatNoteCompleteness(),
         "Archive completeness should be COMPLETE");
     assertEquals(0, metadata.getWorkaroundsCount(), "Workarounds count should be 0");
-    assertEquals("18 KB", metadata.getTotalFileSize(), "Total file size should match");
+    assertEquals("14 KB", metadata.getTotalFileSize(), "Total file size should match");
   }
 
   @Test

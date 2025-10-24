@@ -29,44 +29,23 @@ class ValidationErrorMessagesTest {
   }
 
   @Test
-  void testGeminiExample_ShouldReturnHelpfulValidationErrors() throws IOException {
-    // Arrange - Load the Gemini example that lacks proper wrappers
+  void testGeminiExample_ShouldPassWithCalculatedCounts() throws IOException {
+    // Arrange - Load the Gemini example that previously had count mismatches in YAML
+    // Now that counts are calculated by backend, this should pass validation
     String geminiMarkdown =
         Files.readString(Paths.get("/Users/wmw/Downloads/gemini_example.md"));
 
     // Act
     ChatNoteValidationResult result = preprocessor.preprocess(geminiMarkdown);
 
-    // Assert - Should fail validation
-    assertFalse(result.isValid(), "Gemini example should fail validation");
-    assertNull(result.getChatNoteDto(), "ChatNoteDto should be null on validation failure");
-    assertFalse(result.getErrors().isEmpty(), "Should have validation errors");
+    // Assert - Should now pass validation because counts are calculated from content
+    assertTrue(result.isValid(), "Gemini example should pass validation with calculated counts");
+    assertNotNull(result.getChatNoteDto(), "ChatNoteDto should be populated");
+    assertTrue(result.getErrors().isEmpty(), "Should have no validation errors");
 
-    // Print errors for verification
-    System.out.println("\n=== Validation Errors for Gemini Example ===");
-    result.getErrors().forEach(error -> System.out.println("- " + error));
-    System.out.println("===========================================\n");
-
-    // Check for specific error messages about missing fence markers
-    boolean hasArtifactWrapperError = result.getErrors().stream()
-        .anyMatch(error -> error.contains("ARTIFACT_COUNT") && error.contains("but no artifacts were found")
-            && error.contains(":::artifact"));
-
-    boolean hasAttachmentWrapperError = result.getErrors().stream()
-        .anyMatch(error -> error.contains("ATTACHMENT_COUNT") && error.contains("but no attachments were found")
-            && error.contains(":::attachment"));
-
-    assertTrue(hasArtifactWrapperError,
-        "Should have error message about missing artifact wrappers");
-    assertTrue(hasAttachmentWrapperError,
-        "Should have error message about missing attachment wrappers");
-
-    // Check that errors mention the AI might not have followed the spec
-    boolean mentionsAIIssue = result.getErrors().stream()
-        .anyMatch(error -> error.contains("AI") || error.contains("Gemini")
-            || error.contains("archiving specification"));
-
-    assertTrue(mentionsAIIssue, "Should mention that the AI may not have followed the spec");
+    // Verify that counts were correctly calculated from actual content (not from YAML)
+    assertNotNull(result.getChatNoteDto().getMetadata().getArtifactCount(),
+        "Should have calculated artifact count from actual :::artifact markers");
   }
 
   @Test
@@ -146,43 +125,62 @@ class ValidationErrorMessagesTest {
   }
 
   @Test
-  void testCountMismatch_ShouldReturnHelpfulError() {
-    // Arrange - Claims to have artifacts but section is missing
-    String invalidMarkdown = """
+  void testCountMismatch_ShouldCalculateFromContent() {
+    // Arrange - YAML claims 5 artifacts, but there are none. Backend should calculate 0.
+    String markdownWithWrongCount = """
         ---
         ARCHIVE_FORMAT_VERSION: 1.0
         ARCHIVE_TYPE: conversation_summary
         CREATED_DATE: 2025-10-22
         ORIGINAL_PLATFORM: TestAI
-        ATTACHMENT_COUNT: 0
-        ARTIFACT_COUNT: 5
-        ARCHIVE_COMPLETENESS: COMPLETE
-        WORKAROUNDS_COUNT: 0
-        TOTAL_FILE_SIZE: 1 KB
+        INSTRUCTIONS_FOR_AI: |
+          Test instructions
         ---
 
         # Test Archive
+
+        **Date:** 2025-10-22
+
+        ---
 
         ## Initial Query
 
         Test query
 
+        ---
+
         ## Key Insights
 
         Test insights
+
+        ---
+
+        ## Follow-up Explorations
+
+        None
+
+        ---
+
+        ## Workarounds Used
+
+        None
+
+        ---
+
+        ## Archive Metadata
+
+        **Original conversation date:** 2025-10-22
+        **Archive created:** 2025-10-22
         """;
 
     // Act
-    ChatNoteValidationResult result = preprocessor.preprocess(invalidMarkdown);
+    ChatNoteValidationResult result = preprocessor.preprocess(markdownWithWrongCount);
 
-    // Assert
-    assertFalse(result.isValid(), "Should fail validation");
-
-    boolean hasArtifactSectionError = result.getErrors().stream()
-        .anyMatch(error -> error.contains("Missing '## Conversation Artifacts'")
-            && error.contains("ARTIFACT_COUNT is 5"));
-
-    assertTrue(hasArtifactSectionError,
-        "Should have error about missing Conversation Artifacts section");
+    // Assert - Should pass validation and calculate correct counts
+    assertTrue(result.isValid(), "Should pass validation with calculated counts");
+    assertEquals(0, result.getChatNoteDto().getMetadata().getArtifactCount(),
+        "Should calculate 0 artifacts from actual content, ignoring YAML value");
+    assertEquals(0, result.getChatNoteDto().getMetadata().getAttachmentCount(),
+        "Should calculate 0 attachments from actual content");
   }
 }
