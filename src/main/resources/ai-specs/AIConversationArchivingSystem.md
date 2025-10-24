@@ -29,7 +29,7 @@ This file contains everything needed to archive AI conversations into a standard
 **1. Template Structure (MUST be English):**
 - Section headings: `## Initial Query`, `## Key Insights`, `## Attachments`, etc.
 - YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ATTACHMENT_COUNT`, etc.
-- Wrapper syntax: `<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`, `<!-- MARKDOWN_END:`
+- Wrapper syntax: `:::artifact`, `:::attachment`, `:::`
 - Structure keywords and formatting
 
 **Why:** Backend parsers expect specific English keywords for processing.
@@ -60,10 +60,10 @@ El usuario quería crear un poema alemán sobre la naturaleza...  ← Spanish (c
 
 **Artifacts created:** [Poema Alemán]
 
-<!-- ARTIFACT_START: type="poem" title="Poema Alemán" version="final" -->
+:::artifact type="poem" title="Poema Alemán" version="final"
 Ich liebe dich, mein Schatz,
 In deinen Augen finde ich Platz...  ← German (as created by user)
-<!-- ARTIFACT_END -->
+:::
 ```
 
 ✅ **Chinese conversation with French/Italian documents:**
@@ -74,17 +74,17 @@ In deinen Augen finde ich Platz...  ← German (as created by user)
 
 **Attachments referenced:** [rapport_financier.pdf, bilancio.docx]
 
-<!-- MARKDOWN_START: filename="rapport_financier.pdf" -->
+:::attachment filename="rapport_financier.pdf"
 # Rapport Financier 2024
 
 Bonjour, voici le document financier...  ← French (preserved as-is)
-<!-- MARKDOWN_END -->
+:::
 
-<!-- MARKDOWN_START: filename="bilancio.docx" -->
+:::attachment filename="bilancio.docx"
 # Bilancio Aziendale
 
 Ciao, questo è il rapporto finanziario...  ← Italian (preserved as-is)
-<!-- MARKDOWN_END -->
+:::
 ```
 
 ✅ **English conversation with multilingual code:**
@@ -93,13 +93,13 @@ Ciao, questo è il rapporto finanziario...  ← Italian (preserved as-is)
 
 User needed help creating a Python script with Japanese comments for a client...  ← English (conversation language)
 
-<!-- ARTIFACT_START: type="code" language="python" title="Data Processor" -->
+:::artifact type="code" language="python" title="Data Processor"
 # データ処理スクリプト (Data Processing Script)
 def process_data():
     """Process customer data"""  ← Mixed English/Japanese (as created)
     # 顧客データを読み込む
     pass
-<!-- ARTIFACT_END -->
+:::
 ```
 
 **Common Mistakes to Avoid:**
@@ -229,7 +229,7 @@ If using Canvas, Artifacts, or Code View features:
 - ❌ Special formatting blocks not in the template
 - ❌ Interactive elements or buttons
 - ❌ Platform-specific syntax extensions
-- ❌ Any wrapper that's not in the template (`<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`)
+- ❌ Any wrapper that's not in the template (`:::artifact`, `:::attachment`)
 
 **What the output should be:**
 - ✅ Pure markdown following the template exactly
@@ -340,10 +340,12 @@ For each significant artifact created during the conversation:
 1. Use the artifact wrapper syntax:
 
 ```
-<!-- ARTIFACT_START: type="[type]" language="[language]" title="[title]" version="[version]" -->
+:::artifact type="[type]" language="[language]" title="[title]" version="[version]"
 [artifact content]
-<!-- ARTIFACT_END -->
+:::
 ```
+
+**Note:** Only `:::` at the start of a line closes the artifact. If your content needs `:::` at line start, indent it or escape with `\:::`.
 
 2. **Required attributes:**
    - `type`: The artifact category (code, poem, document, design, analysis, script, etc.)
@@ -358,14 +360,14 @@ For each significant artifact created during the conversation:
    If there were multiple iterations, add a brief comment at the start of the artifact explaining what changed:
 
 ```
-<!-- ARTIFACT_START: type="code" language="python" title="Data Validator" version="final" -->
+:::artifact type="code" language="python" title="Data Validator" version="final"
 # Final version after 3 iterations:
 # - v1: Basic validation only
 # - v2: Added error handling  
 # - v3 (final): Added logging and performance optimization
 
 [final code here]
-<!-- ARTIFACT_END -->
+:::
 ```
 
 5. **When to mention evolution:**
@@ -377,19 +379,19 @@ For each significant artifact created during the conversation:
 **Examples:**
 
 ```markdown
-<!-- ARTIFACT_START: type="poem" title="Autumn Reflections" version="final" -->
+:::artifact type="poem" title="Autumn Reflections" version="final"
 [poem content after revisions]
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="code" language="bash" title="Backup Script" version="final" iterations="3" -->
+:::artifact type="code" language="bash" title="Backup Script" version="final" iterations="3"
 # Working version after debugging file permission issues
 [script content]
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="document" title="Project Proposal" version="v3" -->
+:::artifact type="document" title="Project Proposal" version="v3"
 # Final proposal incorporating stakeholder feedback
 [document content]
-<!-- ARTIFACT_END -->
+:::
 ```
 
 ### Step 6.5: Filter System Prompts and Instructions
@@ -481,10 +483,12 @@ For each attachment in the conversation (after filtering):
 2. Wrap it using this exact syntax:
 
 ```
-<!-- MARKDOWN_START: filename="original_filename.ext" -->
+:::attachment filename="original_filename.ext"
 [converted markdown content]
-<!-- MARKDOWN_END: filename="original_filename.ext" -->
+:::
 ```
+
+**Note:** Only `:::` at the start of a line closes the attachment. If your content needs `:::` at line start, indent it or escape with `\:::`.
 
 **Standard conversion rules:**
 - Images: Convert to `![filename](data:image/[type];base64,[encoded_data])`
@@ -509,14 +513,14 @@ For each attachment in the conversation (after filtering):
 3. Add a clear note in the wrapper indicating summarization:
 
 ```
-<!-- MARKDOWN_START: filename="large_document.pdf" -->
+:::attachment filename="large_document.pdf"
 **⚠️ NOTE: This attachment was summarized due to size limitations.**
 - Original size: [X] pages / [Y] KB
 - Summarization level: [Partial/Significant]
 - Content preserved: [Describe what was kept]
 
 [Summarized content here]
-<!-- MARKDOWN_END: filename="large_document.pdf" -->
+:::
 ```
 
 **For unsupported file types:**
@@ -524,7 +528,7 @@ For each attachment in the conversation (after filtering):
 Create a descriptive placeholder with all available metadata:
 
 ```
-<!-- MARKDOWN_START: filename="complex_image.png" -->
+:::attachment filename="complex_image.png"
 **⚠️ NOTE: Unable to fully process this file type.**
 - File type: PNG image
 - Original filename: complex_image.png
@@ -533,7 +537,7 @@ Create a descriptive placeholder with all available metadata:
 - Visual content: [Describe colors, layout, text, diagrams, etc.]
 - Purpose in conversation: [Why this image was important]
 - Processing limitation: [Explain specifically why you couldn't process it]
-<!-- MARKDOWN_END: filename="complex_image.png" -->
+:::
 ```
 
 **For images you cannot encode to base64:**
@@ -761,9 +765,9 @@ INSTRUCTIONS_FOR_AI: |
   ## Artifact Format
   Artifacts use this wrapper structure:
 
-  <!-- ARTIFACT_START: type="code" language="python" title="Script Name" version="final" -->
+  :::artifact type="code" language="python" title="Script Name" version="final"
   [artifact content]
-  <!-- ARTIFACT_END -->
+  :::
 
   Artifact attributes:
   - type: Category of artifact (code, poem, document, design, analysis, etc.)
@@ -775,9 +779,9 @@ INSTRUCTIONS_FOR_AI: |
   ## Attachment Format
   Attachments are located near the bottom in wrapped format:
 
-  <!-- MARKDOWN_START: filename="example.md" -->
+  :::attachment filename="example.md"
   [content here]
-  <!-- MARKDOWN_END: filename="example.md" -->
+  :::
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
@@ -891,7 +895,7 @@ _Note: References can include URLs (external links) or be descriptive (concepts,
 
 _This section preserves the valuable outputs created during the conversation._
 
-<!-- ARTIFACT_START: type="code" language="python" title="Data Processing Script" version="final" -->
+:::artifact type="code" language="python" title="Data Processing Script" version="final"
 # Final version after debugging and optimization
 # - v1: Basic processing
 # - v2: Added error handling
@@ -906,16 +910,16 @@ def process_data(input_file):
 
 if __name__ == "__main__":
     process_data("data.csv")
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="poem" title="Whispers of Dawn" version="final" -->
+:::artifact type="poem" title="Whispers of Dawn" version="final"
 Morning light breaks through the mist,
 Gentle rays on dewdrops kissed,
 Nature wakes with soft refrain,
 Welcoming the day again.
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="document" title="Project Proposal Summary" version="v2" -->
+:::artifact type="document" title="Project Proposal Summary" version="v2"
 # Project Proposal: Customer Analytics Platform
 
 ## Executive Summary
@@ -927,25 +931,25 @@ Welcoming the day again.
 
 ## Timeline
 [Timeline details]
-<!-- ARTIFACT_END -->
+:::
 
 ---
 
 ## Attachments
 
-<!-- MARKDOWN_START: filename="document1.md" -->
+:::attachment filename="document1.md"
 
 [Your markdown content here]
 
-<!-- MARKDOWN_END: filename="document1.md" -->
+:::
 
-<!-- MARKDOWN_START: filename="image1.png" -->
+:::attachment filename="image1.png"
 
 ![image1.png](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==)
 
-<!-- MARKDOWN_END: filename="image1.png" -->
+:::
 
-<!-- MARKDOWN_START: filename="large_document.pdf" -->
+:::attachment filename="large_document.pdf"
 
 **⚠️ NOTE: This attachment was summarized due to size limitations.**
 - Original size: 150 pages / 2.5 MB
@@ -956,9 +960,9 @@ Welcoming the day again.
 
 [Summarized content preserving the most important information]
 
-<!-- MARKDOWN_END: filename="large_document.pdf" -->
+:::
 
-<!-- MARKDOWN_START: filename="spreadsheet1.xlsx" -->
+:::attachment filename="spreadsheet1.xlsx"
 
 # Spreadsheet: spreadsheet1.xlsx
 
@@ -967,7 +971,7 @@ Welcoming the day again.
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
-<!-- MARKDOWN_END: filename="spreadsheet1.xlsx" -->
+:::
 
 ---
 
