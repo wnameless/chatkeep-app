@@ -50,63 +50,35 @@ This file contains everything needed to archive AI conversations into a standard
 
 **Why:** Preserve content exactly as created or provided - don't translate or change.
 
-**Examples:**
+**Example:**
 
-✅ **Spanish conversation creating German poem:**
-```markdown
-## Key Insights
-
-El usuario quería crear un poema alemán sobre la naturaleza...  ← Spanish (conversation language)
-
-**Artifacts created:** [Poema Alemán]
-
-:::artifact type="poem" title="Poema Alemán" version="final"
-Ich liebe dich, mein Schatz,
-In deinen Augen finde ich Platz...  ← German (as created by user)
-:::
-```
-
-✅ **Chinese conversation with French/Italian documents:**
+✅ **Chinese conversation with English code and French document:**
 ```markdown
 ## Initial Query
 
-用户上传了法语和意大利语商业文档，需要提取关键财务信息。  ← Chinese (conversation language)
+用户需要审查一份法语合同并创建数据处理脚本。  ← Chinese (conversation language)
 
-**Attachments referenced:** [rapport_financier.pdf, bilancio.docx]
+**Attachments referenced:** [contrat.pdf]
+**Artifacts created:** [数据处理器]
 
-:::attachment filename="rapport_financier.pdf"
-# Rapport Financier 2024
-
-Bonjour, voici le document financier...  ← French (preserved as-is)
+:::attachment filename="contrat.pdf"
+# Contrat de Service
+Bonjour, ce document...  ← French (original language, not translated)
 :::
 
-:::attachment filename="bilancio.docx"
-# Bilancio Aziendale
-
-Ciao, questo è il rapporto finanziario...  ← Italian (preserved as-is)
-:::
-```
-
-✅ **English conversation with multilingual code:**
-```markdown
-## Key Insights
-
-User needed help creating a Python script with Japanese comments for a client...  ← English (conversation language)
-
-:::artifact type="code" language="python" title="Data Processor"
-# データ処理スクリプト (Data Processing Script)
+:::artifact type="code" language="python" title="数据处理器"
 def process_data():
-    """Process customer data"""  ← Mixed English/Japanese (as created)
-    # 顧客データを読み込む
-    pass
+    """Process customer data"""  ← English (as created by user)
+    return result
 :::
 ```
 
-**Common Mistakes to Avoid:**
-- ❌ Writing summaries in English when conversation was in Chinese
-- ❌ Translating German poem content to Spanish because conversation was in Spanish
-- ❌ Translating French attachment to English because you're communicating in English
-- ❌ Mixing languages within summaries (use conversation language consistently)
+**Key Rules:**
+- ✅ Structure in English: `## Initial Query`, `:::artifact`, YAML keys
+- ✅ Summaries in conversation language (Chinese)
+- ✅ Content in original language (French document, English code)
+- ❌ Don't translate summaries to English
+- ❌ Don't translate content to match conversation language
 
 ### IMPORTANT: Start Immediately, Don't Explain
 
@@ -589,29 +561,31 @@ If your chosen delivery method fails:
 ### Quality Checklist
 
 Before outputting, verify:
-- [ ] Delivery method was chosen (default: simple response)
-- [ ] If alternative method was needed, user was informed and confirmed
-- [ ] If MCP storage was chosen, storage location was verified
-- [ ] If large document feature was chosen, capability was confirmed
-- [ ] All YAML metadata fields are filled correctly
-- [ ] DELIVERY_METHOD field reflects the actual delivery method used (optional but recommended)
-- [ ] All conversation phases are summarized
-- [ ] All significant artifacts created during the conversation are preserved
-- [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
-- [ ] Only conversation-relevant attachments are included (files actually discussed or analyzed)
-- [ ] All included attachments are either converted or documented with workarounds
-- [ ] All workarounds are explained in the "Workarounds Used" section
-- [ ] All attachment and artifact references in the summary match actual items
-- [ ] No excluded attachments are referenced in summary sections
-- [ ] Artifacts include only final/important versions with evolution notes if significant
-- [ ] Archive infrastructure (summaries, notes) is in conversation's language
-- [ ] Artifact content is in original language (as created by user)
-- [ ] Attachment content is in original language (as provided in files)
-- [ ] Only template structure (headings, YAML keys, wrappers) is in English
-- [ ] If using Canvas/Artifacts: verified no platform-specific formatting
-- [ ] If using Canvas/Artifacts: verified output is pure markdown matching template
-- [ ] If format issues detected: switched to simple response or warned user
-- [ ] The output is complete and ready to save as a .md file (or saved via chosen delivery method)
+
+**1. Template Structure**
+- [ ] YAML metadata complete (version, type, date, platform)
+- [ ] All sections present and in correct order
+- [ ] Wrapper syntax correct (`:::artifact`, `:::attachment`)
+
+**2. Language Handling**
+- [ ] Structure in English (headings, YAML keys, wrappers)
+- [ ] Summaries in conversation's language
+- [ ] Content in original language (artifacts/attachments as-is)
+
+**3. Content Filtering**
+- [ ] System prompts excluded (archiving specs, instruction files)
+- [ ] Only conversation-relevant files included
+- [ ] Artifacts show final/important versions only
+
+**4. Attachments & Artifacts**
+- [ ] All attachments converted or documented with workarounds
+- [ ] Summary references match actual artifacts/attachments
+- [ ] No excluded items referenced in summaries
+
+**5. Delivery Method**
+- [ ] Using simple response (or alternative if needed)
+- [ ] If Canvas/Artifacts: verified pure markdown, no platform formatting
+- [ ] Output complete and ready to save
 
 ---
 
