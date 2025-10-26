@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.service.ChatNoteService;
+import me.moonote.app.chatkeep.service.OAuth2ProviderService;
 
 /**
  * Home Controller - Renders main pages Responsible for serving full HTML pages (not fragments)
@@ -18,6 +19,7 @@ import me.moonote.app.chatkeep.service.ChatNoteService;
 public class HomeController {
 
   private final ChatNoteService chatNoteService;
+  private final OAuth2ProviderService oauth2ProviderService;
 
   /**
    * Home page - Shows active ChatNotes GET /
@@ -113,6 +115,7 @@ public class HomeController {
   public String login(Model model) {
     log.info("Loading login page");
     model.addAttribute("pageTitle", "ChatKeep - Login");
+    model.addAttribute("enabledProviders", oauth2ProviderService.getEnabledProviders());
     return "pages/login";
   }
 
