@@ -182,6 +182,56 @@ If using Canvas, Artifacts, or Code View features:
 - Warn the user: "This platform's [feature name] may add extra formatting. Would you prefer simple response instead?"
 - Wait for user confirmation
 
+### Step 1.5: Detect and Unpack Loaded Archives
+
+**IMPORTANT: Archives are context, not attachments. When users load archives, they are providing prior context to continue from. ALWAYS merge archives - never include them as attachments.**
+
+**Before proceeding, scan the conversation for loaded archive files:**
+
+1. **Identify loaded archives:**
+   - Look for uploaded or pasted files containing both:
+     - `ARCHIVE_FORMAT_VERSION` in YAML frontmatter
+     - `INSTRUCTIONS_FOR_AI` in YAML frontmatter
+   - BUT exclude files containing instruction markers:
+     - "Part 1: Archiving Instructions for AI"
+     - "### Step 0: Acknowledge the Archiving Request"
+     - "Part 2: Archive Template Structure"
+   - These criteria identify generated archives, not the instruction file
+
+2. **If NO archives found:**
+   - Skip to Step 2
+   - This is a fresh conversation with no prior context
+
+3. **If archives ARE found (one or more), merge them:**
+
+   **Extract artifacts from all loaded archives:**
+   - Parse each `:::artifact` wrapper
+   - Note: artifact type, title, version, content
+
+   **Extract attachments from all loaded archives:**
+   - Parse each `:::attachment` wrapper
+   - Note: filename, content
+
+   **Extract summary context (for merged narratives):**
+   - Note the Initial Query from each archive
+   - Note the Key Insights from each archive
+   - This helps create a continuous narrative
+
+4. **Understand the merge strategy:**
+   - **Artifacts:** Include ALL artifacts (from archives + new ones created)
+     - If an artifact was modified/evolved: only include newest version
+     - If an artifact is unchanged: carry it forward as-is
+     - **How to determine "newest" when multiple archives have same artifact:**
+       - Check version numbers/identifiers (v3 > v2 > v1, final > draft)
+       - If version info unclear, assume last-loaded archive has newest version
+   - **Attachments:** Include ALL attachments (from archives + new ones)
+     - Carry forward all attachments from loaded archives
+   - **Summaries:** Create a **merged narrative** blending old and new
+     - Don't separate "old conversation" vs "new conversation"
+     - Tell a unified story across archive boundaries
+
+**After completing this step, proceed to Step 2 with the merged context in mind.**
+
 ### Step 2: Understand the Template
 Review Part 2 of this document which contains the complete template structure. Understand the YAML front matter, the attachment wrapper format, and the artifact wrapper format.
 
@@ -200,25 +250,72 @@ Give this conversation a clear, descriptive title that summarizes the main topic
 
 **⚠️ LANGUAGE REMINDER: Write all summaries in the conversation's language (not English, not content language)!**
 
+**IMPORTANT: If archives were loaded (detected in Step 1.5), create MERGED narratives that blend old and new context into a unified story. Don't separate "previous conversation" from "new conversation" - tell one continuous narrative.**
+
 Write concise summaries for each phase:
 
 **Initial Query:**
+
+*If NO archives were loaded:*
 - What was the user trying to accomplish?
 - What problem were they solving?
 - What question did they ask?
-- List any attachments or artifacts mentioned in this phase
+
+*If archives WERE loaded:*
+- **Blend contexts:** "Building on previous work in [topic from archive], the user sought to..."
+- Reference prior context naturally: "Continuing from earlier exploration of [X], the focus shifted to..."
+- Create continuity: Show how this conversation extends or builds upon previous work
+- **Don't separate old vs new** - create one unified narrative
+
+- List any attachments or artifacts mentioned (including carried-forward ones)
 
 **Key Insights:**
+
+*If NO archives were loaded:*
 - What were the main findings or solutions?
 - What understanding was gained?
 - Extract 3-5 key points as bullet points
+
+*If archives WERE loaded:*
+- **Merge insights across conversations:** Combine findings from loaded archives with new discoveries
+- Show evolution: "The initial approach [from archive] was refined by..."
+- Highlight continuity: "Building on earlier insights about [X], we discovered..."
+- **Present unified findings** that span the entire knowledge journey, not just this session
+
+- Extract 3-5 key points (can span old and new conversations)
 - List any attachments or artifacts referenced
 
 **Follow-up Explorations:**
+
+*If NO archives were loaded:*
 - What deeper questions were explored?
 - What tangents added value?
 - Only include if there were significant follow-ups
+
+*If archives WERE loaded:*
+- **Show cumulative exploration:** "After resolving [X from archive], attention turned to..."
+- Connect threads: How do new explorations relate to previous ones?
+- Demonstrate progression: Each conversation should advance the understanding
+
+- Only include if there were significant follow-ups
 - List any attachments or artifacts referenced
+
+**Examples of Merged Narratives:**
+
+❌ **Bad (Separated):**
+```
+Initial Query:
+Previous conversation: User worked on data validation.
+New conversation: User improved error handling.
+```
+
+✅ **Good (Merged):**
+```
+Initial Query:
+Building on a data validation system developed previously, the user sought to enhance
+error handling and add comprehensive logging. The focus was on making the validator
+production-ready by addressing edge cases discovered in earlier testing.
+```
 
 ### Step 6: Extract References
 List all external links, documentation, concepts, and contextual information mentioned during the conversation. Include two types:
@@ -246,6 +343,64 @@ Artifacts are the valuable outputs CREATED during the conversation, such as:
 - ✅ **Final versions** - The completed, working, or polished output
 - ✅ **Significant milestones** - Important intermediate versions that represent major progress
 - ❌ **Minor iterations** - Don't include every small revision or debugging attempt
+
+**Artifact Continuity (When Archives Were Loaded):**
+
+**IMPORTANT: If archives were loaded in Step 1.5, apply the full carry-forward strategy:**
+
+1. **Include NEW artifacts** created in THIS conversation
+   - All artifacts generated during the current session
+   - Use normal versioning and evolution notes
+
+2. **Include UNMODIFIED artifacts** from loaded archives
+   - If an artifact from a loaded archive was never touched, modified, or discussed → carry it forward as-is
+   - Preserve its original content, attributes, and version number
+
+3. **For MODIFIED artifacts** (evolved from loaded archives):
+   - Only include the NEWEST version (created in this conversation)
+   - Document the evolution with version progression
+   - Example: `version="v4"` with note `# v1-v3 from previous conversation, v4 adds error handling`
+
+4. **Determine if an artifact was modified:**
+   - If user asked to improve/update/debug an existing artifact → modified
+   - If artifact's title or purpose was referenced in conversation → likely modified
+   - If artifact was never mentioned → unmodified (carry forward as-is)
+
+**Examples of Artifact Continuity:**
+
+**Scenario: Archive has 3 artifacts, user modified 1 in new conversation**
+
+```markdown
+## Loaded Archive Had:
+- data_validator.py (v2)
+- report_generator.py (v1)
+- config_parser.py (v1)
+
+## New Conversation:
+- User improved data_validator.py → created v3
+- Other artifacts never mentioned
+
+## New Archive Should Include:
+:::artifact type="code" language="python" title="Data Validator" version="v3"
+# v1-v2 from previous conversation (basic validation, error handling)
+# v3 (this session): Added logging and performance optimization
+
+[v3 code here]
+:::
+
+:::artifact type="code" language="python" title="Report Generator" version="v1"
+[v1 code - unchanged]
+:::
+
+:::artifact type="code" language="python" title="Config Parser" version="v1"
+[v1 code - unchanged]
+:::
+```
+
+**Key Points:**
+- Modified artifact: Only newest version (v3), with evolution note spanning all versions
+- Unmodified artifacts: Carried forward exactly as they were
+- All 3 artifacts appear in new archive (full carry-forward)
 
 **How to preserve artifacts:**
 
@@ -308,85 +463,166 @@ For each significant artifact created during the conversation:
 :::
 ```
 
-### Step 7.5: Filter System Prompts and Instructions
+### Step 7.5: Filter System Prompts and Handle Archives
 
-**IMPORTANT:** Before processing attachments, identify and exclude system prompts, instruction files, and non-conversational content.
+**IMPORTANT:** Before processing attachments, identify and filter system files. Handle archives specially - they should be MERGED (as done in Step 1.5), not included as attachments.
 
-**What to EXCLUDE (do not include in Attachments section):**
+**Three categories of files:**
 
-1. **The Archiving System Itself:**
-   - Any file containing both "ARCHIVE_FORMAT_VERSION" AND "INSTRUCTIONS_FOR_AI"
-   - Files named "AIConversationArchivingSystem.md" or similar variants
-   - Files containing "Part 1: Archiving Instructions for AI"
-   - **CRITICAL**: This file should NOT appear in the archive AT ALL - no placeholder, no mention, completely omitted from the Attachments section
-   - Do NOT create a "This file was excluded" placeholder - simply do not include it
+**1. EXCLUDE (Archiving Instruction File) - ALWAYS**
 
-2. **Other System Prompts:**
-   - Files labeled as "pasted" that are never mentioned or discussed in the conversation
-   - Instruction sets, prompt templates, or system configuration files
-   - Content that was used to guide your behavior but not analyzed as part of the conversation
+**Detection (content-based, filename-independent):**
+Exclude any file containing **ANY** of these unique markers:
+- "Part 1: Archiving Instructions for AI"
+- "### Step 0: Acknowledge the Archiving Request"
+- "Part 2: Archive Template Structure"
 
-3. **Detection Criteria - Exclude if ALL of these are true:**
-   - Attachment has "pasted" label (not uploaded as a file)
-   - Content is never referenced in conversation summary sections
-   - Content was not discussed, analyzed, or used as a topic of conversation
-   - Content appears to be instructions/prompts rather than data/information
+**Why content-based?**
+- Users may rename the file (chatkeep-archiving-spec.md, prompt.md, etc.)
+- Users may paste it without a filename
+- Only the instruction file has these markers - generated archives never do
+
+**Action:**
+- Do NOT include in Attachments section at all
+- Do NOT create any placeholder or mention
+- Completely omit from the archive
+
+**2. MERGE (Generated Archive Files) - Always Merged**
+
+**Detection:**
+Files containing BOTH:
+- `ARCHIVE_FORMAT_VERSION` in YAML frontmatter
+- `INSTRUCTIONS_FOR_AI` in YAML frontmatter
+
+BUT NOT containing ANY instruction markers from category 1
+
+**Action:**
+- Do NOT include as attachments (they're context, not content)
+- Should already be unpacked in Step 1.5
+- Their artifacts and attachments will be carried forward
+- Do NOT mention the archive file itself in Attachments section
+- **Archives are ALWAYS merged, never included as attachments**
+
+**3. EXCLUDE (Other System Prompts) - Conditional**
+
+**Detection - Exclude if ALL of these are true:**
+- File was pasted or uploaded but never discussed
+- Content is never referenced in conversation
+- Content appears to be instructions/prompts rather than data
+- Not actively used or analyzed in the conversation
+
+**Action:**
+- Do NOT include in Attachments section
+- These are operational files, not conversation content
 
 **What to INCLUDE (process normally as attachments):**
 
-✅ **Pasted content that WAS discussed:**
-- Even if pasted, include if the user asked you to analyze it
-- Include if specific content from it was referenced in the conversation
-- Include if it contains data/information that was the subject of discussion
+✅ **Conversation-relevant content:**
+- Files that were discussed, analyzed, or debugged
+- Data files, documents, images used in the conversation
+- Reference materials actively used
+- Even pasted content, if it was the subject of conversation
 
-✅ **Uploaded files:**
-- All actually uploaded files should be included (not just pasted text)
-- These are intentional conversation inputs
+**Examples with Content-Based Detection:**
 
-✅ **Reference materials:**
-- Documentation, articles, code that was actively used in the conversation
-- Any content that was analyzed, debugged, or improved
-
-**Examples:**
-
-❌ **EXCLUDE (no placeholder, completely omit):**
+❌ **EXCLUDE - Category 1 (Instruction File):**
 ```
-Attachment: "AIConversationArchivingSystem.md" (pasted)
-→ This is the archiving instruction file itself - DO NOT include in Attachments section at all
-→ Do NOT create any placeholder or note for this file
+File: "my-prompt.md" (pasted, no filename visible)
+Content contains: "Part 1: Archiving Instructions for AI"
+→ This is the instruction file - EXCLUDE completely
+→ Detection based on CONTENT, not filename
 ```
 
-❌ **EXCLUDE:**
+🔄 **MERGE - Category 2 (Generated Archive):**
 ```
-Attachment: "prompt_template.md" (pasted, never mentioned)
-→ System prompt not discussed in conversation - EXCLUDE
-```
-
-✅ **INCLUDE:**
-```
-Attachment: "bug_report.md" (pasted, discussed extensively)
-→ User asked for help analyzing this bug report - INCLUDE
+File: "conversation_archive_2024.md" (uploaded)
+Content contains: ARCHIVE_FORMAT_VERSION + INSTRUCTIONS_FOR_AI
+Content does NOT contain: "Part 1: Archiving Instructions"
+→ This is a generated archive - MERGE (handled in Step 1.5)
+→ Do NOT include as attachment
+→ Artifacts and attachments already extracted
 ```
 
-✅ **INCLUDE:**
+❌ **EXCLUDE - Category 3 (Unused System Prompt):**
 ```
-Attachment: "data.csv" (uploaded file)
-→ User uploaded this file for analysis - INCLUDE
+File: "template.md" (pasted, never referenced)
+→ System template not used in conversation - EXCLUDE
+```
+
+✅ **INCLUDE - Conversation Content:**
+```
+File: "bug_report.md" (pasted, discussed extensively)
+→ User asked for help analyzing this - INCLUDE
+```
+
+✅ **INCLUDE - Data File:**
+```
+File: "data.csv" (uploaded)
+→ User uploaded for analysis - INCLUDE
 ```
 
 **After filtering:**
-- Do NOT reference excluded attachments in summary sections
-- If an attachment was excluded, do not list it in "Attachments referenced" fields
-- **CRITICAL**: Excluded files should NOT appear in the Attachments section at all - not even as placeholders or notes
-- If ALL attachments were excluded, the Attachments section should only contain the section header with no content wrappers
+- Excluded files (categories 1 & 3) should NOT appear anywhere
+- Merged archives (category 2) should NOT appear in Attachments section
+- Only conversation-relevant files appear as attachments
 
 ### Step 8: Process Attachments (With Workarounds If Needed)
 
 **⚠️ LANGUAGE REMINDER: Preserve attachment content in its original language! Don't translate. Only notes ABOUT attachments should be in conversation language.**
 
-**Note:** After filtering out system prompts in Step 6.5, process only the remaining conversation-relevant attachments.
+**Note:** After filtering out system prompts in Step 7.5, process only the remaining conversation-relevant attachments.
 
-**Preferred approach:** Convert all attachments to full markdown format using the wrapper syntax.
+**Attachment Carry-Forward (When Archives Were Loaded):**
+
+**IMPORTANT: If archives were loaded in Step 1.5, include attachments from TWO sources:**
+
+1. **Attachments from THIS conversation:**
+   - Files uploaded or pasted during the current session (excluding archives themselves)
+   - Process normally using standard conversion rules below
+
+2. **Attachments from MERGED archives (full carry-forward):**
+   - Extract ALL attachments from loaded archives (already done in Step 1.5)
+   - Include them in the new archive's Attachments section
+   - Preserve their original content and format
+
+**Why full carry-forward for attachments?**
+- Attachments are inputs/context that remain relevant
+- Even if not referenced in new conversation, they provide complete context
+- Users expect archives to be cumulative knowledge bases
+- Losing attachments would break continuity
+
+**Example - Multiple Archives Merged:**
+
+```markdown
+## Scenario:
+- Archive 1 had: report.pdf, data.csv
+- Archive 2 had: analysis.md
+- New conversation added: updated_data.csv
+
+## New Archive Attachments Section Should Include:
+
+:::attachment filename="report.pdf"
+[content]
+:::
+
+:::attachment filename="data.csv"
+[content]
+:::
+
+:::attachment filename="analysis.md"
+[content]
+:::
+
+:::attachment filename="updated_data.csv"
+[content]
+:::
+```
+
+**All 4 attachments included - full cumulative history preserved.**
+
+---
+
+**Preferred approach for new attachments:** Convert all attachments to full markdown format using the wrapper syntax.
 
 **Standard Conversion Process:**
 
@@ -625,6 +861,140 @@ Before outputting, verify:
 - [ ] If Canvas/Artifacts: verified pure markdown, no platform formatting
 - [ ] Output complete and ready to save
 
+**6. Archive Continuity (If Applicable)**
+- [ ] If archives were loaded: artifacts and attachments carried forward
+- [ ] Archive files themselves NOT included as attachments
+- [ ] Summaries create unified narrative (not separated old/new)
+- [ ] Modified artifacts show version progression
+
+---
+
+## Comprehensive Examples: Archive Merging in Action
+
+These examples demonstrate the complete context merge workflow when users load archives and continue conversations.
+
+### Example 1: Single Archive Continuation (Simple Case)
+
+**Setup:**
+- User loads `data_project_archive_2024-01-15.md`
+- Archive contains:
+  - Artifacts: data_validator.py (v2), config.json (v1)
+  - Attachments: requirements.txt, sample_data.csv
+  - Summary: "Created data validation system with error handling"
+- User continues: "Add logging to the validator"
+
+**What AI Should Do:**
+
+1. **Step 1.5:** Detect archive, extract 2 artifacts + 2 attachments
+2. **Step 5:** Create merged narrative:
+   ```
+   Initial Query:
+   Building on a data validation system previously developed, the user sought
+   to enhance it with comprehensive logging capabilities for better debugging
+   and monitoring in production environments.
+   ```
+3. **Step 7:** Include 3 artifacts:
+   - data_validator.py v3 (modified - new version with logging)
+   - config.json v1 (unchanged - carried forward)
+4. **Step 8:** Include 2 carried-forward attachments + any new ones
+
+**Result:** New archive seamlessly continues the story, preserves all context.
+
+---
+
+### Example 2: Multiple Archives Merged (Complex Case)
+
+**Setup:**
+- User loads TWO archives in same conversation:
+  - `project_phase1_archive_2024-01-10.md`:
+    - Artifacts: analyzer.py (v1), report_template.md (v1)
+    - Attachments: raw_data.csv
+  - `project_phase2_archive_2024-01-20.md`:
+    - Artifacts: analyzer.py (v2), visualizer.py (v1)
+    - Attachments: config.yaml
+- User continues: "Optimize the analyzer for large datasets"
+
+**What AI Should Do:**
+
+1. **Step 1.5:** Detect BOTH archives
+   - Merge artifacts: analyzer.py v2 (latest), report_template.md v1, visualizer.py v1
+   - Merge attachments: raw_data.csv, config.yaml
+
+2. **Step 5:** Create unified narrative spanning all phases:
+   ```
+   Initial Query:
+   Continuing from a multi-phase project involving data analysis and visualization,
+   the user sought to optimize the analyzer (previously developed through two iterations)
+   to handle large datasets efficiently. The project had progressed from basic analysis
+   to visualization, and now focused on performance enhancement.
+
+   Key Insights:
+   - Phase 1 established core analysis algorithms [from phase1 archive]
+   - Phase 2 improved accuracy and added visualization [from phase2 archive]
+   - Phase 3 (current) optimized for production-scale data with caching and parallel processing
+   ```
+
+3. **Step 7:** Include 4 artifacts:
+   ```
+   :::artifact type="code" language="python" title="Data Analyzer" version="v3"
+   # v1 from phase1 archive: Basic analysis
+   # v2 from phase2 archive: Improved accuracy
+   # v3 (this session): Performance optimization for large datasets
+
+   [v3 code with optimizations]
+   :::
+
+   :::artifact type="document" title="Report Template" version="v1"
+   [unchanged content]
+   :::
+
+   :::artifact type="code" language="python" title="Visualizer" version="v1"
+   [unchanged content]
+   :::
+   ```
+
+4. **Step 8:** Include 2 carried-forward attachments:
+   ```
+   :::attachment filename="raw_data.csv"
+   [content]
+   :::
+
+   :::attachment filename="config.yaml"
+   [content]
+   :::
+   ```
+
+**Result:** Single cumulative archive spanning 3 conversation phases, full context preserved, clear version progression.
+
+---
+
+### Example 3: User Runs Archiving Multiple Times (Within Single Conversation)
+
+**Setup:**
+- User has conversation about topic X
+- At 10:00 AM: User pastes archiving prompt → AI generates archive1
+- Conversation continues
+- At 11:00 AM: User pastes archiving prompt again
+
+**What AI Should Do:**
+
+**For second archiving (11:00 AM):**
+
+1. **Step 1.5:** NO archives to load (archive1 is AI-generated output in chat, not a loaded file)
+   - Archive1 is just conversation history, not an attachment
+   - Treat this as fresh archiving of entire conversation
+
+2. **Step 7.5:** Archive1 is AI-generated content in this conversation
+   - Do NOT include archive1 as an artifact or attachment
+   - The second archive naturally includes all content from the full conversation
+
+3. **Generate complete archive:** Captures entire conversation from start to current moment
+   - Includes all artifacts (even those in archive1, since they're part of conversation)
+   - Includes all attachments (user-provided files, not archive1 itself)
+   - Summaries cover the full conversation timeline
+
+**Result:** Second archive is comprehensive and self-contained, no redundancy with archive1 (which was output, not input).
+
 ---
 
 ## Part 2: Archive Template Structure
@@ -705,9 +1075,10 @@ INSTRUCTIONS_FOR_AI: |
   ## Attachment Filtering
   Not all attachments from the original conversation appear in this archive:
   - System prompts and instruction files are automatically excluded
-  - The archiving system file itself (AIConversationArchivingSystem.md) is never included
+  - The archiving instruction file itself (detected by content, not filename) is never included
   - Pasted content that was never discussed or referenced is filtered out
   - Only conversation-relevant attachments are preserved
+  - Archives loaded as context are ALWAYS merged (never included as attachments)
 
   ## How to Process This Archive
   1. Read this entire file to understand the full context
