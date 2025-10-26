@@ -117,8 +117,8 @@ When a user uploads or pastes this file (with or without additional instructions
 
 Instead:
 1. Briefly acknowledge in the conversation's language: "I'll begin archiving this conversation."
-2. Proceed directly to Step 0 (estimate size and present delivery options)
-3. Keep all interactions concise and focused on gathering necessary user choices
+2. Proceed directly to Step 1
+3. Keep all interactions concise
 
 The user already knows what this file does - they want action, not explanation.
 
@@ -126,91 +126,22 @@ The user already knows what this file does - they want action, not explanation.
 
 When a user asks you to archive a conversation, follow these steps:
 
-### Step 0: Estimate Archive Size & Present Delivery Options
+### Step 1: Choose Delivery Method
 
-Before generating the archive, estimate its size and help the user choose the best delivery method.
+**Default: Use Simple Response (recommended for 90%+ of archives)**
 
-**A. Calculate Estimated Size:**
+Generate the archive as a markdown code block in your response. This works reliably for most conversations.
 
-1. **Metadata & Summary:** ~5-10 KB (YAML frontmatter, summaries, references)
-2. **Artifacts:** Count each artifact and estimate:
-   - Code/text artifacts: Character count ÷ 1024 = KB
-   - Total all artifacts
-3. **Attachments:** This is usually the largest component:
-   - Text files (markdown, code, logs): Character count ÷ 1024 = KB
-   - Binary files (images, PDFs): Original file size × 1.37 (base64 encoding overhead)
-   - Spreadsheets/documents: Estimate based on complexity
-   - Total all attachments
-4. **Total Estimated Size:** Sum of all components
+**When to use alternatives:**
 
-**Example Calculation:**
-```
-Metadata & summary: ~8 KB
-Artifacts: 2 code files (~15 KB)
-Attachments:
-  - document.pdf (120 KB) → 164 KB after base64
-  - image.png (80 KB) → 110 KB after base64
-  - code.py (5 KB) → 5 KB (text, no encoding)
-Total: ~302 KB
-```
+**If the simple response truncates or fails:**
+1. Tell the user: "The archive is large and may not fit in a simple response. I can use [Artifact/Canvas/Code View] instead. Would you like me to do that?"
+2. Wait for user confirmation
+3. Use the alternative delivery method
 
-**B. Present Delivery Options Based on Size:**
-
-Tell the user:
-
-**"This archive will be approximately [X] KB (~[Y] MB). Here are your delivery options:**
-
-**1. Simple Response** (code block in chat)
-- ✅ Recommended for: <100 KB archives
-- ✅ Most reliable: No platform-specific formatting issues
-- ✅ Always produces clean markdown
-- ⚠️ Acceptable for: 100-500 KB (may be slow to render)
-- ❌ Not recommended for: >500 KB (may truncate)
-- **DEFAULT RECOMMENDATION** - Use unless file is truly large
-
-**2. Large Document Feature** (Artifact/Canvas/Code View)
-- ✅ Recommended for: 100 KB - 1 MB archives
-- ⚠️ WARNING: May add platform-specific formatting that breaks template
-- ⚠️ Requires careful verification of output format
-- Better rendering for large documents
-- Separate viewing area outside chat
-- Note: Called "Artifacts" on Claude, "Canvas" on ChatGPT/Gemini
-- **Use only if simple response is too slow or truncates**
-
-**3. MCP Storage** (direct file save)
-- ✅ Recommended for: >500 KB archives
-- Saves directly to your computer or cloud storage
-- Most reliable for very large archives
-- Note: Requires MCP (Model Context Protocol) tools to be connected
-
-**Based on the estimated size (~[X] KB), I recommend: [Option]**
-
-**Which delivery method would you prefer?**"
-
-Wait for the user's choice before proceeding.
-
-### Step 0.5: Verify & Execute Chosen Delivery Method
-
-Handle the user's choice with appropriate fallbacks:
-
-**If user chooses "Simple Response":**
-→ Proceed directly to Step 1 (no verification needed)
-→ Generate the archive and output as a markdown code block
-→ **IMPORTANT**: Do NOT use any other method - respect the user's choice
-
-**If user chooses "Large Document Feature":**
-
-1. Check your capabilities: "Can I create documents in a separate viewing area (Artifacts/Canvas/Code View)?"
-2. **If YES:**
-   - Identify what it's called on your platform
-   - Proceed to Step 1 and generate the archive there
-   - Tell user: "I'll create this archive in [feature name]"
-   - **IMPORTANT**: Only use this method if user explicitly chose it
-3. **If NO:**
-   - Tell user: "I don't have a large document feature on this platform. Would you like:
-     a) Simple response instead (may be slower to render)
-     b) MCP storage (I'll check what's available)"
-   - Wait for user's choice and handle accordingly
+**If user explicitly requests a different method:**
+- **Large Document Feature (Artifact/Canvas/Code View):** Available on some platforms for better rendering of large documents
+- **MCP Storage:** Saves directly to file system (requires MCP tools to be connected)
 
 **CRITICAL: Format Integrity for Canvas/Artifacts/Code Blocks**
 
@@ -241,42 +172,21 @@ If using Canvas, Artifacts, or Code View features:
 - Warn the user: "This platform's [feature name] may add extra formatting. Would you prefer simple response instead?"
 - Wait for user confirmation
 
-**If user chooses "MCP Storage":**
-
-1. **Check for MCP tools** (NOW, not before):
-   - Query: "What MCP servers and tools are currently connected?"
-   - Look for: File system tools, cloud storage connectors
-2. **If MCP tools found:**
-   - List the options: "I found these storage locations:
-     1. [MCP Server 1]: Local file system - ~/Documents/
-     2. [MCP Server 2]: Google Drive (requires authentication)
-     Which would you like to use?"
-   - Wait for user to select specific destination
-   - Proceed to Step 1 and generate archive, then save to chosen location
-3. **If NO MCP tools found:**
-   - Tell user: "No MCP storage is currently available. Would you like:
-     a) Large document feature (if I have it)
-     b) Simple response instead"
-   - Wait for user's choice and handle accordingly
-
-**After confirming the delivery method, proceed to Step 1.**
-
-### Step 1: Understand the Template
+### Step 2: Understand the Template
 Review Part 2 of this document which contains the complete template structure. Understand the YAML front matter, the attachment wrapper format, and the artifact wrapper format.
 
-### Step 2: Fill Out Metadata
+### Step 3: Fill Out Metadata
 In the YAML front matter at the top of the archive:
 - Set CREATED_DATE to today's date (YYYY-MM-DD)
 - Set ORIGINAL_PLATFORM to your platform name (Claude, ChatGPT, Gemini, etc.)
 - Set DELIVERY_METHOD (optional) to the method used: simple_response, large_document, or mcp_storage
-- Set ESTIMATED_SIZE_KB (optional) to the size calculated in Step 0
 
 **Note:** You don't need to count artifacts or attachments - the backend will calculate these automatically from the actual `:::artifact` and `:::attachment` markers in your archive.
 
-### Step 3: Create the Conversation Title
+### Step 4: Create the Conversation Title
 Give this conversation a clear, descriptive title that summarizes the main topic. This will be the H1 heading of the archive.
 
-### Step 4: Summarize Each Phase
+### Step 5: Summarize Each Phase
 
 **⚠️ LANGUAGE REMINDER: Write all summaries in the conversation's language (not English, not content language)!**
 
@@ -300,7 +210,7 @@ Write concise summaries for each phase:
 - Only include if there were significant follow-ups
 - List any attachments or artifacts referenced
 
-### Step 5: Extract References
+### Step 6: Extract References
 List all external links, documentation, concepts, and contextual information mentioned during the conversation. Include two types:
 
 1. **External Links** - URLs to documentation, tools, articles (e.g., "MongoDB Documentation: https://docs.mongodb.com")
@@ -308,7 +218,7 @@ List all external links, documentation, concepts, and contextual information men
 
 Both types are valuable and should be included. The description itself conveys the nature of the reference.
 
-### Step 6: Preserve Conversation Artifacts
+### Step 7: Preserve Conversation Artifacts
 
 **⚠️ LANGUAGE REMINDER: Keep artifact content in its original language (as created by user)! Only descriptions ABOUT artifacts should be in conversation language.**
 
@@ -388,7 +298,7 @@ For each significant artifact created during the conversation:
 :::
 ```
 
-### Step 6.5: Filter System Prompts and Instructions
+### Step 7.5: Filter System Prompts and Instructions
 
 **IMPORTANT:** Before processing attachments, identify and exclude system prompts, instruction files, and non-conversational content.
 
@@ -460,7 +370,7 @@ Attachment: "data.csv" (uploaded file)
 - **CRITICAL**: Excluded files should NOT appear in the Attachments section at all - not even as placeholders or notes
 - If ALL attachments were excluded, the Attachments section should only contain the section header with no content wrappers
 
-### Step 7: Process Attachments (With Workarounds If Needed)
+### Step 8: Process Attachments (With Workarounds If Needed)
 
 **⚠️ LANGUAGE REMINDER: Preserve attachment content in its original language! Don't translate. Only notes ABOUT attachments should be in conversation language.**
 
@@ -553,7 +463,7 @@ Create a descriptive placeholder with all available metadata:
 3. ⚠️ **Detailed placeholder** - Comprehensive description with all available metadata
 4. ❌ **Never omit** - Never completely skip an attachment without at least creating a placeholder
 
-### Step 8: Document Workarounds
+### Step 9: Document Workarounds
 
 If you used any workarounds, fill out the "Workarounds Used" section with:
 - Filename of each affected attachment
@@ -563,7 +473,7 @@ If you used any workarounds, fill out the "Workarounds Used" section with:
 
 If no workarounds were needed, state: **"None - All attachments were successfully converted to full markdown format."**
 
-### Step 9: Complete Archive Metadata
+### Step 10: Complete Archive Metadata
 
 At the bottom of the file, fill in:
 - Original conversation date
@@ -575,7 +485,7 @@ At the bottom of the file, fill in:
 
 ### Output Format
 
-**Depends on the delivery method chosen in Step 0:**
+**Depends on the delivery method chosen in Step 1:**
 
 **Simple Response:**
 - Provide the complete archived markdown file as a single code block
@@ -679,15 +589,12 @@ If your chosen delivery method fails:
 ### Quality Checklist
 
 Before outputting, verify:
-- [ ] Archive size was estimated in Step 0
-- [ ] Delivery method was selected based on size and capabilities
-- [ ] User confirmed their preferred delivery method
+- [ ] Delivery method was chosen (default: simple response)
+- [ ] If alternative method was needed, user was informed and confirmed
 - [ ] If MCP storage was chosen, storage location was verified
 - [ ] If large document feature was chosen, capability was confirmed
-- [ ] Fallback was offered if preferred method was unavailable
 - [ ] All YAML metadata fields are filled correctly
 - [ ] DELIVERY_METHOD field reflects the actual delivery method used (optional but recommended)
-- [ ] ESTIMATED_SIZE_KB field reflects the size calculated in Step 0 (optional but recommended)
 - [ ] All conversation phases are summarized
 - [ ] All significant artifacts created during the conversation are preserved
 - [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
@@ -719,7 +626,6 @@ ARCHIVE_TYPE: conversation_summary
 CREATED_DATE: YYYY-MM-DD
 ORIGINAL_PLATFORM: [Claude/ChatGPT/Gemini/etc.]
 DELIVERY_METHOD: simple_response  # Optional: simple_response | large_document | mcp_storage
-ESTIMATED_SIZE_KB: 0  # Optional: estimated size before generation
 
 INSTRUCTIONS_FOR_AI: |
   ## Purpose
@@ -735,10 +641,9 @@ INSTRUCTIONS_FOR_AI: |
   6. Archive Metadata section
 
   ## Metadata Fields
-  Some fields in the YAML header are optional:
+  The DELIVERY_METHOD field in the YAML header is optional:
   - DELIVERY_METHOD (optional): How the archive was delivered (simple_response, large_document, mcp_storage)
-  - ESTIMATED_SIZE_KB (optional): Estimated size before generation
-  Archives without these fields are still valid (backward compatible with v1.0).
+  Archives without this field are still valid (backward compatible with v1.0).
 
   ## Language in Archives
   Archives use three language contexts:
