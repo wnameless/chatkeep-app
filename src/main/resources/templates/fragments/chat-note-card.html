@@ -29,7 +29,7 @@
 
         <!-- Content Preview (First N characters) -->
         <p class="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-3"
-          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 150) : 'No preview available'}">
+          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 150) : #messages.msg('card.preview.empty')}">
           This is a preview of the chat note content that shows the first few lines...
         </p>
 
@@ -63,14 +63,14 @@
 
           <!-- Artifact Count -->
           <div th:if="${note.artifactCount > 0}" class="flex items-center"
-            th:title="'Artifacts: ' + ${note.artifactCount}">
+            th:title="#{card.artifacts.tooltip(${note.artifactCount})}">
             <i class="fas fa-file-code mr-1"></i>
             <span th:text="${note.artifactCount}">0</span>
           </div>
 
           <!-- Attachment Count -->
           <div th:if="${note.attachmentCount > 0}" class="flex items-center"
-            th:title="'Attachments: ' + ${note.attachmentCount}">
+            th:title="#{card.attachments.tooltip(${note.attachmentCount})}">
             <i class="fas fa-paperclip mr-1"></i>
             <span th:text="${note.attachmentCount}">0</span>
           </div>
@@ -79,7 +79,7 @@
           <div th:if="${note.isPublic}"
             class="flex items-center text-green-600 dark:text-green-400">
             <i class="fas fa-globe mr-1"></i>
-            <span>Public</span>
+            <span th:text="#{card.badge.public}">Public</span>
           </div>
 
           <!-- Archived Badge -->
@@ -100,7 +100,7 @@
         <button
           hx:post="@{/fragments/chat-notes/{id}/favorite(id=${note.id},isFavorite=${!note.isFavorite})}"
           hx-target="closest .chat-note-card" hx-swap="outerHTML"
-          th:title="${note.isFavorite ? 'Remove from favorites' : 'Add to favorites'}"
+          th:title="${note.isFavorite ? #messages.msg('card.action.unfavorite') : #messages.msg('card.action.favorite')}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors rounded">
           <i th:class="${note.isFavorite ? 'fas fa-star' : 'far fa-star'}"></i>
         </button>
@@ -109,7 +109,7 @@
         <button
           hx:post="@{/fragments/chat-notes/{id}/archive(id=${note.id},isArchived=${!note.isArchived})}"
           hx-target="closest .chat-note-card" hx-swap="outerHTML"
-          th:title="${note.isArchived ? 'Unarchive' : 'Archive'}"
+          th:title="${note.isArchived ? #messages.msg('card.action.unarchive') : #messages.msg('card.action.archive')}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors rounded">
           <i th:class="${note.isArchived ? 'fas fa-box-open' : 'fas fa-archive'}"></i>
         </button>
@@ -117,14 +117,14 @@
         <!-- Trash / Restore -->
         <button th:if="${!note.isTrashed}"
           hx:post="@{/fragments/chat-notes/{id}/trash(id=${note.id})}"
-          hx-target="closest .chat-note-card" hx-swap="outerHTML" title="Move to trash"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML" th:title="#{card.action.trash}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded">
           <i class="fas fa-trash"></i>
         </button>
 
         <button th:if="${note.isTrashed}"
           hx:post="@{/fragments/chat-notes/{id}/restore(id=${note.id})}"
-          hx-target="closest .chat-note-card" hx-swap="outerHTML" title="Restore from trash"
+          hx-target="closest .chat-note-card" hx-swap="outerHTML" th:title="#{card.action.restore}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors rounded">
           <i class="fas fa-undo"></i>
         </button>
@@ -132,7 +132,7 @@
         <!-- Share (if public) -->
         <button th:if="${note.isPublic}" th:data-note-id="${note.id}"
           th:attr="onclick=${'event.stopPropagation(); copyShareLink(''' + note.id + ''')'}"
-          title="Copy share link"
+          th:title="#{card.action.share}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors rounded">
           <i class="fas fa-share"></i>
         </button>
@@ -140,7 +140,7 @@
         <!-- Download -->
         <button th:data-note-id="${note.id}"
           th:attr="onclick=${'event.stopPropagation(); downloadChatNote(''' + note.id + ''')'}"
-          title="Download markdown"
+          th:title="#{card.action.download}"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors rounded">
           <i class="fas fa-download"></i>
         </button>
@@ -149,7 +149,7 @@
         <div class="relative more-menu-container">
           <button th:data-note-id="${note.id}"
             th:attr="onclick=${'event.stopPropagation(); toggleMoreMenu(''' + note.id + ''')'}"
-            title="More options"
+            th:title="#{card.action.more}"
             class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors rounded">
             <i class="fas fa-ellipsis-v"></i>
           </button>
@@ -164,7 +164,7 @@
                 hx-target="closest .chat-note-card" hx-swap="outerHTML"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i th:class="${note.isPublic ? 'fas fa-lock w-4' : 'fas fa-globe w-4'}"></i>
-                <span th:text="${note.isPublic ? 'Make Private' : 'Make Public'}">Make Public</span>
+                <span th:text="${note.isPublic ? #messages.msg('card.menu.makePrivate') : #messages.msg('card.menu.makePublic')}">Make Public</span>
               </button>
 
               <!-- Edit -->
@@ -172,7 +172,7 @@
                 th:attr="onclick=${'editChatNote(''' + note.id + ''')'}"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-edit w-4"></i>
-                <span>Edit</span>
+                <span th:text="#{card.menu.edit}">Edit</span>
               </button>
 
               <!-- Duplicate -->
@@ -180,7 +180,7 @@
                 th:attr="onclick=${'duplicateChatNote(''' + note.id + ''')'}"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-copy w-4"></i>
-                <span>Duplicate</span>
+                <span th:text="#{card.menu.duplicate}">Duplicate</span>
               </button>
 
               <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
@@ -189,10 +189,10 @@
               <button th:if="${note.isTrashed}"
                 hx:delete="@{/fragments/chat-notes/{id}/permanent(id=${note.id})}"
                 hx-target="closest .chat-note-card" hx-swap="outerHTML"
-                hx-confirm="Are you sure you want to permanently delete this note? This action cannot be undone."
+                th:hx-confirm="#{card.menu.deleteConfirm}"
                 class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-trash-alt w-4"></i>
-                <span>Delete Forever</span>
+                <span th:text="#{card.menu.deleteForever}">Delete Forever</span>
               </button>
             </div>
           </div>
@@ -222,7 +222,7 @@
 
         <!-- Content Preview -->
         <p class="text-sm text-gray-600 dark:text-gray-300 mb-2 line-clamp-2"
-          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 200) : 'No preview available'}">
+          th:text="${note.contentPreview != null ? #strings.abbreviate(note.contentPreview, 200) : #messages.msg('card.preview.empty')}">
           Content preview...
         </p>
 

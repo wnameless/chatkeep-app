@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChatKeep - Login</title>
+  <title th:text="#{page.login.title}">ChatKeep - Login</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,8 +28,8 @@
     <!-- Logo & Title -->
     <div class="text-center mb-8">
       <img src="/images/ChatKeep_icon_light.png" alt="ChatKeep" class="h-20 w-20 mx-auto mb-4">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome to ChatKeep</h1>
-      <p class="text-gray-600">Archive and organize your AI conversations</p>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2" th:text="#{page.login.welcome}">Welcome to ChatKeep</h1>
+      <p class="text-gray-600" th:text="#{page.login.description}">Archive and organize your AI conversations</p>
     </div>
 
     <!-- Login Options -->
@@ -39,28 +39,28 @@
       <a href="/oauth2/authorization/cognito"
         class="flex items-center justify-center w-full px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors">
         <i class="fas fa-cloud mr-3"></i>
-        Login with AWS Cognito
+        <span th:text="#{page.login.cognito}">Login with AWS Cognito</span>
       </a>
 
       <!-- Google -->
       <a href="/oauth2/authorization/google"
         class="flex items-center justify-center w-full px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
         <i class="fab fa-google mr-3 text-red-500"></i>
-        Login with Google
+        <span th:text="#{page.login.google}">Login with Google</span>
       </a>
 
       <!-- GitHub -->
       <a href="/oauth2/authorization/github"
         class="flex items-center justify-center w-full px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
         <i class="fab fa-github mr-3"></i>
-        Login with GitHub
+        <span th:text="#{page.login.github}">Login with GitHub</span>
       </a>
 
       <!-- Facebook -->
       <a href="/oauth2/authorization/facebook"
         class="flex items-center justify-center w-full px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition-colors">
         <i class="fab fa-facebook mr-3"></i>
-        Login with Facebook
+        <span th:text="#{page.login.facebook}">Login with Facebook</span>
       </a>
 
     </div>
@@ -71,7 +71,7 @@
         <div class="w-full border-t border-gray-300"></div>
       </div>
       <div class="relative flex justify-center text-sm">
-        <span class="px-2 bg-white text-gray-500">OR</span>
+        <span class="px-2 bg-white text-gray-500" th:text="#{page.login.or}">OR</span>
       </div>
     </div>
 
@@ -79,19 +79,19 @@
     <a href="/"
       class="flex items-center justify-center w-full px-6 py-3 border-2 border-dashed border-gray-300 text-base font-medium rounded-lg text-gray-600 hover:border-gray-400 hover:text-gray-800 transition-colors">
       <i class="fas fa-user-secret mr-3"></i>
-      Continue as Anonymous User
+      <span th:text="#{page.login.anonymous}">Continue as Anonymous User</span>
     </a>
 
     <!-- Info Text -->
-    <p class="mt-6 text-center text-sm text-gray-500">
+    <p class="mt-6 text-center text-sm text-gray-500" th:text="#{page.login.anonymousInfo}">
       Anonymous mode: Your data is stored locally. Log in to sync across devices.
     </p>
 
     <!-- Privacy & Terms -->
     <div class="mt-8 text-center text-xs text-gray-400">
-      <a href="#" class="hover:text-gray-600">Privacy Policy</a>
+      <a href="#" class="hover:text-gray-600" th:text="#{page.login.privacy}">Privacy Policy</a>
       <span class="mx-2">•</span>
-      <a href="#" class="hover:text-gray-600">Terms of Service</a>
+      <a href="#" class="hover:text-gray-600" th:text="#{page.login.terms}">Terms of Service</a>
     </div>
 
   </div>

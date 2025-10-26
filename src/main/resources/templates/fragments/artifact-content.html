@@ -16,12 +16,12 @@
       <div class="flex justify-end space-x-2 mt-1.5 md:mt-2">
         <button th:attr="onclick=${'cancelArtifactEdit(' + index + ')' }"
           class="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded transition-colors">
-          Cancel
+          <span th:text="#{button.cancel}">Cancel</span>
         </button>
         <button th:attr="onclick=${'saveArtifactContent(''' + noteId + ''',' + index + ')' }"
           class="px-3 py-1.5 text-sm text-white bg-green-500 hover:bg-green-600 rounded transition-colors">
           <i class="fas fa-save mr-1"></i>
-          Save
+          <span th:text="#{button.save}">Save</span>
         </button>
       </div>
     </div>
@@ -31,7 +31,7 @@
       th:attr="onclick=${'enterArtifactEditMode(' + index + ')' }"
       class="mt-1.5 md:mt-2 mx-2 mb-2 md:mx-0 md:mb-0 px-3 py-1.5 text-sm text-white bg-primary-500 hover:bg-primary-600 rounded transition-colors">
       <i class="fas fa-edit mr-1"></i>
-      Edit Content
+      <span th:text="#{content.editButton}">Edit Content</span>
     </button>
   </div>
 

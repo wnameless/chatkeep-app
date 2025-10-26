@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.moonote.app.chatkeep.service.ChatNoteService;
@@ -22,10 +23,14 @@ public class HomeController {
    * Home page - Shows active ChatNotes GET /
    */
   @GetMapping("/")
-  public String home(Model model) {
+  public String home(Model model, HttpSession session) {
     log.info("Loading home page");
+    String viewMode = (String) session.getAttribute("viewMode");
+    if (viewMode == null) viewMode = "masonry";
+
     model.addAttribute("pageTitle", "ChatKeep - ChatNotes");
     model.addAttribute("currentView", "chatnotes");
+    model.addAttribute("viewMode", viewMode);
     return "pages/index";
   }
 

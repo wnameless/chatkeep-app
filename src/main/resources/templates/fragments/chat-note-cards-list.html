@@ -8,8 +8,9 @@
     <!-- Cards container -->
     <th:block th:if="${notes != null && !notes.isEmpty()}">
       <!-- Note cards -->
-      <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}">
-      </div>
+      <th:block th:each="note : ${notes}">
+        <div th:replace="~{fragments/chat-note-card :: list-card(${note})}"></div>
+      </th:block>
 
       <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
       <div th:if="${hasMore}" th:id="'scroll-sentinel-' + ${currentPage}" hx:get="@{/fragments/chat-notes(
@@ -21,7 +22,7 @@
         class="col-span-full flex items-center justify-center py-8">
         <div class="text-sm text-gray-500 dark:text-gray-400">
           <i class="fas fa-spinner fa-spin mr-2"></i>
-          <span>Loading more notes...</span>
+          <span th:text="#{empty.loading}">Loading more notes...</span>
         </div>
       </div>
 
@@ -29,7 +30,7 @@
       <div th:unless="${hasMore}" class="col-span-full flex items-center justify-center py-8">
         <div class="text-sm text-gray-500 dark:text-gray-400">
           <i class="fas fa-check-circle mr-2"></i>
-          <span>All notes loaded</span>
+          <span th:text="#{empty.allLoaded}">All notes loaded</span>
         </div>
       </div>
     </th:block>
@@ -47,38 +48,38 @@
                            filter == 'archived' ? 'fa-archive' :
                            'fa-inbox')}"></i>
             </div>
-            <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3" th:text="${filter == 'favorites' ? 'No Favorites yet' :
-                                  filter == 'trash' ? 'Trash is empty' :
-                                  filter == 'archived' ? 'No Archived notes' :
-                                  'No ChatNotes yet'}">
+            <h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3" th:text="${filter == 'favorites' ? #messages.msg('empty.favorites.title') :
+                                  filter == 'trash' ? #messages.msg('empty.trash.title') :
+                                  filter == 'archived' ? #messages.msg('empty.archived.title') :
+                                  #messages.msg('empty.notes.title')}">
               No ChatNotes yet
             </h3>
             <th:block th:if="${filter == null || filter == 'active' || filter == ''}">
-              <p class="text-gray-600 dark:text-gray-400 mb-4">
+              <p class="text-gray-600 dark:text-gray-400 mb-4" th:text="#{empty.notes.hint}">
                 Get started by importing your first conversation archive
               </p>
               <div
                 class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-500">
-                <span>Click the</span>
+                <span th:text="#{empty.notes.clickButton}">Click the</span>
                 <span
                   class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary-500 text-white">
                   <i class="fas fa-robot text-xs"></i>
                 </span>
-                <span>button to begin</span>
+                <span th:text="#{empty.notes.buttonToBegin}">button to begin</span>
               </div>
             </th:block>
             <th:block th:if="${filter == 'favorites'}">
-              <p class="text-gray-600 dark:text-gray-400">
+              <p class="text-gray-600 dark:text-gray-400" th:text="#{empty.favorites.hint}">
                 Star important notes to find them quickly here
               </p>
             </th:block>
             <th:block th:if="${filter == 'trash'}">
-              <p class="text-gray-600 dark:text-gray-400">
+              <p class="text-gray-600 dark:text-gray-400" th:text="#{empty.trash.hint}">
                 Deleted notes will appear here for 30 days before permanent removal
               </p>
             </th:block>
             <th:block th:if="${filter == 'archived'}">
-              <p class="text-gray-600 dark:text-gray-400">
+              <p class="text-gray-600 dark:text-gray-400" th:text="#{empty.archived.hint}">
                 Archive old notes to keep your workspace organized
               </p>
             </th:block>
@@ -91,8 +92,9 @@
   <!-- Cards-only fragment (for infinite scroll appending) -->
   <th:block th:fragment="cards-only">
     <!-- Just the note cards, no empty states or sentinels -->
-    <div th:each="note : ${notes}" th:replace="~{fragments/chat-note-card :: list-card(${note})}">
-    </div>
+    <th:block th:each="note : ${notes}">
+      <div th:replace="~{fragments/chat-note-card :: list-card(${note})}"></div>
+    </th:block>
 
     <!-- Infinite scroll sentinel (triggers when scrolled into view) -->
     <div th:if="${hasMore}" th:id="'scroll-sentinel-' + ${currentPage}" hx:get="@{/fragments/chat-notes(
@@ -104,7 +106,7 @@
       class="col-span-full flex items-center justify-center py-8">
       <div class="text-sm text-gray-500 dark:text-gray-400">
         <i class="fas fa-spinner fa-spin mr-2"></i>
-        <span>Loading more notes...</span>
+        <span th:text="#{empty.loading}">Loading more notes...</span>
       </div>
     </div>
 
@@ -112,7 +114,7 @@
     <div th:unless="${hasMore}" class="col-span-full flex items-center justify-center py-8">
       <div class="text-sm text-gray-500 dark:text-gray-400">
         <i class="fas fa-check-circle mr-2"></i>
-        <span>All notes loaded</span>
+        <span th:text="#{empty.allLoaded}">All notes loaded</span>
       </div>
     </div>
   </th:block>

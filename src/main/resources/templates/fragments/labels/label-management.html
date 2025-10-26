@@ -7,14 +7,14 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Label Management</h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Create and organize labels for your ChatNotes</p>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100" th:text="#{label.management.title}">Label Management</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" th:text="#{label.management.description}">Create and organize labels for your ChatNotes</p>
     </div>
     <button
       hx-get="/fragments/labels/create-modal"
       hx-target="#modal-container"
       hx-swap="innerHTML"
-      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md">
+      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md" th:text="#{label.create.button}">
       + Create Label
     </button>
   </div>
@@ -24,10 +24,10 @@
     <!-- Table Header -->
     <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
       <div class="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-        <div class="col-span-1">Color</div>
-        <div class="col-span-6">Name</div>
-        <div class="col-span-3">Created</div>
-        <div class="col-span-2 text-right">Actions</div>
+        <div class="col-span-1" th:text="#{label.table.color}">Color</div>
+        <div class="col-span-6" th:text="#{label.table.name}">Name</div>
+        <div class="col-span-3" th:text="#{label.table.created}">Created</div>
+        <div class="col-span-2 text-right" th:text="#{label.table.actions}">Actions</div>
       </div>
     </div>
 
@@ -36,14 +36,14 @@
       <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
       </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No labels</h3>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Get started by creating a new label.</p>
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100" th:text="#{label.empty.title}">No labels</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" th:text="#{label.empty.description}">Get started by creating a new label.</p>
       <div class="mt-6">
         <button
           hx-get="/fragments/labels/create-modal"
           hx-target="#modal-container"
           hx-swap="innerHTML"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md">
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-md" th:text="#{label.create.button}">
           + Create Label
         </button>
       </div>
@@ -78,14 +78,14 @@
               hx:get="@{/fragments/labels/{id}/edit-modal(id=${label.id})}"
               hx-target="#modal-container"
               hx-swap="innerHTML"
-              class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+              class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300" th:text="#{button.edit}">
               Edit
             </button>
             <button
               hx:get="@{/fragments/labels/{id}/delete-confirm(id=${label.id})}"
               hx-target="#modal-container"
               hx-swap="innerHTML"
-              class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+              class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300" th:text="#{button.delete}">
               Delete
             </button>
           </div>
