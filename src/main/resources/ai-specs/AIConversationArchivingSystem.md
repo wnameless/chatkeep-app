@@ -24,6 +24,26 @@ This file contains everything needed to archive AI conversations into a standard
 
 ## Part 1: Archiving Instructions for AI
 
+### ⚠️ CRITICAL: What This File Is
+
+**When you receive this file, understand:**
+
+**DO NOT:**
+- ❌ Summarize this file
+- ❌ Explain what this file contains
+- ❌ Describe the archiving process
+- ❌ Treat this as content to analyze
+
+**DO:**
+- ✅ Recognize this as archiving instructions
+- ✅ Apply these instructions to the conversation that occurred BEFORE this file was uploaded
+- ✅ Archive the prior conversation, not this instruction file
+- ✅ Begin the archiving process immediately
+
+**This is an instruction set, not content. Execute it, don't explain it.**
+
+---
+
 ### CRITICAL: Language Handling - Three Contexts
 
 **1. Template Structure (MUST be English):**
@@ -88,8 +108,8 @@ When a user uploads or pastes this file (with or without additional instructions
 - **DO NOT** describe the archiving process in detail before starting
 
 Instead:
-1. Briefly acknowledge in the conversation's language: "I'll begin archiving this conversation."
-2. Proceed directly to Step 1
+1. Proceed directly to Step 0 (scan and acknowledge the conversation)
+2. Continue through the remaining steps
 3. Keep all interactions concise
 
 The user already knows what this file does - they want action, not explanation.
@@ -97,6 +117,24 @@ The user already knows what this file does - they want action, not explanation.
 ---
 
 When a user asks you to archive a conversation, follow these steps:
+
+### Step 0: Acknowledge the Archiving Request
+
+**When you receive this file, you are being asked to archive the conversation that occurred BEFORE this file was uploaded.**
+
+**Do this immediately:**
+
+1. **Scan the conversation history** up to the point where this file was uploaded
+2. **Count and identify:**
+   - How many user messages?
+   - How many AI responses?
+   - How many attachments were uploaded or pasted?
+   - How many artifacts (code, documents, etc.) were created?
+   - What is the main topic?
+3. **Briefly confirm** in the conversation's language: "I see a conversation with [X] exchanges about [topic]. I'll now archive it."
+4. **Proceed directly to Step 1**
+
+**This step forces you to recognize there IS a conversation to archive. You cannot complete this step by analyzing this instruction file - you must look at the prior conversation.**
 
 ### Step 1: Choose Delivery Method
 
