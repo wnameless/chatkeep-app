@@ -364,10 +364,6 @@
                         th:text="${attachment.filename}">
                         document.pdf
                       </p>
-                      <p class="text-xs text-gray-500 dark:text-gray-400"
-                        th:text="${attachment.originalType}">
-                        PDF
-                      </p>
                     </div>
                   </div>
                   <i th:id="'attachment-chevron-' + ${iterStat.index}"
@@ -414,7 +410,7 @@
 
     <!-- Initialize metadata section chevron based on screen size -->
     <script>
-      (function() {
+      (function () {
         // Use requestAnimationFrame to ensure styles are computed
         requestAnimationFrame(() => {
           const metadataSection = document.getElementById('metadata-section');

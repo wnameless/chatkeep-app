@@ -47,8 +47,8 @@ public class MarkdownChatNotePreprocessor {
     try {
       log.info("Starting preprocessing of markdown archive");
 
-      // Step 0: Strip code block wrappers if present (users often copy from code blocks)
-      markdownContent = stripCodeBlockWrappers(markdownContent);
+      // Step 0: Strip code block wrappers and trim extraneous content
+      markdownContent = stripAndTrimArchive(markdownContent);
 
       // Step 1: Validate basic structure
       List<String> structuralErrors = validateBasicStructure(markdownContent);
@@ -93,33 +93,53 @@ public class MarkdownChatNotePreprocessor {
   }
 
   /**
-   * Strips code block wrappers (```) from markdown content if present. Users often copy archives
-   * from code blocks, which adds ``` at the beginning and end.
+   * Strips code block wrappers and trims extraneous content before/after the archive.
    *
-   * Handles: - Plain code blocks: ```content``` - Language-specific blocks: ```markdown content ```
-   * - Multiple backticks: ````content````
+   * Performs three cleanup operations:
+   * 1. Strips code block wrappers (```) that users often add when copying archives
+   * 2. Trims any content before the archive starts (first `---` YAML delimiter)
+   * 3. Trims any content after the archive ends (`_End of archived conversation_`)
    *
    * @param content the markdown content
-   * @return content with code block wrappers removed if present, otherwise unchanged
+   * @return cleaned content with wrappers removed and boundaries trimmed
    */
-  private String stripCodeBlockWrappers(String content) {
+  private String stripAndTrimArchive(String content) {
     if (content == null || content.trim().isEmpty()) {
       return content;
     }
 
+    String cleaned = content.trim();
+
+    // Operation 1: Strip code block wrappers
+    cleaned = stripCodeBlockWrappers(cleaned);
+
+    // Operation 2: Trim everything before archive start (first `---`)
+    cleaned = trimBeforeArchiveStart(cleaned);
+
+    // Operation 3: Trim everything after archive end
+    cleaned = trimAfterArchiveEnd(cleaned);
+
+    return cleaned;
+  }
+
+  /**
+   * Strips code block wrappers (```) from markdown content if present.
+   *
+   * Handles: - Plain code blocks: ```content``` - Language-specific blocks: ```markdown content ```
+   * - Multiple backticks: ````content````
+   */
+  private String stripCodeBlockWrappers(String content) {
     String trimmed = content.trim();
 
     // Pattern to match opening code fence: ``` or ```language or ````
-    // Allows optional language identifier after opening fence
     Pattern openingPattern = Pattern.compile("^(`{3,})\\s*[\\w]*\\s*\\n");
     Matcher openingMatcher = openingPattern.matcher(trimmed);
 
     if (!openingMatcher.find()) {
-      // No opening code fence found
       return content;
     }
 
-    String fence = openingMatcher.group(1); // e.g., "```" or "````"
+    String fence = openingMatcher.group(1);
     int fenceLength = fence.length();
 
     // Check if content ends with matching closing fence
@@ -127,21 +147,69 @@ public class MarkdownChatNotePreprocessor {
     Matcher closingMatcher = closingPattern.matcher(trimmed);
 
     if (!closingMatcher.find()) {
-      // No matching closing fence found
       log.debug("Opening code fence found but no matching closing fence, leaving content as-is");
       return content;
     }
 
-    // Remove opening fence (including optional language and newline)
+    // Remove opening and closing fences
     int startIndex = openingMatcher.end();
-
-    // Remove closing fence (including newline before it)
     int endIndex = closingMatcher.start();
 
     String unwrapped = trimmed.substring(startIndex, endIndex);
     log.debug("Stripped code block wrappers from markdown content");
 
     return unwrapped;
+  }
+
+  /**
+   * Trims all content before the archive starts (first `---` YAML frontmatter delimiter).
+   * Handles cases where AI adds preamble text before the actual archive.
+   */
+  private String trimBeforeArchiveStart(String content) {
+    // Find first occurrence of `---` at the start of a line (YAML frontmatter opening)
+    Pattern yamlStartPattern = Pattern.compile("^---\\s*$", Pattern.MULTILINE);
+    Matcher matcher = yamlStartPattern.matcher(content);
+
+    if (!matcher.find()) {
+      // No YAML frontmatter found, return as-is
+      return content;
+    }
+
+    int startIndex = matcher.start();
+    if (startIndex == 0) {
+      // Archive already starts at beginning, no trimming needed
+      return content;
+    }
+
+    String trimmed = content.substring(startIndex);
+    log.debug("Trimmed {} characters before archive start (preamble text removed)", startIndex);
+
+    return trimmed;
+  }
+
+  /**
+   * Trims all content after the archive ends (`_End of archived conversation_` marker).
+   * Handles cases where AI adds follow-up text after the archive.
+   */
+  private String trimAfterArchiveEnd(String content) {
+    String endMarker = "_End of archived conversation_";
+    int endMarkerIndex = content.indexOf(endMarker);
+
+    if (endMarkerIndex == -1) {
+      // No end marker found, return as-is
+      return content;
+    }
+
+    // Trim at the END marker (inclusive - remove the marker itself)
+    String trimmed = content.substring(0, endMarkerIndex).trim();
+
+    int charactersRemoved = content.length() - trimmed.length();
+    if (charactersRemoved > 0) {
+      log.debug("Trimmed {} characters after archive end (follow-up text and end marker removed)",
+          charactersRemoved);
+    }
+
+    return trimmed;
   }
 
   private ChatNoteMetadataDto parseYamlFrontmatter(String content) {
