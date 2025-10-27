@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title th:text="${pageTitle} ?: 'ChatKeep - Shared Note'">ChatKeep - Shared Note</title>
+  <title th:text="${pageTitle} ?: #{page.share.title}">ChatKeep - Shared Note</title>
 
   <!-- PWA Meta -->
-  <meta name="description" content="Shared ChatNote from ChatKeep">
+  <meta name="description" th:content="#{page.share.title}" content="Shared ChatNote from ChatKeep">
   <meta name="theme-color" content="#F59E0B">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" href="/images/ChatKeep_icon_light.png">
@@ -44,14 +44,14 @@
         <button onclick="copyToWorkspace()"
           class="px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-lg transition-colors">
           <i class="fas fa-copy mr-2"></i>
-          Copy to My Workspace
+          <span th:text="#{page.share.copyToWorkspace}">Copy to My Workspace</span>
         </button>
 
         <!-- Back to Home -->
         <a href="/"
           class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors">
           <i class="fas fa-home mr-2"></i>
-          Home
+          <span th:text="#{page.share.home}">Home</span>
         </a>
       </div>
     </div>
@@ -71,23 +71,23 @@
       <!-- Metadata -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
         <div>
-          <span class="text-gray-500 dark:text-gray-400">Platform:</span>
+          <span class="text-gray-500 dark:text-gray-400" th:text="#{page.share.platform}">Platform:</span>
           <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
             th:text="${note.originalPlatform}">Claude</span>
         </div>
         <div>
-          <span class="text-gray-500 dark:text-gray-400">Date:</span>
+          <span class="text-gray-500 dark:text-gray-400" th:text="#{page.share.date}">Date:</span>
           <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
             th:text="${#temporals.format(note.conversationDate, 'MMM dd, yyyy')}">Jan 15,
             2025</span>
         </div>
         <div th:if="${note.artifactCount > 0}">
-          <span class="text-gray-500 dark:text-gray-400">Artifacts:</span>
+          <span class="text-gray-500 dark:text-gray-400" th:text="#{page.share.artifacts}">Artifacts:</span>
           <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
             th:text="${note.artifactCount}">0</span>
         </div>
         <div th:if="${note.attachmentCount > 0}">
-          <span class="text-gray-500 dark:text-gray-400">Attachments:</span>
+          <span class="text-gray-500 dark:text-gray-400" th:text="#{page.share.attachments}">Attachments:</span>
           <span class="ml-2 font-medium text-gray-900 dark:text-gray-100"
             th:text="${note.attachmentCount}">0</span>
         </div>
@@ -107,7 +107,7 @@
       class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <div class="prose dark:prose-invert max-w-none" id="markdown-content">
         <!-- Rendered markdown content will be inserted here -->
-        <p>Loading content...</p>
+        <p th:text="#{page.share.loadingContent}">Loading content...</p>
       </div>
     </div>
 
@@ -116,10 +116,10 @@
       class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
       <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
         <i class="fas fa-file-code text-primary-500 mr-2"></i>
-        Artifacts
+        <span th:text="#{page.share.artifactsSection}">Artifacts</span>
       </h2>
       <!-- Artifacts list would go here -->
-      <p class="text-gray-500 dark:text-gray-400 text-sm">Artifacts are included in the downloadable
+      <p class="text-gray-500 dark:text-gray-400 text-sm" th:text="#{page.share.artifactsInfo}">Artifacts are included in the downloadable
         archive.</p>
     </div>
 
@@ -128,7 +128,7 @@
       class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
       <div class="flex items-center text-blue-800 dark:text-blue-300">
         <i class="fas fa-info-circle mr-3"></i>
-        <p class="text-sm">
+        <p class="text-sm" th:text="#{page.share.shareInfo}">
           This is a publicly shared ChatNote. Copy it to your workspace to edit or add it to your
           collection.
         </p>
@@ -143,6 +143,15 @@
     const noteId = /*[[${note.id}]]*/ null;
     const noteContent = /*[[${note.conversationContent}]]*/ '';
 
+    // i18n messages
+    const i18n = {
+      contentNotAvailable: /*[[#{page.share.contentNotAvailable}]]*/ 'Content not available',
+      copySuccess: /*[[#{page.share.copySuccess}]]*/ 'ChatNote copied to your workspace!',
+      copyError: /*[[#{page.share.copyError}]]*/ 'Error copying ChatNote: ',
+      copyFailed: /*[[#{page.share.copyFailed}]]*/ 'Failed to copy ChatNote: ',
+      unknownError: /*[[#{page.share.unknownError}]]*/ 'Unknown error'
+    };
+
     // Render markdown on page load
     document.addEventListener('DOMContentLoaded', function () {
       if (noteContent && typeof marked !== 'undefined') {
@@ -150,7 +159,7 @@
           breaks: true,
           gfm: true
         });
-        const html = marked.parse(noteContent || 'Content not available');
+        const html = marked.parse(noteContent || i18n.contentNotAvailable);
         document.getElementById('markdown-content').innerHTML = html;
       }
     });
@@ -183,15 +192,15 @@
         .then(data => {
           // API returns { success: true, message: "...", data: {...} }
           if (data.success) {
-            alert('ChatNote copied to your workspace!');
+            alert(i18n.copySuccess);
             window.location.href = '/';
           } else {
-            alert('Error copying ChatNote: ' + (data.message || 'Unknown error'));
+            alert(i18n.copyError.replace('{0}', data.message || i18n.unknownError));
           }
         })
         .catch(err => {
           console.error('Error copying ChatNote:', err);
-          alert('Failed to copy ChatNote: ' + err.message);
+          alert(i18n.copyFailed.replace('{0}', err.message));
         });
     }
 
