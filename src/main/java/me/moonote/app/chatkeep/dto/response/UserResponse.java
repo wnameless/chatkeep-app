@@ -2,6 +2,7 @@ package me.moonote.app.chatkeep.dto.response;
 
 import static lombok.AccessLevel.PRIVATE;
 import java.time.Instant;
+import me.moonote.app.chatkeep.model.UserPreferences;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class UserResponse {
   String email; // Email (null for anonymous users)
   String username; // Display name (null for anonymous users)
   String userType; // "ANONYMOUS" or "AUTHENTICATED"
+  UserPreferences preferences; // User preferences (theme, language)
   Instant registeredAt; // When user upgraded from anonymous to authenticated
   Instant createdAt;
   Instant updatedAt;

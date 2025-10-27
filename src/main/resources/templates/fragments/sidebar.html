@@ -21,7 +21,7 @@
           hx-push-url="false"
           class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors active">
           <i class="fas fa-notes-medical w-6 text-lg"></i>
-          <span class="ml-3 font-medium">ChatNotes</span>
+          <span class="ml-3 font-medium" th:text="#{sidebar.notes}">ChatNotes</span>
         </a>
 
         <!-- Favorite -->
@@ -29,7 +29,7 @@
           hx-push-url="false"
           class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
           <i class="fas fa-star w-6 text-lg"></i>
-          <span class="ml-3 font-medium">Favorites</span>
+          <span class="ml-3 font-medium" th:text="#{sidebar.favorites}">Favorites</span>
         </a>
 
         <!-- Shared (Public ChatNotes) -->
@@ -45,7 +45,7 @@
           hx-push-url="false"
           class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
           <i class="fas fa-archive w-6 text-lg"></i>
-          <span class="ml-3 font-medium">Archive</span>
+          <span class="ml-3 font-medium" th:text="#{sidebar.archived}">Archive</span>
         </a>
 
         <!-- Trash -->
@@ -53,7 +53,7 @@
           hx-push-url="false"
           class="sidebar-nav-item flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
           <i class="fas fa-trash w-6 text-lg"></i>
-          <span class="ml-3 font-medium">Trash</span>
+          <span class="ml-3 font-medium" th:text="#{sidebar.trash}">Trash</span>
         </a>
 
         <!-- Separator -->

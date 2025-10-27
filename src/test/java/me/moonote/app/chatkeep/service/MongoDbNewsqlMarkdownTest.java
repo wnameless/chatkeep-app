@@ -73,7 +73,7 @@ class MongoDbNewsqlMarkdownTest {
     assertEquals("COMPLETE", metadata.getChatNoteCompleteness(),
         "Archive completeness should be COMPLETE");
     assertEquals(0, metadata.getWorkaroundsCount(), "Workarounds count should be 0");
-    assertEquals("3 KB", metadata.getTotalFileSize(), "Total file size should be 3 KB");
+    assertEquals("6 KB", metadata.getTotalFileSize(), "Total file size should be 6 KB");
   }
 
   @Test

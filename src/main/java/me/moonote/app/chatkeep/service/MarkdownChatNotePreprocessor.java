@@ -47,22 +47,35 @@ public class MarkdownChatNotePreprocessor {
     try {
       log.info("Starting preprocessing of markdown archive");
 
-      // Step 1-5: Parse all sections (same as before)
+      // Step 0: Strip code block wrappers and trim extraneous content
+      markdownContent = stripAndTrimArchive(markdownContent);
+
+      // Step 1: Validate basic structure
+      List<String> structuralErrors = validateBasicStructure(markdownContent);
+      if (!structuralErrors.isEmpty()) {
+        log.warn("Archive structural validation failed: {}", structuralErrors);
+        return ChatNoteValidationResult.failure(structuralErrors);
+      }
+
+      // Step 2-6: Parse all sections
       ChatNoteMetadataDto metadata = parseYamlFrontmatter(markdownContent);
       ConversationSummaryDto summary = parseSummary(markdownContent);
       List<ArtifactDto> artifacts = extractArtifacts(markdownContent);
       List<AttachmentDto> attachments = extractAttachments(markdownContent);
       List<WorkaroundDto> workarounds = extractWorkarounds(markdownContent);
 
-      // Step 6: Create JSON structure
+      // Step 7: Calculate and set counts from actual content (backend is authoritative)
+      calculateAndSetMetadataCounts(metadata, artifacts, attachments, workarounds, markdownContent);
+
+      // Step 8: Create JSON structure
       ChatNoteDto chatNoteDto = ChatNoteDto.builder().metadata(metadata).summary(summary)
           .artifacts(artifacts).attachments(attachments).workarounds(workarounds).build();
 
-      // Step 7: Convert to JSON
+      // Step 9: Convert to JSON
       String json = objectMapper.writeValueAsString(chatNoteDto);
       log.debug("Converted archive to JSON, size: {} bytes", json.length());
 
-      // Step 8: Validate against schema
+      // Step 10: Validate against schema
       ValidationResult validationResult = schemaValidator.validate(json);
 
       if (validationResult.isValid()) {
@@ -77,6 +90,126 @@ public class MarkdownChatNotePreprocessor {
       log.error("Error preprocessing archive", e);
       return ChatNoteValidationResult.failure(Collections.singletonList(e.getMessage()));
     }
+  }
+
+  /**
+   * Strips code block wrappers and trims extraneous content before/after the archive.
+   *
+   * Performs three cleanup operations:
+   * 1. Strips code block wrappers (```) that users often add when copying archives
+   * 2. Trims any content before the archive starts (first `---` YAML delimiter)
+   * 3. Trims any content after the archive ends (`_End of archived conversation_`)
+   *
+   * @param content the markdown content
+   * @return cleaned content with wrappers removed and boundaries trimmed
+   */
+  private String stripAndTrimArchive(String content) {
+    if (content == null || content.trim().isEmpty()) {
+      return content;
+    }
+
+    String cleaned = content.trim();
+
+    // Operation 1: Strip code block wrappers
+    cleaned = stripCodeBlockWrappers(cleaned);
+
+    // Operation 2: Trim everything before archive start (first `---`)
+    cleaned = trimBeforeArchiveStart(cleaned);
+
+    // Operation 3: Trim everything after archive end
+    cleaned = trimAfterArchiveEnd(cleaned);
+
+    return cleaned;
+  }
+
+  /**
+   * Strips code block wrappers (```) from markdown content if present.
+   *
+   * Handles: - Plain code blocks: ```content``` - Language-specific blocks: ```markdown content ```
+   * - Multiple backticks: ````content````
+   */
+  private String stripCodeBlockWrappers(String content) {
+    String trimmed = content.trim();
+
+    // Pattern to match opening code fence: ``` or ```language or ````
+    Pattern openingPattern = Pattern.compile("^(`{3,})\\s*[\\w]*\\s*\\n");
+    Matcher openingMatcher = openingPattern.matcher(trimmed);
+
+    if (!openingMatcher.find()) {
+      return content;
+    }
+
+    String fence = openingMatcher.group(1);
+    int fenceLength = fence.length();
+
+    // Check if content ends with matching closing fence
+    Pattern closingPattern = Pattern.compile("\\n`{" + fenceLength + ",}\\s*$");
+    Matcher closingMatcher = closingPattern.matcher(trimmed);
+
+    if (!closingMatcher.find()) {
+      log.debug("Opening code fence found but no matching closing fence, leaving content as-is");
+      return content;
+    }
+
+    // Remove opening and closing fences
+    int startIndex = openingMatcher.end();
+    int endIndex = closingMatcher.start();
+
+    String unwrapped = trimmed.substring(startIndex, endIndex);
+    log.debug("Stripped code block wrappers from markdown content");
+
+    return unwrapped;
+  }
+
+  /**
+   * Trims all content before the archive starts (first `---` YAML frontmatter delimiter).
+   * Handles cases where AI adds preamble text before the actual archive.
+   */
+  private String trimBeforeArchiveStart(String content) {
+    // Find first occurrence of `---` at the start of a line (YAML frontmatter opening)
+    Pattern yamlStartPattern = Pattern.compile("^---\\s*$", Pattern.MULTILINE);
+    Matcher matcher = yamlStartPattern.matcher(content);
+
+    if (!matcher.find()) {
+      // No YAML frontmatter found, return as-is
+      return content;
+    }
+
+    int startIndex = matcher.start();
+    if (startIndex == 0) {
+      // Archive already starts at beginning, no trimming needed
+      return content;
+    }
+
+    String trimmed = content.substring(startIndex);
+    log.debug("Trimmed {} characters before archive start (preamble text removed)", startIndex);
+
+    return trimmed;
+  }
+
+  /**
+   * Trims all content after the archive ends (`_End of archived conversation_` marker).
+   * Handles cases where AI adds follow-up text after the archive.
+   */
+  private String trimAfterArchiveEnd(String content) {
+    String endMarker = "_End of archived conversation_";
+    int endMarkerIndex = content.indexOf(endMarker);
+
+    if (endMarkerIndex == -1) {
+      // No end marker found, return as-is
+      return content;
+    }
+
+    // Trim at the END marker (inclusive - remove the marker itself)
+    String trimmed = content.substring(0, endMarkerIndex).trim();
+
+    int charactersRemoved = content.length() - trimmed.length();
+    if (charactersRemoved > 0) {
+      log.debug("Trimmed {} characters after archive end (follow-up text and end marker removed)",
+          charactersRemoved);
+    }
+
+    return trimmed;
   }
 
   private ChatNoteMetadataDto parseYamlFrontmatter(String content) {
@@ -374,7 +507,7 @@ public class MarkdownChatNotePreprocessor {
     String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
 
     Pattern artifactPattern = Pattern.compile(
-        "<!-- ARTIFACT_START: (.*?) -->\\s*\\n(.*?)\\n<!-- ARTIFACT_END -->", Pattern.DOTALL);
+        ":::artifact (.*?)\\n(.*?)\\n:::", Pattern.DOTALL);
 
     Matcher matcher = artifactPattern.matcher(contentAfterYaml);
 
@@ -419,7 +552,7 @@ public class MarkdownChatNotePreprocessor {
     String contentAfterYaml = yamlEnd > 0 ? content.substring(yamlEnd) : content;
 
     Pattern attachmentPattern = Pattern.compile(
-        "<!-- MARKDOWN_START: filename=\"(.*?)\" -->\\s*\\n(.*?)\\n<!-- MARKDOWN_END: filename=\".*?\" -->",
+        ":::attachment filename=\"(.*?)\"\\n(.*?)\\n:::",
         Pattern.DOTALL);
 
     Matcher matcher = attachmentPattern.matcher(contentAfterYaml);
@@ -550,8 +683,9 @@ public class MarkdownChatNotePreprocessor {
    */
   private List<String> extractReferencedItems(String sectionContent, String fieldName) {
     // Pattern matches: **FieldName:** [items] or **FieldName:** items
+    // Use .*? instead of .+? to allow empty brackets []
     Pattern pattern = Pattern.compile(
-        "\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.+?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
+        "\\*\\*" + fieldName + ":\\*\\*\\s*(?:\\[(.*?)\\]|(.+?)(?=\\n|$))", Pattern.DOTALL);
     Matcher matcher = pattern.matcher(sectionContent);
 
     if (matcher.find()) {
@@ -567,6 +701,122 @@ public class MarkdownChatNotePreprocessor {
     }
 
     return Collections.emptyList();
+  }
+
+  /**
+   * Validates the basic structure of the archive markdown. Checks for required sections and proper
+   * formatting.
+   *
+   * @param content the markdown content
+   * @return list of validation error messages (empty if valid)
+   */
+  private List<String> validateBasicStructure(String content) {
+    List<String> errors = new ArrayList<>();
+
+    // Check for YAML frontmatter
+    if (!content.trim().startsWith("---")) {
+      errors.add(
+          "Missing YAML frontmatter at the beginning of the archive. Archives must start with '---' followed by metadata fields. "
+              + "This may indicate the AI did not follow the archiving specification correctly.");
+      return errors; // Can't continue without YAML
+    }
+
+    Pattern yamlPattern = Pattern.compile("^---\\s*\\n(.*?)\\n---", Pattern.DOTALL);
+    Matcher yamlMatcher = yamlPattern.matcher(content);
+    if (!yamlMatcher.find()) {
+      errors.add(
+          "Malformed YAML frontmatter. Expected format: '---' (opening), metadata fields, '---' (closing). "
+              + "Make sure the YAML section is properly closed with '---' on its own line.");
+      return errors;
+    }
+
+    // Check for required sections
+    if (!content.contains("## Initial Query")) {
+      errors.add(
+          "Missing required section: '## Initial Query'. This section should describe what the user was trying to accomplish. "
+              + "The AI may have skipped this section or used a different heading.");
+    }
+
+    if (!content.contains("## Key Insights")) {
+      errors.add(
+          "Missing required section: '## Key Insights'. This section should contain the main findings or solutions. "
+              + "The AI may have skipped this section or used a different heading.");
+    }
+
+    // Check for Conversation Artifacts section (if ARTIFACT_COUNT > 0)
+    // Accept both "## Conversation Artifacts" (current spec) and "## Artifacts" (legacy)
+    String yamlContent = yamlMatcher.group(1);
+    Pattern artifactCountPattern = Pattern.compile("ARTIFACT_COUNT:\\s*(\\d+)");
+    Matcher artifactCountMatcher = artifactCountPattern.matcher(yamlContent);
+    if (artifactCountMatcher.find()) {
+      int artifactCount = Integer.parseInt(artifactCountMatcher.group(1));
+      if (artifactCount > 0 && !content.contains("## Conversation Artifacts")
+          && !content.contains("## Artifacts")) {
+        errors.add(
+            "Missing '## Conversation Artifacts' (or '## Artifacts') section, but ARTIFACT_COUNT is "
+                + artifactCount + ". "
+                + "Either the section is missing or the count is incorrect. Artifacts should be outputs created during the conversation.");
+      }
+    }
+
+    // Check for Attachments section (if ATTACHMENT_COUNT > 0)
+    Pattern attachmentCountPattern = Pattern.compile("ATTACHMENT_COUNT:\\s*(\\d+)");
+    Matcher attachmentCountMatcher = attachmentCountPattern.matcher(yamlContent);
+    if (attachmentCountMatcher.find()) {
+      int attachmentCount = Integer.parseInt(attachmentCountMatcher.group(1));
+      if (attachmentCount > 0 && !content.contains("## Attachments")) {
+        errors.add("Missing '## Attachments' section, but ATTACHMENT_COUNT is " + attachmentCount
+            + ". "
+            + "Either the section is missing or the count is incorrect. Attachments should be inputs provided to the conversation.");
+      }
+    }
+
+    return errors;
+  }
+
+  /**
+   * Calculates and sets metadata counts from actual content. Backend is authoritative source for
+   * all counts - YAML values are ignored if present.
+   *
+   * @param metadata the metadata object to update
+   * @param artifacts the list of extracted artifacts
+   * @param attachments the list of extracted attachments
+   * @param workarounds the list of extracted workarounds
+   * @param markdownContent the full markdown content for size calculation
+   */
+  private void calculateAndSetMetadataCounts(ChatNoteMetadataDto metadata,
+      List<ArtifactDto> artifacts, List<AttachmentDto> attachments,
+      List<WorkaroundDto> workarounds, String markdownContent) {
+
+    // Calculate counts from actual content
+    metadata.setArtifactCount(artifacts.size());
+    metadata.setAttachmentCount(attachments.size());
+    metadata.setWorkaroundsCount(workarounds.size());
+
+    // Calculate total file size from markdown content
+    long sizeInBytes = markdownContent.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+    long sizeInKB = (sizeInBytes + 512) / 1024; // Round to nearest KB
+    metadata.setTotalFileSize(sizeInKB + " KB");
+
+    // Derive chatNoteCompleteness from workarounds
+    if (workarounds.isEmpty()) {
+      metadata.setChatNoteCompleteness("COMPLETE");
+    } else {
+      // If attachments exist and workarounds cover most/all of them, it's SUMMARIZED
+      // Otherwise it's PARTIAL
+      int attachmentCount = attachments.size();
+      int workaroundCount = workarounds.size();
+
+      if (attachmentCount > 0 && workaroundCount >= attachmentCount) {
+        metadata.setChatNoteCompleteness("SUMMARIZED");
+      } else {
+        metadata.setChatNoteCompleteness("PARTIAL");
+      }
+    }
+
+    log.debug("Calculated metadata: artifacts={}, attachments={}, workarounds={}, completeness={}, size={}",
+        metadata.getArtifactCount(), metadata.getAttachmentCount(), metadata.getWorkaroundsCount(),
+        metadata.getChatNoteCompleteness(), metadata.getTotalFileSize());
   }
 
 }

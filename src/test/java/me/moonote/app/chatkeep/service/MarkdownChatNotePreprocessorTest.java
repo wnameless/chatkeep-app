@@ -48,6 +48,12 @@ class MarkdownChatNotePreprocessorTest {
     ChatNoteValidationResult result = preprocessor.preprocess(dragonwellMarkdown);
 
     // Assert
+    if (!result.isValid()) {
+      System.out.println("\n=== Dragonwell Validation Errors ===");
+      result.getErrors().forEach(error -> System.out.println("- " + error));
+      System.out.println("====================================\n");
+    }
+
     assertTrue(result.isValid(), "Validation should succeed");
     assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
     assertTrue(result.getErrors().isEmpty(), "Errors should be empty");
@@ -73,7 +79,7 @@ class MarkdownChatNotePreprocessorTest {
     assertEquals("COMPLETE", metadata.getChatNoteCompleteness(),
         "Archive completeness should be COMPLETE");
     assertEquals(0, metadata.getWorkaroundsCount(), "Workarounds count should be 0");
-    assertEquals("18 KB", metadata.getTotalFileSize(), "Total file size should match");
+    assertEquals("14 KB", metadata.getTotalFileSize(), "Total file size should match");
   }
 
   @Test
@@ -335,5 +341,87 @@ class MarkdownChatNotePreprocessorTest {
     assertNotNull(dto.getMetadata(), "Metadata is required by schema");
     assertNotNull(dto.getMetadata().getArchiveVersion(), "Archive version is required");
     assertNotNull(dto.getMetadata().getTitle(), "Title is required");
+  }
+
+  @Test
+  void testPreprocess_ShouldStripCodeBlockWrappers_WithPlainBackticks() {
+    // Arrange - wrap the markdown in plain code block
+    String wrappedMarkdown = "```\n" + dragonwellMarkdown + "\n```";
+
+    // Act
+    ChatNoteValidationResult result = preprocessor.preprocess(wrappedMarkdown);
+
+    // Assert - should successfully parse the unwrapped content
+    assertTrue(result.isValid(), "Validation should succeed after stripping code block wrappers");
+    assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
+    assertEquals("Building Dragonwell JDK 21 on macOS with Compact Object Headers",
+        result.getChatNoteDto().getMetadata().getTitle(), "Should extract title correctly");
+  }
+
+  @Test
+  void testPreprocess_ShouldStripCodeBlockWrappers_WithMarkdownLanguage() {
+    // Arrange - wrap the markdown with language identifier
+    String wrappedMarkdown = "```markdown\n" + dragonwellMarkdown + "\n```";
+
+    // Act
+    ChatNoteValidationResult result = preprocessor.preprocess(wrappedMarkdown);
+
+    // Assert - should successfully parse the unwrapped content
+    assertTrue(result.isValid(), "Validation should succeed after stripping code block wrappers");
+    assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
+    assertEquals("1.0", result.getChatNoteDto().getMetadata().getArchiveVersion(),
+        "Should parse metadata correctly");
+  }
+
+  @Test
+  void testPreprocess_ShouldStripCodeBlockWrappers_WithQuadrupleBackticks() {
+    // Arrange - wrap with quadruple backticks
+    String wrappedMarkdown = "````\n" + dragonwellMarkdown + "\n````";
+
+    // Act
+    ChatNoteValidationResult result = preprocessor.preprocess(wrappedMarkdown);
+
+    // Assert - should successfully parse the unwrapped content
+    assertTrue(result.isValid(), "Validation should succeed after stripping code block wrappers");
+    assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
+    assertEquals(1, result.getChatNoteDto().getArtifacts().size(),
+        "Should extract artifacts correctly");
+  }
+
+  @Test
+  void testPreprocess_ShouldNotModify_WhenNoCodeBlockWrappers() {
+    // Act - process original markdown without wrappers
+    ChatNoteValidationResult result = preprocessor.preprocess(dragonwellMarkdown);
+
+    // Assert - should work as before
+    assertTrue(result.isValid(), "Validation should succeed");
+    assertEquals("Building Dragonwell JDK 21 on macOS with Compact Object Headers",
+        result.getChatNoteDto().getMetadata().getTitle(), "Should extract title correctly");
+  }
+
+  @Test
+  void testPreprocess_ShouldNotModify_WhenOnlyOpeningFence() {
+    // Arrange - markdown with only opening fence (incomplete code block)
+    String partialMarkdown = "```\n" + dragonwellMarkdown;
+
+    // Act
+    ChatNoteValidationResult result = preprocessor.preprocess(partialMarkdown);
+
+    // Assert - should still parse (fence is treated as part of content)
+    // The YAML parser will handle this appropriately
+    assertNotNull(result, "Result should not be null");
+  }
+
+  @Test
+  void testPreprocess_ShouldStripCodeBlockWrappers_WithWhitespace() {
+    // Arrange - wrap with extra whitespace
+    String wrappedMarkdown = "  ```markdown  \n" + dragonwellMarkdown + "\n```  ";
+
+    // Act
+    ChatNoteValidationResult result = preprocessor.preprocess(wrappedMarkdown);
+
+    // Assert - should handle whitespace gracefully
+    assertTrue(result.isValid(), "Validation should succeed with whitespace around fences");
+    assertNotNull(result.getChatNoteDto(), "ChatNoteDto should not be null");
   }
 }

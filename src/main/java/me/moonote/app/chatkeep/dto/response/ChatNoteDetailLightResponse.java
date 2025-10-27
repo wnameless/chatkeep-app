@@ -33,8 +33,6 @@ public class ChatNoteDetailLightResponse {
   String title;
   LocalDate conversationDate;
   List<String> tags;
-  Integer messageCount; // Total number of messages in conversation
-  Integer wordCount; // Total word count
   ConversationSummary summary;
   List<ArtifactMetadata> artifacts; // Metadata only, no content
   List<AttachmentMetadata> attachments; // Metadata only, no content

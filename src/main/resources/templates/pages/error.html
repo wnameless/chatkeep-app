@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChatKeep - Error</title>
+  <title th:text="#{page.error.title}">ChatKeep - Error</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,15 +19,15 @@
 
   <div class="text-center">
     <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-6"></i>
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Oops!</h1>
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4" th:text="#{page.error.oops}">Oops!</h1>
     <p class="text-xl text-gray-600 dark:text-gray-400 mb-8"
-      th:text="${error} ?: 'Something went wrong'">
+      th:text="${error} ?: #messages.msg('page.error.default')">
       Something went wrong
     </p>
     <a href="/"
       class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-500 hover:bg-primary-600 transition-colors">
       <i class="fas fa-home mr-2"></i>
-      Back to Home
+      <span th:text="#{page.error.backHome}">Back to Home</span>
     </a>
   </div>
 

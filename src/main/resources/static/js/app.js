@@ -383,6 +383,17 @@ function initializeViewToggle() {
     const notesGrid = document.getElementById('notes-grid');
 
     if (gridViewBtn && listViewBtn && notesGrid) {
+        // Set initial button states based on current grid class
+        if (notesGrid.classList.contains('space-y-0')) {
+            // List view is active
+            listViewBtn.classList.add('active', 'bg-white', 'dark:bg-gray-600');
+            gridViewBtn.classList.remove('active', 'bg-white', 'dark:bg-gray-600');
+        } else {
+            // Grid view is active
+            gridViewBtn.classList.add('active', 'bg-white', 'dark:bg-gray-600');
+            listViewBtn.classList.remove('active', 'bg-white', 'dark:bg-gray-600');
+        }
+
         gridViewBtn.addEventListener('click', function() {
             // Update active state
             gridViewBtn.classList.add('active', 'bg-white', 'dark:bg-gray-600');

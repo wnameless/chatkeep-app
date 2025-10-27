@@ -68,7 +68,7 @@ class ChatNoteMapperTest {
     assertEquals(ChatNoteCompleteness.COMPLETE, chatNote.getChatNoteCompleteness(),
         "Archive completeness should be COMPLETE");
     assertEquals(0, chatNote.getWorkaroundsCount(), "Workarounds count should match");
-    assertEquals("18 KB", chatNote.getTotalFileSize(), "Total file size should match");
+    assertEquals("14 KB", chatNote.getTotalFileSize(), "Total file size should match");
   }
 
   @Test

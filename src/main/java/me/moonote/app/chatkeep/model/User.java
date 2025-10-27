@@ -71,6 +71,12 @@ public class User {
   List<OAuthProvider> oauthProviders = new ArrayList<>();
 
   /**
+   * User preferences for UI customization (theme, language, etc.)
+   */
+  @Builder.Default
+  UserPreferences preferences = UserPreferences.builder().build();
+
+  /**
    * When the user upgraded from anonymous to authenticated (via OAuth2 registration)
    */
   Instant registeredAt;

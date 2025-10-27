@@ -24,12 +24,32 @@ This file contains everything needed to archive AI conversations into a standard
 
 ## Part 1: Archiving Instructions for AI
 
+### ⚠️ CRITICAL: What This File Is
+
+**When you receive this file, understand:**
+
+**DO NOT:**
+- ❌ Summarize this file
+- ❌ Explain what this file contains
+- ❌ Describe the archiving process
+- ❌ Treat this as content to analyze
+
+**DO:**
+- ✅ Recognize this as archiving instructions
+- ✅ Apply these instructions to the conversation that occurred BEFORE this file was uploaded
+- ✅ Archive the prior conversation, not this instruction file
+- ✅ Begin the archiving process immediately
+
+**This is an instruction set, not content. Execute it, don't explain it.**
+
+---
+
 ### CRITICAL: Language Handling - Three Contexts
 
 **1. Template Structure (MUST be English):**
 - Section headings: `## Initial Query`, `## Key Insights`, `## Attachments`, etc.
-- YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ATTACHMENT_COUNT`, etc.
-- Wrapper syntax: `<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`, `<!-- MARKDOWN_END:`
+- YAML keys: `ARCHIVE_FORMAT_VERSION`, `CREATED_DATE`, `ORIGINAL_PLATFORM`, etc.
+- Wrapper syntax: `:::artifact`, `:::attachment`, `:::`
 - Structure keywords and formatting
 
 **Why:** Backend parsers expect specific English keywords for processing.
@@ -50,63 +70,35 @@ This file contains everything needed to archive AI conversations into a standard
 
 **Why:** Preserve content exactly as created or provided - don't translate or change.
 
-**Examples:**
+**Example:**
 
-✅ **Spanish conversation creating German poem:**
-```markdown
-## Key Insights
-
-El usuario quería crear un poema alemán sobre la naturaleza...  ← Spanish (conversation language)
-
-**Artifacts created:** [Poema Alemán]
-
-<!-- ARTIFACT_START: type="poem" title="Poema Alemán" version="final" -->
-Ich liebe dich, mein Schatz,
-In deinen Augen finde ich Platz...  ← German (as created by user)
-<!-- ARTIFACT_END -->
-```
-
-✅ **Chinese conversation with French/Italian documents:**
+✅ **Chinese conversation with English code and French document:**
 ```markdown
 ## Initial Query
 
-用户上传了法语和意大利语商业文档，需要提取关键财务信息。  ← Chinese (conversation language)
+用户需要审查一份法语合同并创建数据处理脚本。  ← Chinese (conversation language)
 
-**Attachments referenced:** [rapport_financier.pdf, bilancio.docx]
+**Attachments referenced:** [contrat.pdf]
+**Artifacts created:** [数据处理器]
 
-<!-- MARKDOWN_START: filename="rapport_financier.pdf" -->
-# Rapport Financier 2024
+:::attachment filename="contrat.pdf"
+# Contrat de Service
+Bonjour, ce document...  ← French (original language, not translated)
+:::
 
-Bonjour, voici le document financier...  ← French (preserved as-is)
-<!-- MARKDOWN_END -->
-
-<!-- MARKDOWN_START: filename="bilancio.docx" -->
-# Bilancio Aziendale
-
-Ciao, questo è il rapporto finanziario...  ← Italian (preserved as-is)
-<!-- MARKDOWN_END -->
-```
-
-✅ **English conversation with multilingual code:**
-```markdown
-## Key Insights
-
-User needed help creating a Python script with Japanese comments for a client...  ← English (conversation language)
-
-<!-- ARTIFACT_START: type="code" language="python" title="Data Processor" -->
-# データ処理スクリプト (Data Processing Script)
+:::artifact type="code" language="python" title="数据处理器"
 def process_data():
-    """Process customer data"""  ← Mixed English/Japanese (as created)
-    # 顧客データを読み込む
-    pass
-<!-- ARTIFACT_END -->
+    """Process customer data"""  ← English (as created by user)
+    return result
+:::
 ```
 
-**Common Mistakes to Avoid:**
-- ❌ Writing summaries in English when conversation was in Chinese
-- ❌ Translating German poem content to Spanish because conversation was in Spanish
-- ❌ Translating French attachment to English because you're communicating in English
-- ❌ Mixing languages within summaries (use conversation language consistently)
+**Key Rules:**
+- ✅ Structure in English: `## Initial Query`, `:::artifact`, YAML keys
+- ✅ Summaries in conversation language (Chinese)
+- ✅ Content in original language (French document, English code)
+- ❌ Don't translate summaries to English
+- ❌ Don't translate content to match conversation language
 
 ### IMPORTANT: Start Immediately, Don't Explain
 
@@ -116,9 +108,9 @@ When a user uploads or pastes this file (with or without additional instructions
 - **DO NOT** describe the archiving process in detail before starting
 
 Instead:
-1. Briefly acknowledge in the conversation's language: "I'll begin archiving this conversation."
-2. Proceed directly to Step 0 (estimate size and present delivery options)
-3. Keep all interactions concise and focused on gathering necessary user choices
+1. Proceed directly to Step 0 (scan and acknowledge the conversation)
+2. Continue through the remaining steps
+3. Keep all interactions concise
 
 The user already knows what this file does - they want action, not explanation.
 
@@ -126,91 +118,40 @@ The user already knows what this file does - they want action, not explanation.
 
 When a user asks you to archive a conversation, follow these steps:
 
-### Step 0: Estimate Archive Size & Present Delivery Options
+### Step 0: Acknowledge the Archiving Request
 
-Before generating the archive, estimate its size and help the user choose the best delivery method.
+**When you receive this file, you are being asked to archive the conversation that occurred BEFORE this file was uploaded.**
 
-**A. Calculate Estimated Size:**
+**Do this immediately:**
 
-1. **Metadata & Summary:** ~5-10 KB (YAML frontmatter, summaries, references)
-2. **Artifacts:** Count each artifact and estimate:
-   - Code/text artifacts: Character count ÷ 1024 = KB
-   - Total all artifacts
-3. **Attachments:** This is usually the largest component:
-   - Text files (markdown, code, logs): Character count ÷ 1024 = KB
-   - Binary files (images, PDFs): Original file size × 1.37 (base64 encoding overhead)
-   - Spreadsheets/documents: Estimate based on complexity
-   - Total all attachments
-4. **Total Estimated Size:** Sum of all components
+1. **Scan the conversation history** up to the point where this file was uploaded
+2. **Count and identify:**
+   - How many user messages?
+   - How many AI responses?
+   - How many attachments were uploaded or pasted?
+   - How many artifacts (code, documents, etc.) were created?
+   - What is the main topic?
+3. **Briefly confirm** in the conversation's language: "I see a conversation with [X] exchanges about [topic]. I'll now archive it."
+4. **Proceed directly to Step 1**
 
-**Example Calculation:**
-```
-Metadata & summary: ~8 KB
-Artifacts: 2 code files (~15 KB)
-Attachments:
-  - document.pdf (120 KB) → 164 KB after base64
-  - image.png (80 KB) → 110 KB after base64
-  - code.py (5 KB) → 5 KB (text, no encoding)
-Total: ~302 KB
-```
+**This step forces you to recognize there IS a conversation to archive. You cannot complete this step by analyzing this instruction file - you must look at the prior conversation.**
 
-**B. Present Delivery Options Based on Size:**
+### Step 1: Choose Delivery Method
 
-Tell the user:
+**Default: Use Simple Response (recommended for 90%+ of archives)**
 
-**"This archive will be approximately [X] KB (~[Y] MB). Here are your delivery options:**
+Generate the archive as a markdown code block in your response. This works reliably for most conversations.
 
-**1. Simple Response** (code block in chat)
-- ✅ Recommended for: <100 KB archives
-- ✅ Most reliable: No platform-specific formatting issues
-- ✅ Always produces clean markdown
-- ⚠️ Acceptable for: 100-500 KB (may be slow to render)
-- ❌ Not recommended for: >500 KB (may truncate)
-- **DEFAULT RECOMMENDATION** - Use unless file is truly large
+**When to use alternatives:**
 
-**2. Large Document Feature** (Artifact/Canvas/Code View)
-- ✅ Recommended for: 100 KB - 1 MB archives
-- ⚠️ WARNING: May add platform-specific formatting that breaks template
-- ⚠️ Requires careful verification of output format
-- Better rendering for large documents
-- Separate viewing area outside chat
-- Note: Called "Artifacts" on Claude, "Canvas" on ChatGPT/Gemini
-- **Use only if simple response is too slow or truncates**
+**If the simple response truncates or fails:**
+1. Tell the user: "The archive is large and may not fit in a simple response. I can use [Artifact/Canvas/Code View] instead. Would you like me to do that?"
+2. Wait for user confirmation
+3. Use the alternative delivery method
 
-**3. MCP Storage** (direct file save)
-- ✅ Recommended for: >500 KB archives
-- Saves directly to your computer or cloud storage
-- Most reliable for very large archives
-- Note: Requires MCP (Model Context Protocol) tools to be connected
-
-**Based on the estimated size (~[X] KB), I recommend: [Option]**
-
-**Which delivery method would you prefer?**"
-
-Wait for the user's choice before proceeding.
-
-### Step 0.5: Verify & Execute Chosen Delivery Method
-
-Handle the user's choice with appropriate fallbacks:
-
-**If user chooses "Simple Response":**
-→ Proceed directly to Step 1 (no verification needed)
-→ Generate the archive and output as a markdown code block
-→ **IMPORTANT**: Do NOT use any other method - respect the user's choice
-
-**If user chooses "Large Document Feature":**
-
-1. Check your capabilities: "Can I create documents in a separate viewing area (Artifacts/Canvas/Code View)?"
-2. **If YES:**
-   - Identify what it's called on your platform
-   - Proceed to Step 1 and generate the archive there
-   - Tell user: "I'll create this archive in [feature name]"
-   - **IMPORTANT**: Only use this method if user explicitly chose it
-3. **If NO:**
-   - Tell user: "I don't have a large document feature on this platform. Would you like:
-     a) Simple response instead (may be slower to render)
-     b) MCP storage (I'll check what's available)"
-   - Wait for user's choice and handle accordingly
+**If user explicitly requests a different method:**
+- **Large Document Feature (Artifact/Canvas/Code View):** Available on some platforms for better rendering of large documents
+- **MCP Storage:** Saves directly to file system (requires MCP tools to be connected)
 
 **CRITICAL: Format Integrity for Canvas/Artifacts/Code Blocks**
 
@@ -229,7 +170,7 @@ If using Canvas, Artifacts, or Code View features:
 - ❌ Special formatting blocks not in the template
 - ❌ Interactive elements or buttons
 - ❌ Platform-specific syntax extensions
-- ❌ Any wrapper that's not in the template (`<!-- ARTIFACT_START:`, `<!-- MARKDOWN_START:`)
+- ❌ Any wrapper that's not in the template (`:::artifact`, `:::attachment`)
 
 **What the output should be:**
 - ✅ Pure markdown following the template exactly
@@ -241,72 +182,142 @@ If using Canvas, Artifacts, or Code View features:
 - Warn the user: "This platform's [feature name] may add extra formatting. Would you prefer simple response instead?"
 - Wait for user confirmation
 
-**If user chooses "MCP Storage":**
+### Step 1.5: Detect and Unpack Loaded Archives
 
-1. **Check for MCP tools** (NOW, not before):
-   - Query: "What MCP servers and tools are currently connected?"
-   - Look for: File system tools, cloud storage connectors
-2. **If MCP tools found:**
-   - List the options: "I found these storage locations:
-     1. [MCP Server 1]: Local file system - ~/Documents/
-     2. [MCP Server 2]: Google Drive (requires authentication)
-     Which would you like to use?"
-   - Wait for user to select specific destination
-   - Proceed to Step 1 and generate archive, then save to chosen location
-3. **If NO MCP tools found:**
-   - Tell user: "No MCP storage is currently available. Would you like:
-     a) Large document feature (if I have it)
-     b) Simple response instead"
-   - Wait for user's choice and handle accordingly
+**IMPORTANT: Archives are context, not attachments. When users load archives, they are providing prior context to continue from. ALWAYS merge archives - never include them as attachments.**
 
-**After confirming the delivery method, proceed to Step 1.**
+**Before proceeding, scan the conversation for loaded archive files:**
 
-### Step 1: Understand the Template
+1. **Identify loaded archives:**
+   - Look for uploaded or pasted files containing both:
+     - `ARCHIVE_FORMAT_VERSION` in YAML frontmatter
+     - `INSTRUCTIONS_FOR_AI` in YAML frontmatter
+   - BUT exclude files containing instruction markers:
+     - "Part 1: Archiving Instructions for AI"
+     - "### Step 0: Acknowledge the Archiving Request"
+     - "Part 2: Archive Template Structure"
+   - These criteria identify generated archives, not the instruction file
+
+2. **If NO archives found:**
+   - Skip to Step 2
+   - This is a fresh conversation with no prior context
+
+3. **If archives ARE found (one or more), merge them:**
+
+   **Extract artifacts from all loaded archives:**
+   - Parse each `:::artifact` wrapper
+   - Note: artifact type, title, version, content
+
+   **Extract attachments from all loaded archives:**
+   - Parse each `:::attachment` wrapper
+   - Note: filename, content
+
+   **Extract summary context (for merged narratives):**
+   - Note the Initial Query from each archive
+   - Note the Key Insights from each archive
+   - This helps create a continuous narrative
+
+4. **Understand the merge strategy:**
+   - **Artifacts:** Include ALL artifacts (from archives + new ones created)
+     - If an artifact was modified/evolved: only include newest version
+     - If an artifact is unchanged: carry it forward as-is
+     - **How to determine "newest" when multiple archives have same artifact:**
+       - Check version numbers/identifiers (v3 > v2 > v1, final > draft)
+       - If version info unclear, assume last-loaded archive has newest version
+   - **Attachments:** Include ALL attachments (from archives + new ones)
+     - Carry forward all attachments from loaded archives
+   - **Summaries:** Create a **merged narrative** blending old and new
+     - Don't separate "old conversation" vs "new conversation"
+     - Tell a unified story across archive boundaries
+
+**After completing this step, proceed to Step 2 with the merged context in mind.**
+
+### Step 2: Understand the Template
 Review Part 2 of this document which contains the complete template structure. Understand the YAML front matter, the attachment wrapper format, and the artifact wrapper format.
 
-### Step 2: Fill Out Metadata
+### Step 3: Fill Out Metadata
 In the YAML front matter at the top of the archive:
 - Set CREATED_DATE to today's date (YYYY-MM-DD)
 - Set ORIGINAL_PLATFORM to your platform name (Claude, ChatGPT, Gemini, etc.)
 - Set DELIVERY_METHOD (optional) to the method used: simple_response, large_document, or mcp_storage
-- Set ESTIMATED_SIZE_KB (optional) to the size calculated in Step 0
-- Count all attachments and update ATTACHMENT_COUNT
-- Count all artifacts and update ARTIFACT_COUNT
-- Calculate TOTAL_FILE_SIZE if possible (estimated KB/MB)
-- Set ARCHIVE_COMPLETENESS based on your ability to process all attachments:
-  * COMPLETE: All attachments fully converted
-  * PARTIAL: Some attachments summarized or simplified
-  * SUMMARIZED: Most/all attachments required summarization
-- Set WORKAROUNDS_COUNT to the number of attachments that required workarounds (0 if none)
 
-### Step 3: Create the Conversation Title
+**Note:** You don't need to count artifacts or attachments - the backend will calculate these automatically from the actual `:::artifact` and `:::attachment` markers in your archive.
+
+### Step 4: Create the Conversation Title
 Give this conversation a clear, descriptive title that summarizes the main topic. This will be the H1 heading of the archive.
 
-### Step 4: Summarize Each Phase
+### Step 5: Summarize Each Phase
 
 **⚠️ LANGUAGE REMINDER: Write all summaries in the conversation's language (not English, not content language)!**
+
+**IMPORTANT: If archives were loaded (detected in Step 1.5), create MERGED narratives that blend old and new context into a unified story. Don't separate "previous conversation" from "new conversation" - tell one continuous narrative.**
 
 Write concise summaries for each phase:
 
 **Initial Query:**
+
+*If NO archives were loaded:*
 - What was the user trying to accomplish?
 - What problem were they solving?
 - What question did they ask?
-- List any attachments or artifacts mentioned in this phase
+
+*If archives WERE loaded:*
+- **Blend contexts:** "Building on previous work in [topic from archive], the user sought to..."
+- Reference prior context naturally: "Continuing from earlier exploration of [X], the focus shifted to..."
+- Create continuity: Show how this conversation extends or builds upon previous work
+- **Don't separate old vs new** - create one unified narrative
+
+- List any attachments or artifacts mentioned (including carried-forward ones)
 
 **Key Insights:**
+
+*If NO archives were loaded:*
 - What were the main findings or solutions?
 - What understanding was gained?
 - Extract 3-5 key points as bullet points
+
+*If archives WERE loaded:*
+- **Merge insights across conversations:** Combine findings from loaded archives with new discoveries
+- Show evolution: "The initial approach [from archive] was refined by..."
+- Highlight continuity: "Building on earlier insights about [X], we discovered..."
+- **Present unified findings** that span the entire knowledge journey, not just this session
+
+- Extract 3-5 key points (can span old and new conversations)
 - List any attachments or artifacts referenced
 
 **Follow-up Explorations:**
+
+*If NO archives were loaded:*
 - What deeper questions were explored?
 - What tangents added value?
 - Only include if there were significant follow-ups
+
+*If archives WERE loaded:*
+- **Show cumulative exploration:** "After resolving [X from archive], attention turned to..."
+- Connect threads: How do new explorations relate to previous ones?
+- Demonstrate progression: Each conversation should advance the understanding
+
+- Only include if there were significant follow-ups
 - List any attachments or artifacts referenced
 
-### Step 5: Extract References
+**Examples of Merged Narratives:**
+
+❌ **Bad (Separated):**
+```
+Initial Query:
+Previous conversation: User worked on data validation.
+New conversation: User improved error handling.
+```
+
+✅ **Good (Merged):**
+```
+Initial Query:
+Building on a data validation system developed previously, the user sought to enhance
+error handling and add comprehensive logging. The focus was on making the validator
+production-ready by addressing edge cases discovered in earlier testing.
+```
+
+### Step 6: Extract References
 List all external links, documentation, concepts, and contextual information mentioned during the conversation. Include two types:
 
 1. **External Links** - URLs to documentation, tools, articles (e.g., "MongoDB Documentation: https://docs.mongodb.com")
@@ -314,7 +325,7 @@ List all external links, documentation, concepts, and contextual information men
 
 Both types are valuable and should be included. The description itself conveys the nature of the reference.
 
-### Step 6: Preserve Conversation Artifacts
+### Step 7: Preserve Conversation Artifacts
 
 **⚠️ LANGUAGE REMINDER: Keep artifact content in its original language (as created by user)! Only descriptions ABOUT artifacts should be in conversation language.**
 
@@ -333,6 +344,64 @@ Artifacts are the valuable outputs CREATED during the conversation, such as:
 - ✅ **Significant milestones** - Important intermediate versions that represent major progress
 - ❌ **Minor iterations** - Don't include every small revision or debugging attempt
 
+**Artifact Continuity (When Archives Were Loaded):**
+
+**IMPORTANT: If archives were loaded in Step 1.5, apply the full carry-forward strategy:**
+
+1. **Include NEW artifacts** created in THIS conversation
+   - All artifacts generated during the current session
+   - Use normal versioning and evolution notes
+
+2. **Include UNMODIFIED artifacts** from loaded archives
+   - If an artifact from a loaded archive was never touched, modified, or discussed → carry it forward as-is
+   - Preserve its original content, attributes, and version number
+
+3. **For MODIFIED artifacts** (evolved from loaded archives):
+   - Only include the NEWEST version (created in this conversation)
+   - Document the evolution with version progression
+   - Example: `version="v4"` with note `# v1-v3 from previous conversation, v4 adds error handling`
+
+4. **Determine if an artifact was modified:**
+   - If user asked to improve/update/debug an existing artifact → modified
+   - If artifact's title or purpose was referenced in conversation → likely modified
+   - If artifact was never mentioned → unmodified (carry forward as-is)
+
+**Examples of Artifact Continuity:**
+
+**Scenario: Archive has 3 artifacts, user modified 1 in new conversation**
+
+```markdown
+## Loaded Archive Had:
+- data_validator.py (v2)
+- report_generator.py (v1)
+- config_parser.py (v1)
+
+## New Conversation:
+- User improved data_validator.py → created v3
+- Other artifacts never mentioned
+
+## New Archive Should Include:
+:::artifact type="code" language="python" title="Data Validator" version="v3"
+# v1-v2 from previous conversation (basic validation, error handling)
+# v3 (this session): Added logging and performance optimization
+
+[v3 code here]
+:::
+
+:::artifact type="code" language="python" title="Report Generator" version="v1"
+[v1 code - unchanged]
+:::
+
+:::artifact type="code" language="python" title="Config Parser" version="v1"
+[v1 code - unchanged]
+:::
+```
+
+**Key Points:**
+- Modified artifact: Only newest version (v3), with evolution note spanning all versions
+- Unmodified artifacts: Carried forward exactly as they were
+- All 3 artifacts appear in new archive (full carry-forward)
+
 **How to preserve artifacts:**
 
 For each significant artifact created during the conversation:
@@ -340,10 +409,12 @@ For each significant artifact created during the conversation:
 1. Use the artifact wrapper syntax:
 
 ```
-<!-- ARTIFACT_START: type="[type]" language="[language]" title="[title]" version="[version]" -->
+:::artifact type="[type]" language="[language]" title="[title]" version="[version]"
 [artifact content]
-<!-- ARTIFACT_END -->
+:::
 ```
+
+**Note:** Only `:::` at the start of a line closes the artifact. If your content needs `:::` at line start, indent it or escape with `\:::`.
 
 2. **Required attributes:**
    - `type`: The artifact category (code, poem, document, design, analysis, script, etc.)
@@ -358,14 +429,14 @@ For each significant artifact created during the conversation:
    If there were multiple iterations, add a brief comment at the start of the artifact explaining what changed:
 
 ```
-<!-- ARTIFACT_START: type="code" language="python" title="Data Validator" version="final" -->
+:::artifact type="code" language="python" title="Data Validator" version="final"
 # Final version after 3 iterations:
 # - v1: Basic validation only
 # - v2: Added error handling  
 # - v3 (final): Added logging and performance optimization
 
 [final code here]
-<!-- ARTIFACT_END -->
+:::
 ```
 
 5. **When to mention evolution:**
@@ -377,101 +448,181 @@ For each significant artifact created during the conversation:
 **Examples:**
 
 ```markdown
-<!-- ARTIFACT_START: type="poem" title="Autumn Reflections" version="final" -->
+:::artifact type="poem" title="Autumn Reflections" version="final"
 [poem content after revisions]
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="code" language="bash" title="Backup Script" version="final" iterations="3" -->
+:::artifact type="code" language="bash" title="Backup Script" version="final" iterations="3"
 # Working version after debugging file permission issues
 [script content]
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="document" title="Project Proposal" version="v3" -->
+:::artifact type="document" title="Project Proposal" version="v3"
 # Final proposal incorporating stakeholder feedback
 [document content]
-<!-- ARTIFACT_END -->
+:::
 ```
 
-### Step 6.5: Filter System Prompts and Instructions
+### Step 7.5: Filter System Prompts and Handle Archives
 
-**IMPORTANT:** Before processing attachments, identify and exclude system prompts, instruction files, and non-conversational content.
+**IMPORTANT:** Before processing attachments, identify and filter system files. Handle archives specially - they should be MERGED (as done in Step 1.5), not included as attachments.
 
-**What to EXCLUDE (do not include in Attachments section):**
+**Three categories of files:**
 
-1. **The Archiving System Itself:**
-   - Any file containing both "ARCHIVE_FORMAT_VERSION" AND "INSTRUCTIONS_FOR_AI"
-   - Files named "AIConversationArchivingSystem.md" or similar variants
-   - Files containing "Part 1: Archiving Instructions for AI"
-   - **CRITICAL**: This file should NOT appear in the archive AT ALL - no placeholder, no mention, completely omitted from the Attachments section
-   - Do NOT create a "This file was excluded" placeholder - simply do not include it
+**1. EXCLUDE (Archiving Instruction File) - ALWAYS**
 
-2. **Other System Prompts:**
-   - Files labeled as "pasted" that are never mentioned or discussed in the conversation
-   - Instruction sets, prompt templates, or system configuration files
-   - Content that was used to guide your behavior but not analyzed as part of the conversation
+**Detection (content-based, filename-independent):**
+Exclude any file containing **ANY** of these unique markers:
+- "Part 1: Archiving Instructions for AI"
+- "### Step 0: Acknowledge the Archiving Request"
+- "Part 2: Archive Template Structure"
 
-3. **Detection Criteria - Exclude if ALL of these are true:**
-   - Attachment has "pasted" label (not uploaded as a file)
-   - Content is never referenced in conversation summary sections
-   - Content was not discussed, analyzed, or used as a topic of conversation
-   - Content appears to be instructions/prompts rather than data/information
+**Why content-based?**
+- Users may rename the file (chatkeep-archiving-spec.md, prompt.md, etc.)
+- Users may paste it without a filename
+- Only the instruction file has these markers - generated archives never do
+
+**Action:**
+- Do NOT include in Attachments section at all
+- Do NOT create any placeholder or mention
+- Completely omit from the archive
+
+**2. MERGE (Generated Archive Files) - Always Merged**
+
+**Detection:**
+Files containing BOTH:
+- `ARCHIVE_FORMAT_VERSION` in YAML frontmatter
+- `INSTRUCTIONS_FOR_AI` in YAML frontmatter
+
+BUT NOT containing ANY instruction markers from category 1
+
+**Action:**
+- Do NOT include as attachments (they're context, not content)
+- Should already be unpacked in Step 1.5
+- Their artifacts and attachments will be carried forward
+- Do NOT mention the archive file itself in Attachments section
+- **Archives are ALWAYS merged, never included as attachments**
+
+**3. EXCLUDE (Other System Prompts) - Conditional**
+
+**Detection - Exclude if ALL of these are true:**
+- File was pasted or uploaded but never discussed
+- Content is never referenced in conversation
+- Content appears to be instructions/prompts rather than data
+- Not actively used or analyzed in the conversation
+
+**Action:**
+- Do NOT include in Attachments section
+- These are operational files, not conversation content
 
 **What to INCLUDE (process normally as attachments):**
 
-✅ **Pasted content that WAS discussed:**
-- Even if pasted, include if the user asked you to analyze it
-- Include if specific content from it was referenced in the conversation
-- Include if it contains data/information that was the subject of discussion
+✅ **Conversation-relevant content:**
+- Files that were discussed, analyzed, or debugged
+- Data files, documents, images used in the conversation
+- Reference materials actively used
+- Even pasted content, if it was the subject of conversation
 
-✅ **Uploaded files:**
-- All actually uploaded files should be included (not just pasted text)
-- These are intentional conversation inputs
+**Examples with Content-Based Detection:**
 
-✅ **Reference materials:**
-- Documentation, articles, code that was actively used in the conversation
-- Any content that was analyzed, debugged, or improved
-
-**Examples:**
-
-❌ **EXCLUDE (no placeholder, completely omit):**
+❌ **EXCLUDE - Category 1 (Instruction File):**
 ```
-Attachment: "AIConversationArchivingSystem.md" (pasted)
-→ This is the archiving instruction file itself - DO NOT include in Attachments section at all
-→ Do NOT create any placeholder or note for this file
+File: "my-prompt.md" (pasted, no filename visible)
+Content contains: "Part 1: Archiving Instructions for AI"
+→ This is the instruction file - EXCLUDE completely
+→ Detection based on CONTENT, not filename
 ```
 
-❌ **EXCLUDE:**
+🔄 **MERGE - Category 2 (Generated Archive):**
 ```
-Attachment: "prompt_template.md" (pasted, never mentioned)
-→ System prompt not discussed in conversation - EXCLUDE
-```
-
-✅ **INCLUDE:**
-```
-Attachment: "bug_report.md" (pasted, discussed extensively)
-→ User asked for help analyzing this bug report - INCLUDE
+File: "conversation_archive_2024.md" (uploaded)
+Content contains: ARCHIVE_FORMAT_VERSION + INSTRUCTIONS_FOR_AI
+Content does NOT contain: "Part 1: Archiving Instructions"
+→ This is a generated archive - MERGE (handled in Step 1.5)
+→ Do NOT include as attachment
+→ Artifacts and attachments already extracted
 ```
 
-✅ **INCLUDE:**
+❌ **EXCLUDE - Category 3 (Unused System Prompt):**
 ```
-Attachment: "data.csv" (uploaded file)
-→ User uploaded this file for analysis - INCLUDE
+File: "template.md" (pasted, never referenced)
+→ System template not used in conversation - EXCLUDE
+```
+
+✅ **INCLUDE - Conversation Content:**
+```
+File: "bug_report.md" (pasted, discussed extensively)
+→ User asked for help analyzing this - INCLUDE
+```
+
+✅ **INCLUDE - Data File:**
+```
+File: "data.csv" (uploaded)
+→ User uploaded for analysis - INCLUDE
 ```
 
 **After filtering:**
-- Update ATTACHMENT_COUNT to reflect only included attachments
-- Do NOT reference excluded attachments in summary sections
-- If an attachment was excluded, do not list it in "Attachments referenced" fields
-- **CRITICAL**: Excluded files should NOT appear in the Attachments section at all - not even as placeholders or notes
-- If ALL attachments were excluded, the Attachments section should only contain the section header with no content wrappers
+- Excluded files (categories 1 & 3) should NOT appear anywhere
+- Merged archives (category 2) should NOT appear in Attachments section
+- Only conversation-relevant files appear as attachments
 
-### Step 7: Process Attachments (With Workarounds If Needed)
+### Step 8: Process Attachments (With Workarounds If Needed)
 
 **⚠️ LANGUAGE REMINDER: Preserve attachment content in its original language! Don't translate. Only notes ABOUT attachments should be in conversation language.**
 
-**Note:** After filtering out system prompts in Step 6.5, process only the remaining conversation-relevant attachments.
+**Note:** After filtering out system prompts in Step 7.5, process only the remaining conversation-relevant attachments.
 
-**Preferred approach:** Convert all attachments to full markdown format using the wrapper syntax.
+**Attachment Carry-Forward (When Archives Were Loaded):**
+
+**IMPORTANT: If archives were loaded in Step 1.5, include attachments from TWO sources:**
+
+1. **Attachments from THIS conversation:**
+   - Files uploaded or pasted during the current session (excluding archives themselves)
+   - Process normally using standard conversion rules below
+
+2. **Attachments from MERGED archives (full carry-forward):**
+   - Extract ALL attachments from loaded archives (already done in Step 1.5)
+   - Include them in the new archive's Attachments section
+   - Preserve their original content and format
+
+**Why full carry-forward for attachments?**
+- Attachments are inputs/context that remain relevant
+- Even if not referenced in new conversation, they provide complete context
+- Users expect archives to be cumulative knowledge bases
+- Losing attachments would break continuity
+
+**Example - Multiple Archives Merged:**
+
+```markdown
+## Scenario:
+- Archive 1 had: report.pdf, data.csv
+- Archive 2 had: analysis.md
+- New conversation added: updated_data.csv
+
+## New Archive Attachments Section Should Include:
+
+:::attachment filename="report.pdf"
+[content]
+:::
+
+:::attachment filename="data.csv"
+[content]
+:::
+
+:::attachment filename="analysis.md"
+[content]
+:::
+
+:::attachment filename="updated_data.csv"
+[content]
+:::
+```
+
+**All 4 attachments included - full cumulative history preserved.**
+
+---
+
+**Preferred approach for new attachments:** Convert all attachments to full markdown format using the wrapper syntax.
 
 **Standard Conversion Process:**
 
@@ -481,10 +632,12 @@ For each attachment in the conversation (after filtering):
 2. Wrap it using this exact syntax:
 
 ```
-<!-- MARKDOWN_START: filename="original_filename.ext" -->
+:::attachment filename="original_filename.ext"
 [converted markdown content]
-<!-- MARKDOWN_END: filename="original_filename.ext" -->
+:::
 ```
+
+**Note:** Only `:::` at the start of a line closes the attachment. If your content needs `:::` at line start, indent it or escape with `\:::`.
 
 **Standard conversion rules:**
 - Images: Convert to `![filename](data:image/[type];base64,[encoded_data])`
@@ -509,14 +662,14 @@ For each attachment in the conversation (after filtering):
 3. Add a clear note in the wrapper indicating summarization:
 
 ```
-<!-- MARKDOWN_START: filename="large_document.pdf" -->
+:::attachment filename="large_document.pdf"
 **⚠️ NOTE: This attachment was summarized due to size limitations.**
 - Original size: [X] pages / [Y] KB
 - Summarization level: [Partial/Significant]
 - Content preserved: [Describe what was kept]
 
 [Summarized content here]
-<!-- MARKDOWN_END: filename="large_document.pdf" -->
+:::
 ```
 
 **For unsupported file types:**
@@ -524,7 +677,7 @@ For each attachment in the conversation (after filtering):
 Create a descriptive placeholder with all available metadata:
 
 ```
-<!-- MARKDOWN_START: filename="complex_image.png" -->
+:::attachment filename="complex_image.png"
 **⚠️ NOTE: Unable to fully process this file type.**
 - File type: PNG image
 - Original filename: complex_image.png
@@ -533,7 +686,7 @@ Create a descriptive placeholder with all available metadata:
 - Visual content: [Describe colors, layout, text, diagrams, etc.]
 - Purpose in conversation: [Why this image was important]
 - Processing limitation: [Explain specifically why you couldn't process it]
-<!-- MARKDOWN_END: filename="complex_image.png" -->
+:::
 ```
 
 **For images you cannot encode to base64:**
@@ -556,7 +709,7 @@ Create a descriptive placeholder with all available metadata:
 3. ⚠️ **Detailed placeholder** - Comprehensive description with all available metadata
 4. ❌ **Never omit** - Never completely skip an attachment without at least creating a placeholder
 
-### Step 8: Document Workarounds
+### Step 9: Document Workarounds
 
 If you used any workarounds, fill out the "Workarounds Used" section with:
 - Filename of each affected attachment
@@ -566,7 +719,7 @@ If you used any workarounds, fill out the "Workarounds Used" section with:
 
 If no workarounds were needed, state: **"None - All attachments were successfully converted to full markdown format."**
 
-### Step 9: Complete Archive Metadata
+### Step 10: Complete Archive Metadata
 
 At the bottom of the file, fill in:
 - Original conversation date
@@ -578,7 +731,7 @@ At the bottom of the file, fill in:
 
 ### Output Format
 
-**Depends on the delivery method chosen in Step 0:**
+**Depends on the delivery method chosen in Step 1:**
 
 **Simple Response:**
 - Provide the complete archived markdown file as a single code block
@@ -682,34 +835,165 @@ If your chosen delivery method fails:
 ### Quality Checklist
 
 Before outputting, verify:
-- [ ] Archive size was estimated in Step 0
-- [ ] Delivery method was selected based on size and capabilities
-- [ ] User confirmed their preferred delivery method
-- [ ] If MCP storage was chosen, storage location was verified
-- [ ] If large document feature was chosen, capability was confirmed
-- [ ] Fallback was offered if preferred method was unavailable
-- [ ] All YAML metadata fields are filled correctly
-- [ ] DELIVERY_METHOD field reflects the actual delivery method used (optional but recommended)
-- [ ] ESTIMATED_SIZE_KB field reflects the size calculated in Step 0 (optional but recommended)
-- [ ] All conversation phases are summarized
-- [ ] All significant artifacts created during the conversation are preserved
-- [ ] System prompts and instruction files have been excluded (archiving system itself, pasted prompts not discussed)
-- [ ] Only conversation-relevant attachments are included (files actually discussed or analyzed)
-- [ ] ATTACHMENT_COUNT reflects only included attachments (after filtering)
-- [ ] All included attachments are either converted or documented with workarounds
-- [ ] All workarounds are explained in the "Workarounds Used" section
-- [ ] ARCHIVE_COMPLETENESS accurately reflects the archive state
-- [ ] All attachment and artifact references in the summary match actual items
-- [ ] No excluded attachments are referenced in summary sections
-- [ ] Artifacts include only final/important versions with evolution notes if significant
-- [ ] Archive infrastructure (summaries, notes) is in conversation's language
-- [ ] Artifact content is in original language (as created by user)
-- [ ] Attachment content is in original language (as provided in files)
-- [ ] Only template structure (headings, YAML keys, wrappers) is in English
-- [ ] If using Canvas/Artifacts: verified no platform-specific formatting
-- [ ] If using Canvas/Artifacts: verified output is pure markdown matching template
-- [ ] If format issues detected: switched to simple response or warned user
-- [ ] The output is complete and ready to save as a .md file (or saved via chosen delivery method)
+
+**1. Template Structure**
+- [ ] YAML metadata complete (version, type, date, platform)
+- [ ] All sections present and in correct order
+- [ ] Wrapper syntax correct (`:::artifact`, `:::attachment`)
+
+**2. Language Handling**
+- [ ] Structure in English (headings, YAML keys, wrappers)
+- [ ] Summaries in conversation's language
+- [ ] Content in original language (artifacts/attachments as-is)
+
+**3. Content Filtering**
+- [ ] System prompts excluded (archiving specs, instruction files)
+- [ ] Only conversation-relevant files included
+- [ ] Artifacts show final/important versions only
+
+**4. Attachments & Artifacts**
+- [ ] All attachments converted or documented with workarounds
+- [ ] Summary references match actual artifacts/attachments
+- [ ] No excluded items referenced in summaries
+
+**5. Delivery Method**
+- [ ] Using simple response (or alternative if needed)
+- [ ] If Canvas/Artifacts: verified pure markdown, no platform formatting
+- [ ] Output complete and ready to save
+
+**6. Archive Continuity (If Applicable)**
+- [ ] If archives were loaded: artifacts and attachments carried forward
+- [ ] Archive files themselves NOT included as attachments
+- [ ] Summaries create unified narrative (not separated old/new)
+- [ ] Modified artifacts show version progression
+
+---
+
+## Comprehensive Examples: Archive Merging in Action
+
+These examples demonstrate the complete context merge workflow when users load archives and continue conversations.
+
+### Example 1: Single Archive Continuation (Simple Case)
+
+**Setup:**
+- User loads `data_project_archive_2024-01-15.md`
+- Archive contains:
+  - Artifacts: data_validator.py (v2), config.json (v1)
+  - Attachments: requirements.txt, sample_data.csv
+  - Summary: "Created data validation system with error handling"
+- User continues: "Add logging to the validator"
+
+**What AI Should Do:**
+
+1. **Step 1.5:** Detect archive, extract 2 artifacts + 2 attachments
+2. **Step 5:** Create merged narrative:
+   ```
+   Initial Query:
+   Building on a data validation system previously developed, the user sought
+   to enhance it with comprehensive logging capabilities for better debugging
+   and monitoring in production environments.
+   ```
+3. **Step 7:** Include 3 artifacts:
+   - data_validator.py v3 (modified - new version with logging)
+   - config.json v1 (unchanged - carried forward)
+4. **Step 8:** Include 2 carried-forward attachments + any new ones
+
+**Result:** New archive seamlessly continues the story, preserves all context.
+
+---
+
+### Example 2: Multiple Archives Merged (Complex Case)
+
+**Setup:**
+- User loads TWO archives in same conversation:
+  - `project_phase1_archive_2024-01-10.md`:
+    - Artifacts: analyzer.py (v1), report_template.md (v1)
+    - Attachments: raw_data.csv
+  - `project_phase2_archive_2024-01-20.md`:
+    - Artifacts: analyzer.py (v2), visualizer.py (v1)
+    - Attachments: config.yaml
+- User continues: "Optimize the analyzer for large datasets"
+
+**What AI Should Do:**
+
+1. **Step 1.5:** Detect BOTH archives
+   - Merge artifacts: analyzer.py v2 (latest), report_template.md v1, visualizer.py v1
+   - Merge attachments: raw_data.csv, config.yaml
+
+2. **Step 5:** Create unified narrative spanning all phases:
+   ```
+   Initial Query:
+   Continuing from a multi-phase project involving data analysis and visualization,
+   the user sought to optimize the analyzer (previously developed through two iterations)
+   to handle large datasets efficiently. The project had progressed from basic analysis
+   to visualization, and now focused on performance enhancement.
+
+   Key Insights:
+   - Phase 1 established core analysis algorithms [from phase1 archive]
+   - Phase 2 improved accuracy and added visualization [from phase2 archive]
+   - Phase 3 (current) optimized for production-scale data with caching and parallel processing
+   ```
+
+3. **Step 7:** Include 4 artifacts:
+   ```
+   :::artifact type="code" language="python" title="Data Analyzer" version="v3"
+   # v1 from phase1 archive: Basic analysis
+   # v2 from phase2 archive: Improved accuracy
+   # v3 (this session): Performance optimization for large datasets
+
+   [v3 code with optimizations]
+   :::
+
+   :::artifact type="document" title="Report Template" version="v1"
+   [unchanged content]
+   :::
+
+   :::artifact type="code" language="python" title="Visualizer" version="v1"
+   [unchanged content]
+   :::
+   ```
+
+4. **Step 8:** Include 2 carried-forward attachments:
+   ```
+   :::attachment filename="raw_data.csv"
+   [content]
+   :::
+
+   :::attachment filename="config.yaml"
+   [content]
+   :::
+   ```
+
+**Result:** Single cumulative archive spanning 3 conversation phases, full context preserved, clear version progression.
+
+---
+
+### Example 3: User Runs Archiving Multiple Times (Within Single Conversation)
+
+**Setup:**
+- User has conversation about topic X
+- At 10:00 AM: User pastes archiving prompt → AI generates archive1
+- Conversation continues
+- At 11:00 AM: User pastes archiving prompt again
+
+**What AI Should Do:**
+
+**For second archiving (11:00 AM):**
+
+1. **Step 1.5:** NO archives to load (archive1 is AI-generated output in chat, not a loaded file)
+   - Archive1 is just conversation history, not an attachment
+   - Treat this as fresh archiving of entire conversation
+
+2. **Step 7.5:** Archive1 is AI-generated content in this conversation
+   - Do NOT include archive1 as an artifact or attachment
+   - The second archive naturally includes all content from the full conversation
+
+3. **Generate complete archive:** Captures entire conversation from start to current moment
+   - Includes all artifacts (even those in archive1, since they're part of conversation)
+   - Includes all attachments (user-provided files, not archive1 itself)
+   - Summaries cover the full conversation timeline
+
+**Result:** Second archive is comprehensive and self-contained, no redundancy with archive1 (which was output, not input).
 
 ---
 
@@ -724,7 +1008,6 @@ ARCHIVE_TYPE: conversation_summary
 CREATED_DATE: YYYY-MM-DD
 ORIGINAL_PLATFORM: [Claude/ChatGPT/Gemini/etc.]
 DELIVERY_METHOD: simple_response  # Optional: simple_response | large_document | mcp_storage
-ESTIMATED_SIZE_KB: 0  # Optional: estimated size before generation
 
 INSTRUCTIONS_FOR_AI: |
   ## Purpose
@@ -740,10 +1023,9 @@ INSTRUCTIONS_FOR_AI: |
   6. Archive Metadata section
 
   ## Metadata Fields
-  Some fields in the YAML header are optional:
+  The DELIVERY_METHOD field in the YAML header is optional:
   - DELIVERY_METHOD (optional): How the archive was delivered (simple_response, large_document, mcp_storage)
-  - ESTIMATED_SIZE_KB (optional): Estimated size before generation
-  Archives without these fields are still valid (backward compatible with v1.0).
+  Archives without this field are still valid (backward compatible with v1.0).
 
   ## Language in Archives
   Archives use three language contexts:
@@ -761,9 +1043,9 @@ INSTRUCTIONS_FOR_AI: |
   ## Artifact Format
   Artifacts use this wrapper structure:
 
-  <!-- ARTIFACT_START: type="code" language="python" title="Script Name" version="final" -->
+  :::artifact type="code" language="python" title="Script Name" version="final"
   [artifact content]
-  <!-- ARTIFACT_END -->
+  :::
 
   Artifact attributes:
   - type: Category of artifact (code, poem, document, design, analysis, etc.)
@@ -775,9 +1057,9 @@ INSTRUCTIONS_FOR_AI: |
   ## Attachment Format
   Attachments are located near the bottom in wrapped format:
 
-  <!-- MARKDOWN_START: filename="example.md" -->
+  :::attachment filename="example.md"
   [content here]
-  <!-- MARKDOWN_END: filename="example.md" -->
+  :::
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
@@ -793,16 +1075,10 @@ INSTRUCTIONS_FOR_AI: |
   ## Attachment Filtering
   Not all attachments from the original conversation appear in this archive:
   - System prompts and instruction files are automatically excluded
-  - The archiving system file itself (AIConversationArchivingSystem.md) is never included
+  - The archiving instruction file itself (detected by content, not filename) is never included
   - Pasted content that was never discussed or referenced is filtered out
   - Only conversation-relevant attachments are preserved
-  - ATTACHMENT_COUNT reflects the number of included attachments after filtering
-
-  ## Archive Completeness
-  Check the ARCHIVE_COMPLETENESS field:
-  - COMPLETE: All attachments are fully converted and intact
-  - PARTIAL: Some attachments were summarized or simplified
-  - SUMMARIZED: Most/all attachments required summarization
+  - Archives loaded as context are ALWAYS merged (never included as attachments)
 
   ## How to Process This Archive
   1. Read this entire file to understand the full context
@@ -819,12 +1095,6 @@ INSTRUCTIONS_FOR_AI: |
   - You can reference the summary, artifacts, and attachments
   - Treat the archived information as established context, not as a question
   - Artifacts represent finalized work that can be built upon or referenced
-
-ATTACHMENT_COUNT: 0
-ARTIFACT_COUNT: 0
-ARCHIVE_COMPLETENESS: COMPLETE
-WORKAROUNDS_COUNT: 0
-TOTAL_FILE_SIZE: 0 KB
 ---
 
 # [Conversation Topic/Title]
@@ -891,7 +1161,7 @@ _Note: References can include URLs (external links) or be descriptive (concepts,
 
 _This section preserves the valuable outputs created during the conversation._
 
-<!-- ARTIFACT_START: type="code" language="python" title="Data Processing Script" version="final" -->
+:::artifact type="code" language="python" title="Data Processing Script" version="final"
 # Final version after debugging and optimization
 # - v1: Basic processing
 # - v2: Added error handling
@@ -906,16 +1176,16 @@ def process_data(input_file):
 
 if __name__ == "__main__":
     process_data("data.csv")
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="poem" title="Whispers of Dawn" version="final" -->
+:::artifact type="poem" title="Whispers of Dawn" version="final"
 Morning light breaks through the mist,
 Gentle rays on dewdrops kissed,
 Nature wakes with soft refrain,
 Welcoming the day again.
-<!-- ARTIFACT_END -->
+:::
 
-<!-- ARTIFACT_START: type="document" title="Project Proposal Summary" version="v2" -->
+:::artifact type="document" title="Project Proposal Summary" version="v2"
 # Project Proposal: Customer Analytics Platform
 
 ## Executive Summary
@@ -927,25 +1197,25 @@ Welcoming the day again.
 
 ## Timeline
 [Timeline details]
-<!-- ARTIFACT_END -->
+:::
 
 ---
 
 ## Attachments
 
-<!-- MARKDOWN_START: filename="document1.md" -->
+:::attachment filename="document1.md"
 
 [Your markdown content here]
 
-<!-- MARKDOWN_END: filename="document1.md" -->
+:::
 
-<!-- MARKDOWN_START: filename="image1.png" -->
+:::attachment filename="image1.png"
 
 ![image1.png](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==)
 
-<!-- MARKDOWN_END: filename="image1.png" -->
+:::
 
-<!-- MARKDOWN_START: filename="large_document.pdf" -->
+:::attachment filename="large_document.pdf"
 
 **⚠️ NOTE: This attachment was summarized due to size limitations.**
 - Original size: 150 pages / 2.5 MB
@@ -956,9 +1226,9 @@ Welcoming the day again.
 
 [Summarized content preserving the most important information]
 
-<!-- MARKDOWN_END: filename="large_document.pdf" -->
+:::
 
-<!-- MARKDOWN_START: filename="spreadsheet1.xlsx" -->
+:::attachment filename="spreadsheet1.xlsx"
 
 # Spreadsheet: spreadsheet1.xlsx
 
@@ -967,7 +1237,7 @@ Welcoming the day again.
 | Data 1   | Data 2   | Data 3   |
 | Data 4   | Data 5   | Data 6   |
 
-<!-- MARKDOWN_END: filename="spreadsheet1.xlsx" -->
+:::
 
 ---
 

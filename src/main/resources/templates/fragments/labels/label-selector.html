@@ -20,7 +20,8 @@
         </button>
       </span>
       <span th:if="${#lists.isEmpty(selectedLabelIds)}"
-        class="text-sm text-gray-500 dark:text-gray-400 italic">
+        class="text-sm text-gray-500 dark:text-gray-400 italic"
+        th:text="#{label.selector.noLabels}">
         No labels assigned
       </span>
     </div>
@@ -28,14 +29,15 @@
     <!-- Add Label Dropdown -->
     <details class="relative">
       <summary
-        class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+        class="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+        th:text="#{label.selector.addLabel}">
         + Add Label
       </summary>
 
       <div
         class="absolute z-10 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
         <!-- No Labels Message -->
-        <div th:if="${#lists.isEmpty(labels)}" class="p-4 text-sm text-gray-500 dark:text-gray-400">
+        <div th:if="${#lists.isEmpty(labels)}" class="p-4 text-sm text-gray-500 dark:text-gray-400" th:text="#{label.selector.empty}">
           No labels created yet.
         </div>
 

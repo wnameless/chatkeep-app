@@ -86,7 +86,7 @@ class MarkdownToChatNoteConversionTest {
     assertEquals(0, chatNote.getAttachmentCount());
     assertEquals(1, chatNote.getArtifactCount());
     assertEquals(0, chatNote.getWorkaroundsCount());
-    assertEquals("18 KB", chatNote.getTotalFileSize());
+    assertEquals("14 KB", chatNote.getTotalFileSize());
 
     // Content metadata
     assertEquals("Building Dragonwell JDK 21 on macOS with Compact Object Headers",

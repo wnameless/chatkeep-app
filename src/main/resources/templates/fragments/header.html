@@ -28,14 +28,14 @@
       <div class="flex-1 max-w-3xl mx-4 hidden md:flex items-center gap-3">
         <div class="relative flex-1">
           <input type="text" id="search-input" name="query"
-            placeholder="Search notes by title, tags, or content..." hx:get="@{/fragments/search}"
+            th:placeholder="#{search.placeholder}" hx:get="@{/fragments/search}"
             hx-trigger="keyup changed delay:500ms" hx-target="#notes-grid" hx-swap="innerHTML"
             class="w-full px-4 py-2 pr-12 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400">
 
           <!-- Import Archive Button (Plus Icon) inside search box -->
           <div class="absolute right-2 top-1/2 transform -translate-y-1/2">
             <div class="relative">
-              <button id="import-archive-btn" title="Import Archive"
+              <button id="import-archive-btn" th:title="#{header.import.tooltip}"
                 class="p-1.5 text-gray-500 hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">
                 <i class="fas fa-plus text-lg"></i>
               </button>
@@ -48,8 +48,8 @@
                     class="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                     <i class="fas fa-file-upload w-5 text-primary-500"></i>
                     <div>
-                      <div class="font-medium">Upload File</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file
+                      <div class="font-medium" th:text="#{header.import.uploadFile}">Upload File</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400" th:text="#{header.import.uploadFile.desc}">Import .md archive file
                       </div>
                     </div>
                   </button>
@@ -57,8 +57,8 @@
                     class="w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                     <i class="fas fa-clipboard w-5 text-primary-500"></i>
                     <div>
-                      <div class="font-medium">Paste Content</div>
-                      <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown
+                      <div class="font-medium" th:text="#{header.import.pasteContent}">Paste Content</div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400" th:text="#{header.import.pasteContent.desc}">Paste archive markdown
                       </div>
                     </div>
                   </button>
@@ -70,10 +70,10 @@
 
         <!-- Copy Template Button with Dropdown -->
         <div class="relative">
-          <button id="copy-template-btn" title="AI Archiving Prompt"
+          <button id="copy-template-btn" th:title="#{header.archivingPrompt.tooltip}"
             class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-primary-400 dark:hover:border-primary-500 transition-all whitespace-nowrap">
             <i class="fas fa-robot text-primary-500"></i>
-            <span>Archiving Prompt</span>
+            <span th:text="#{header.archivingPrompt.button}">Archiving Prompt</span>
           </button>
 
           <!-- Dropdown Panel -->
@@ -83,12 +83,12 @@
               <!-- Header -->
               <div class="flex items-center gap-2 mb-3">
                 <i class="fas fa-robot text-primary-500 text-lg"></i>
-                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">AI Archiving
+                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100" th:text="#{header.archivingPrompt.title}">AI Archiving
                   Prompt</h3>
               </div>
 
               <!-- Description -->
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4" th:text="#{header.archivingPrompt.description}">
                 Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations
                 in ChatKeep format.
               </p>
@@ -98,22 +98,22 @@
                 <div class="flex items-start gap-2">
                   <span
                     class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">1</span>
-                  <span>Copy the archiving prompt</span>
+                  <span th:text="#{header.archivingPrompt.step1}">Copy the archiving prompt</span>
                 </div>
                 <div class="flex items-start gap-2">
                   <span
                     class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">2</span>
-                  <span>Paste it into your AI conversation</span>
+                  <span th:text="#{header.archivingPrompt.step2}">Paste it into your AI conversation</span>
                 </div>
                 <div class="flex items-start gap-2">
                   <span
                     class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">3</span>
-                  <span>AI generates markdown archive</span>
+                  <span th:text="#{header.archivingPrompt.step3}">AI generates markdown archive</span>
                 </div>
                 <div class="flex items-start gap-2">
                   <span
                     class="flex-shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-xs font-semibold">4</span>
-                  <span>Import using the <i class="fas fa-plus text-xs"></i> button</span>
+                  <span th:utext="#{header.archivingPrompt.step4}">Import using the <i class="fas fa-plus text-xs"></i> button</span>
                 </div>
               </div>
 
@@ -122,9 +122,9 @@
                 <button id="copy-prompt-action-btn"
                   class="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                   <i class="fas fa-clipboard"></i>
-                  <span>Copy to Clipboard</span>
+                  <span th:text="#{header.archivingPrompt.copyButton}">Copy to Clipboard</span>
                 </button>
-                <button id="download-spec-btn" title="Download full specification"
+                <button id="download-spec-btn" th:title="#{header.archivingPrompt.downloadTooltip}"
                   class="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors flex items-center justify-center">
                   <i class="fas fa-download"></i>
                 </button>
@@ -133,7 +133,7 @@
               <!-- Success Message (Hidden by default) -->
               <div id="copy-success-message"
                 class="hidden mt-3 p-2 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded text-sm text-green-700 dark:text-green-300 text-center">
-                <i class="fas fa-check-circle"></i> Copied! Now paste into your AI chat.
+                <i class="fas fa-check-circle"></i> <span th:text="#{header.archivingPrompt.successMessage}">Copied! Now paste into your AI chat.</span>
               </div>
             </div>
           </div>
@@ -144,7 +144,7 @@
       <div class="flex items-center space-x-2 md:space-x-3">
 
         <!-- Refresh Button -->
-        <button id="refresh-btn" title="Refresh" hx:get="@{/fragments/chat-notes}"
+        <button id="refresh-btn" th:title="#{header.refresh}" hx:get="@{/fragments/chat-notes}"
           hx-target="#notes-grid" hx-swap="innerHTML"
           class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
           <i class="fas fa-sync-alt"></i>
@@ -153,13 +153,13 @@
         <!-- View Toggle: Grid / List -->
         <div
           class="hidden sm:flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-          <button id="grid-view-btn" title="Grid View"
+          <button id="grid-view-btn" th:title="#{header.gridView}"
             hx:get="@{/fragments/chat-notes(view='masonry')}" hx-target="#notes-grid"
             hx-swap="innerHTML"
             class="p-2 rounded text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 transition-colors view-toggle active">
             <i class="fas fa-th"></i>
           </button>
-          <button id="list-view-btn" title="List View"
+          <button id="list-view-btn" th:title="#{header.listView}"
             hx:get="@{/fragments/chat-notes(view='list')}" hx-target="#notes-grid"
             hx-swap="innerHTML"
             class="p-2 rounded text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-600 transition-colors view-toggle">
@@ -169,7 +169,7 @@
 
         <!-- Settings Button -->
         <div class="relative">
-          <button id="settings-btn" title="Settings"
+          <button id="settings-btn" th:title="#{header.settings}"
             class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
             <i class="fas fa-cog"></i>
           </button>
@@ -177,25 +177,46 @@
           <!-- Settings Dropdown -->
           <div id="settings-dropdown"
             class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-            <div class="py-2">
-              <div
-                class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+            <!-- Theme Section -->
+            <div class="py-2 border-b border-gray-200 dark:border-gray-700">
+              <div class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300" th:text="#{header.settings.theme}">
                 Theme
               </div>
               <button data-theme="light"
                 class="theme-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-sun w-5"></i>
-                <span>Light</span>
+                <span th:text="#{header.settings.theme.light}">Light</span>
               </button>
               <button data-theme="dark"
                 class="theme-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-moon w-5"></i>
-                <span>Dark</span>
+                <span th:text="#{header.settings.theme.dark}">Dark</span>
               </button>
               <button data-theme="auto"
                 class="theme-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-circle-half-stroke w-5"></i>
-                <span>Auto</span>
+                <span th:text="#{header.settings.theme.auto}">Auto</span>
+              </button>
+            </div>
+            <!-- Language Section -->
+            <div class="py-2">
+              <div class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300" th:text="#{header.settings.language}">
+                Language
+              </div>
+              <button data-language="en"
+                class="language-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-language w-5"></i>
+                <span>English</span>
+              </button>
+              <button data-language="zh_TW"
+                class="language-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-language w-5"></i>
+                <span>繁體中文</span>
+              </button>
+              <button data-language="zh_CN"
+                class="language-option w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
+                <i class="fas fa-language w-5"></i>
+                <span>简体中文</span>
               </button>
             </div>
           </div>
@@ -203,7 +224,7 @@
 
         <!-- User Avatar / Login -->
         <div class="relative">
-          <button id="user-menu-btn" title="Account"
+          <button id="user-menu-btn" th:title="#{header.account}"
             class="p-1 rounded-full border-2 border-primary-400 hover:border-primary-500 transition-colors">
             <!-- Authenticated User Avatar -->
             <div id="user-avatar"
@@ -232,20 +253,20 @@
                 <button id="logout-btn"
                   class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                   <i class="fas fa-sign-out-alt w-5"></i>
-                  <span>Log Out</span>
+                  <span th:text="#{header.user.logout}">Log Out</span>
                 </button>
               </div>
             </div>
 
             <!-- Anonymous User Login -->
             <div id="anonymous-user-menu" class="py-2">
-              <p class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+              <p class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400" th:text="#{header.user.loginPrompt}">
                 Log in to sync across devices
               </p>
               <a href="/login"
                 class="block px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2">
                 <i class="fas fa-sign-in-alt w-5"></i>
-                <span>Log In with OAuth2</span>
+                <span th:text="#{header.user.login}">Log In with OAuth2</span>
               </a>
             </div>
 
@@ -259,7 +280,7 @@
     <!-- Mobile Search Bar (hidden on desktop) -->
     <div class="md:hidden px-4 pb-3">
       <div class="relative">
-        <input type="text" id="mobile-search-input" name="query" placeholder="Search notes..."
+        <input type="text" id="mobile-search-input" name="query" th:placeholder="#{search.placeholder}"
           hx:get="@{/fragments/search}" hx-trigger="keyup changed delay:500ms"
           hx-target="#notes-grid" hx-swap="innerHTML"
           class="w-full px-4 py-2 pr-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-400">
@@ -280,8 +301,8 @@
                   class="mobile-upload-file-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                   <i class="fas fa-file-upload w-5 text-primary-500"></i>
                   <div>
-                    <div class="font-medium">Upload File</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Import .md archive file
+                    <div class="font-medium" th:text="#{header.import.uploadFile}">Upload File</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400" th:text="#{header.import.uploadFile.desc}">Import .md archive file
                     </div>
                   </div>
                 </button>
@@ -289,8 +310,8 @@
                   class="mobile-paste-content-btn w-full px-4 py-2.5 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-3">
                   <i class="fas fa-clipboard w-5 text-primary-500"></i>
                   <div>
-                    <div class="font-medium">Paste Content</div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400">Paste archive markdown
+                    <div class="font-medium" th:text="#{header.import.pasteContent}">Paste Content</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400" th:text="#{header.import.pasteContent.desc}">Paste archive markdown
                     </div>
                   </div>
                 </button>
@@ -323,12 +344,12 @@
         <!-- Header -->
         <div class="flex items-center gap-2 mb-4">
           <i class="fas fa-robot text-primary-500 text-xl"></i>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">AI Archiving Prompt
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100" th:text="#{header.archivingPrompt.title}">AI Archiving Prompt
           </h3>
         </div>
 
         <!-- Description -->
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-5">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-5" th:text="#{header.archivingPrompt.description}">
           Paste this prompt into your AI chat (Claude, ChatGPT, etc.) to archive conversations in
           ChatKeep format.
         </p>
@@ -338,22 +359,22 @@
           <div class="flex items-start gap-3">
             <span
               class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">1</span>
-            <span>Copy the archiving prompt</span>
+            <span th:text="#{header.archivingPrompt.step1}">Copy the archiving prompt</span>
           </div>
           <div class="flex items-start gap-3">
             <span
               class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">2</span>
-            <span>Paste it into your AI conversation</span>
+            <span th:text="#{header.archivingPrompt.step2}">Paste it into your AI conversation</span>
           </div>
           <div class="flex items-start gap-3">
             <span
               class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">3</span>
-            <span>AI generates markdown archive</span>
+            <span th:text="#{header.archivingPrompt.step3}">AI generates markdown archive</span>
           </div>
           <div class="flex items-start gap-3">
             <span
               class="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 flex items-center justify-center text-sm font-semibold">4</span>
-            <span>Import using the <i class="fas fa-plus text-sm"></i> button</span>
+            <span th:utext="#{header.archivingPrompt.step4}">Import using the <i class="fas fa-plus text-sm"></i> button</span>
           </div>
         </div>
 
@@ -362,9 +383,9 @@
           <button id="mobile-copy-prompt-action-btn"
             class="flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
             <i class="fas fa-clipboard"></i>
-            <span>Copy to Clipboard</span>
+            <span th:text="#{header.archivingPrompt.copyButton}">Copy to Clipboard</span>
           </button>
-          <button id="mobile-download-spec-btn" title="Download full specification"
+          <button id="mobile-download-spec-btn" th:title="#{header.archivingPrompt.downloadTooltip}"
             class="px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors flex items-center justify-center">
             <i class="fas fa-download"></i>
           </button>
@@ -373,7 +394,7 @@
         <!-- Success Message (Hidden by default) -->
         <div id="mobile-copy-success-message"
           class="hidden mt-4 p-3 bg-green-100 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg text-sm text-green-700 dark:text-green-300 text-center">
-          <i class="fas fa-check-circle"></i> Copied! Now paste into your AI chat.
+          <i class="fas fa-check-circle"></i> <span th:text="#{header.archivingPrompt.successMessage}">Copied! Now paste into your AI chat.</span>
         </div>
       </div>
     </div>

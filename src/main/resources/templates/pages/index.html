@@ -15,13 +15,13 @@
       </div>
 
       <!-- ChatNotes Grid (Masonry Layout) -->
-      <div id="notes-grid" class="masonry-grid" hx-get="/fragments/chat-notes"
+      <div id="notes-grid" th:class="${viewMode == 'list' ? 'space-y-0' : 'masonry-grid'}" hx-get="/fragments/chat-notes"
         hx-trigger="load, labelDeleted from:body" hx-swap="innerHTML">
         <!-- Loading State -->
         <div class="col-span-full flex items-center justify-center py-20">
           <div class="text-center">
             <i class="fas fa-spinner fa-spin text-4xl text-primary-500 mb-4"></i>
-            <p class="text-gray-600 dark:text-gray-400">Loading your ChatNotes...</p>
+            <p class="text-gray-600 dark:text-gray-400" th:text="#{empty.loading.initial}">Loading your ChatNotes...</p>
           </div>
         </div>
       </div>

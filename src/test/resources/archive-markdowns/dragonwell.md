@@ -25,9 +25,9 @@ INSTRUCTIONS_FOR_AI: |
   All attachments are located at the bottom of this file in a wrapped format.
   Each attachment uses this exact structure:
 
-  <!-- MARKDOWN_START: filename="example.md" -->
+  :::attachment filename="example.md"
   [content here]
-  <!-- MARKDOWN_END: filename="example.md" -->
+  :::
 
   Important notes about attachments:
   - ALL attachments have been converted to markdown format, regardless of original type
@@ -53,12 +53,6 @@ INSTRUCTIONS_FOR_AI: |
   - Be ready to continue from where it left off
   - Reference both summary and artifacts/attachments as needed
   - Treat archived information as established context
-
-ATTACHMENT_COUNT: 0
-ARTIFACT_COUNT: 1
-ARCHIVE_COMPLETENESS: COMPLETE
-WORKAROUNDS_COUNT: 0
-TOTAL_FILE_SIZE: 18 KB
 ---
 
 # Building Dragonwell JDK 21 on macOS with Compact Object Headers
@@ -201,7 +195,7 @@ Iteratively developed comprehensive build script with 10 automated steps:
 
 ## Artifacts
 
-<!-- ARTIFACT_START: type="script" language="bash" title="Dragonwell macOS Build Script" version="final" -->
+:::artifact type="script" language="bash" title="Dragonwell macOS Build Script" version="final"
 #!/bin/bash
 set -e
 
@@ -372,7 +366,7 @@ echo "Or extract and use the archive:"
 echo "  tar -xzf build/$ZIP_NAME -C /Library/Java/JavaVirtualMachines/"
 echo ""
 echo "✅ Build completed successfully!"
-<!-- ARTIFACT_END -->
+:::
 
 ---
 
