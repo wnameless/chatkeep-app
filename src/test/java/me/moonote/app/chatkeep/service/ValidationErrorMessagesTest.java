@@ -33,7 +33,7 @@ class ValidationErrorMessagesTest {
     // Arrange - Load the Gemini example that previously had count mismatches in YAML
     // Now that counts are calculated by backend, this should pass validation
     String geminiMarkdown =
-        Files.readString(Paths.get("/Users/wmw/Downloads/gemini_example.md"));
+        Files.readString(Paths.get("src/test/resources/archive-markdowns/gemini_example.md"));
 
     // Act
     ChatNoteValidationResult result = preprocessor.preprocess(geminiMarkdown);
@@ -60,8 +60,8 @@ class ValidationErrorMessagesTest {
     assertFalse(result.isValid(), "Should fail validation");
     assertFalse(result.getErrors().isEmpty(), "Should have validation errors");
 
-    boolean hasYamlError = result.getErrors().stream()
-        .anyMatch(error -> error.contains("Missing YAML frontmatter")
+    boolean hasYamlError =
+        result.getErrors().stream().anyMatch(error -> error.contains("Missing YAML frontmatter")
             && error.contains("Archives must start with '---'"));
 
     assertTrue(hasYamlError, "Should have error message about missing YAML frontmatter");
@@ -78,9 +78,8 @@ class ValidationErrorMessagesTest {
     // Assert
     assertFalse(result.isValid(), "Should fail validation");
 
-    boolean hasYamlError = result.getErrors().stream()
-        .anyMatch(error -> error.contains("Malformed YAML frontmatter")
-            && error.contains("properly closed"));
+    boolean hasYamlError = result.getErrors().stream().anyMatch(
+        error -> error.contains("Malformed YAML frontmatter") && error.contains("properly closed"));
 
     assertTrue(hasYamlError, "Should have error message about malformed YAML");
   }
